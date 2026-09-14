@@ -1,0 +1,212 @@
+# ===========================================================================
+# CD — deploy on merge to main + weekly scheduled retraining
+# ===========================================================================
+name: CD
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    # Weekly retraining: every Sunday at 03:00 UTC
+    - cron: "0 3 * * 0"
+  workflow_dispatch:
+    inputs:
+      retrain:
+        description: "Run retraining pipeline"
+        type: boolean
+        default: false
+
+permissions:
+  id-token: write   # OIDC authentication to AWS
+  contents: write    # create branches and PRs for retraining
+  pull-requests: write
+
+env:
+  AWS_REGION: ca-central-1
+  ECR_REPOSITORY: boreal-marche
+  APP_RUNNER_SERVICE: boreal-marche-api
+
+jobs:
+  # -----------------------------------------------------------------------
+  # 1. Build, tag, and push Docker image
+  # -----------------------------------------------------------------------
+  build-and-push:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tags }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # Authenticate to AWS via OIDC — no long-lived credentials stored
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract metadata
+        id: meta
+        run: |
+          IMAGE_URI="${{ steps.ecr-login.outputs.registry }}/${{ env.ECR_REPOSITORY }}"
+          SHA_TAG="${IMAGE_URI}:${{ github.sha }}"
+          LATEST_TAG="${IMAGE_URI}:latest"
+          echo "tags=${SHA_TAG},${LATEST_TAG}" >> "$GITHUB_OUTPUT"
+          echo "sha_tag=${SHA_TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push to ECR
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # -----------------------------------------------------------------------
+  # 2. Deploy to App Runner
+  # -----------------------------------------------------------------------
+  deploy:
+    needs: build-and-push
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Deploy to App Runner
+        run: |
+          IMAGE_URI="${{ needs.build-and-push.outputs.image_tag }}"
+          # Extract the SHA-tagged URI (first of the comma-separated tags)
+          SHA_IMAGE=$(echo "$IMAGE_URI" | cut -d',' -f1)
+
+          aws apprunner update-service \
+            --service-arn "${{ secrets.APP_RUNNER_SERVICE_ARN }}" \
+            --source-configuration "{
+              \"ImageRepository\": {
+                \"ImageIdentifier\": \"${SHA_IMAGE}\",
+                \"ImageRepositoryType\": \"ECR\",
+                \"ImageConfiguration\": {
+                  \"Port\": \"8000\"
+                }
+              }
+            }"
+
+          echo "Deployed image: ${SHA_IMAGE}"
+
+  # -----------------------------------------------------------------------
+  # 3. Post-deploy smoke test
+  # -----------------------------------------------------------------------
+  smoke-test:
+    needs: deploy
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for deployment to stabilise
+        run: sleep 60
+
+      - name: Smoke test — health
+        run: |
+          HEALTH=$(curl -sf "${{ secrets.APP_URL }}/health")
+          echo "Health: $HEALTH"
+          echo "$HEALTH" | python3 -c "
+          import sys, json
+          data = json.load(sys.stdin)
+          assert data['status'] == 'ok', f'Health check failed: {data}'
+          print('✅ Health check passed')
+          "
+
+      - name: Smoke test — version matches commit SHA
+        run: |
+          VERSION=$(curl -sf "${{ secrets.APP_URL }}/version")
+          echo "Version: $VERSION"
+          echo "$VERSION" | python3 -c "
+          import sys, json
+          data = json.load(sys.stdin)
+          expected_sha = '${{ github.sha }}'
+          actual_sha = data.get('git_sha', '')
+          assert actual_sha == expected_sha, (
+              f'SHA mismatch: deployed={actual_sha}, expected={expected_sha}'
+          )
+          print('✅ Version SHA matches deployed commit')
+          "
+
+  # -----------------------------------------------------------------------
+  # 4. Scheduled retraining
+  # -----------------------------------------------------------------------
+  retrain:
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.retrain)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install ".[dev]"
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Run retraining pipeline
+        env:
+          MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
+        run: python scripts/retrain.py --config configs/pipeline.yaml
+
+      - name: Create PR if metrics improved
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="retrain/$(date +%Y-%m-%d)"
+
+          # Check if retrain produced updated artifacts
+          if git diff --quiet; then
+            echo "No model changes — metrics did not pass promotion criteria."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add artifacts/ configs/
+          git commit -m "chore: scheduled retrain $(date +%Y-%m-%d)
+
+          Automated weekly retraining. Review metrics before merging.
+          This PR does NOT auto-deploy — a human must approve and merge."
+
+          git push origin "$BRANCH"
+
+          gh pr create \
+            --title "🔄 Scheduled retrain $(date +%Y-%m-%d)" \
+            --body "## Automated Weekly Retraining
+
+          This PR was created by the scheduled retraining pipeline.
+
+          **⚠️ This does NOT auto-deploy.** A human must:
+          1. Review the MLflow experiment comparison
+          2. Verify metrics pass promotion criteria
+          3. Approve and merge
+
+          See the retraining logs in the Actions tab for details." \
+            --base main \
+            --head "$BRANCH"

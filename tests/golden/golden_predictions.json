@@ -1,0 +1,37 @@
+{
+  "_comment": "Golden-prediction regression test data. If the model changes, re-generate this file and review the diff.",
+  "cases": [
+    {
+      "customer_id": "GOLDEN-001",
+      "features": {
+        "recency_days": 15.0,
+        "frequency": 8.0,
+        "monetary_total": 1250.0,
+        "monetary_mean": 156.25,
+        "monetary_std": 45.0,
+        "days_since_first_purchase": 400.0,
+        "avg_days_between_orders": 50.0,
+        "std_days_between_orders": 12.0,
+        "is_one_time_buyer": 0.0,
+        "avg_basket_size": 5.0,
+        "avg_basket_value": 62.50,
+        "max_basket_value": 150.0,
+        "avg_unique_items_per_basket": 4.0,
+        "single_item_basket_ratio": 0.1,
+        "top_category_share": 0.4,
+        "n_unique_categories": 6.0,
+        "category_entropy": 1.5,
+        "has_ever_cancelled": 0.0,
+        "cancellation_rate": 0.0,
+        "return_rate": 0.02,
+        "weekend_purchase_ratio": 0.3,
+        "morning_purchase_ratio": 0.5,
+        "country_code": 1.0,
+        "is_domestic": 1.0
+      },
+      "expected_probability_range": [0.60, 0.70],
+      "expected_will_return": true,
+      "expected_risk_label": "high"
+    }
+  ]
+}

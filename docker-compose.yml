@@ -1,0 +1,95 @@
+# ===========================================================================
+# Boréal Marché — Full Stack
+# Launch:  docker compose up --build
+# ===========================================================================
+version: "3.9"
+
+services:
+  # -------------------------------------------------------------------------
+  # FastAPI backend
+  # -------------------------------------------------------------------------
+  api:
+    build:
+      context: .
+      target: runtime
+    container_name: boreal-api
+    ports:
+      - "8000:8000"
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OLLAMA_HOST=http://ollama:11434
+    volumes:
+      - ./artifacts:/app/artifacts:ro
+      - ./data/processed:/app/data/processed:ro
+      - ./docs/corpus:/app/docs/corpus:ro
+    depends_on:
+      mlflow:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health').raise_for_status()"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+  # -------------------------------------------------------------------------
+  # Streamlit front end
+  # -------------------------------------------------------------------------
+  app:
+    build:
+      context: .
+      target: runtime
+    container_name: boreal-app
+    command: ["streamlit", "run", "app/streamlit_app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+    ports:
+      - "8501:8501"
+    environment:
+      - API_BASE_URL=http://api:8000
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # -------------------------------------------------------------------------
+  # MLflow tracking server
+  # -------------------------------------------------------------------------
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.15.1
+    container_name: boreal-mlflow
+    command: >
+      mlflow server
+      --host 0.0.0.0
+      --port 5000
+      --backend-store-uri sqlite:///mlflow/mlflow.db
+      --default-artifact-root /mlflow/artifacts
+    ports:
+      - "5000:5000"
+    volumes:
+      - mlflow-data:/mlflow
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  # -------------------------------------------------------------------------
+  # Ollama — local LLM for Head C (optional, comment out if not needed)
+  # -------------------------------------------------------------------------
+  ollama:
+    image: ollama/ollama:latest
+    container_name: boreal-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+    profiles:
+      - with-ollama   # Only starts with: docker compose --profile with-ollama up
+    restart: unless-stopped
+
+volumes:
+  mlflow-data:
+  ollama-models:

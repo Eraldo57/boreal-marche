@@ -1,0 +1,149 @@
+# ============================================================================
+# Boréal Marché — Pipeline Configuration
+# ============================================================================
+# Every magic number lives HERE, not buried in a notebook cell.
+
+data:
+  source_url: "https://archive.ics.uci.edu/static/public/502/online+retail+ii.zip"
+  source_sha256: "62ca00ab6e20bead1e2e7a39ef8a9e59a719dfa1e9acc71093de1c3e6a234e45"
+  raw_filename: "online_retail_II.xlsx"
+  parquet_path: "data/processed/transactions.parquet"
+  manifest_path: "data/processed/manifest.json"
+  seed: 42
+
+  # Boréal Marché re-skinning
+  reskin:
+    company_name: "Boréal Marché"
+    country_filter: null  # null = keep all countries
+    description_language: "mixed"  # original dataset is English
+
+labelling:
+  # Observation window: all transactions BEFORE this date
+  cutoff_date: "2011-09-01"
+  # Label window: 90 days AFTER cutoff
+  label_window_days: 90
+  # Target: did the customer place at least one order in the label window?
+  target_column: "will_return"
+
+cleaning:
+  rules:
+    - name: "remove_cancellations"
+      description: "Drop rows where InvoiceNo starts with 'C'"
+    - name: "remove_non_positive_quantity"
+      description: "Drop rows where Quantity <= 0"
+    - name: "remove_non_positive_price"
+      description: "Drop rows where Price <= 0"
+    - name: "remove_null_customer"
+      description: "Drop rows where Customer ID is null"
+    - name: "remove_service_skus"
+      description: "Drop non-product SKUs (POST, DOT, BANK, M, etc.)"
+    - name: "canonicalise_descriptions"
+      description: "Lowercase, strip whitespace, collapse runs"
+
+features:
+  # At least 25 documented features covering RFM, basket shape,
+  # category mix, behavioural signals and geography.
+  groups:
+    rfm:
+      - recency_days
+      - frequency
+      - monetary_total
+      - monetary_mean
+      - monetary_std
+    cadence:
+      - days_since_first_purchase
+      - avg_days_between_orders
+      - std_days_between_orders
+      - is_one_time_buyer
+    basket_shape:
+      - avg_basket_size
+      - avg_basket_value
+      - max_basket_value
+      - avg_unique_items_per_basket
+      - single_item_basket_ratio
+    category_mix:
+      - top_category_share
+      - n_unique_categories
+      - category_entropy
+    behavioural:
+      - has_ever_cancelled
+      - cancellation_rate
+      - return_rate
+      - weekend_purchase_ratio
+      - morning_purchase_ratio
+    geography:
+      - country_code
+      - is_domestic
+
+  missingness_policy: "explicit"  # never silently fill with zero
+
+modelling:
+  primary_metric: "average_precision"  # PR-AUC
+  secondary_metrics:
+    - "roc_auc"
+    - "brier_score_loss"
+    - "recall_at_top_decile"
+    - "fit_time"
+  cv_folds: 5
+  test_size: 0.2
+
+  spot_check_families:
+    - LogisticRegression
+    - RidgeClassifier
+    - DecisionTreeClassifier
+    - RandomForestClassifier
+    - GradientBoostingClassifier
+    - HistGradientBoostingClassifier
+    - KNeighborsClassifier
+    - LinearSVC
+
+  baselines:
+    - DummyClassifier_stratified
+    - business_heuristic_recency
+
+  tuning:
+    engine: optuna
+    n_trials: 100
+    direction: maximize
+    pruning: true
+
+  calibration:
+    methods: ["isotonic", "sigmoid"]
+
+  threshold:
+    cost_assumptions:
+      cost_coupon: 5.0        # cost of sending a retention coupon
+      margin_retained: 25.0   # average margin from a retained customer
+      cost_false_negative: 0  # missed customer — no coupon sent
+
+rules:
+  algorithm_demo: "apriori"
+  algorithm_prod: "fpgrowth"
+  min_support_sweep: [0.005, 0.01, 0.02, 0.03, 0.05]
+  min_confidence: 0.1
+  min_lift: 1.0
+  max_rules: 5000
+  top_k_recommendations: 5
+
+assistant:
+  providers: ["regex", "openai", "ollama"]
+  default_provider: "regex"
+  embedding_model: "all-MiniLM-L6-v2"
+  similarity_floor: 0.25
+  max_chunks_per_query: 5
+  chunk_size: 512
+  chunk_overlap: 64
+
+  openai:
+    model: "gpt-4o-mini"
+  ollama:
+    model: "llama3.1"
+    host: "http://localhost:11434"
+
+monitoring:
+  drift:
+    reference_window: "training"
+    psi_threshold: 0.2
+    ks_threshold: 0.05
+  alert:
+    channels: ["log"]  # add "email", "slack" in production

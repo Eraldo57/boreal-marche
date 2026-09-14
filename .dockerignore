@@ -1,0 +1,60 @@
+# Version control
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*.egg-info
+dist
+build
+.eggs
+
+# Virtual environments
+.venv
+venv
+env
+
+# Data (tracked by DVC, not shipped in image)
+data/raw/
+*.xlsx
+
+# MLflow local runs
+mlruns/
+mlartifacts/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# CI/CD
+.github/
+
+# Tests (not needed in production image)
+tests/
+
+# Notebooks (development only)
+notebooks/
+
+# Documentation sources
+*.md
+!governance/*.md
+!docs/corpus/*.md
+
+# Environment files
+.env
+.env.*
+
+# DVC
+.dvc/
+*.dvc

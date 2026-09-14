@@ -1,0 +1,139 @@
+# ===========================================================================
+# CI — runs on every pull request and push to main
+# ===========================================================================
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  # -----------------------------------------------------------------------
+  # 1. Lint
+  # -----------------------------------------------------------------------
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install ruff
+        run: pip install ruff
+
+      - name: Lint with ruff
+        run: ruff check src/ api/ app/ tests/ scripts/
+
+      - name: Check formatting
+        run: ruff format --check src/ api/ app/ tests/ scripts/
+
+  # -----------------------------------------------------------------------
+  # 2. Type checking
+  # -----------------------------------------------------------------------
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install ".[dev]"
+
+      - name: Run mypy
+        run: mypy src/ api/ --ignore-missing-imports
+
+  # -----------------------------------------------------------------------
+  # 3. Tests with coverage gate
+  # -----------------------------------------------------------------------
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install ".[dev]"
+
+      - name: Run tests with coverage
+        run: |
+          coverage run -m pytest tests/ -v --tb=short
+          coverage report --fail-under=80
+          coverage xml -o coverage.xml
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+  # -----------------------------------------------------------------------
+  # 4. Data-quality assertions (only if processed data exists)
+  # -----------------------------------------------------------------------
+  data-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install ".[dev]"
+
+      - name: Run data-quality checks
+        run: |
+          if [ -f data/processed/transactions.parquet ]; then
+            python -m pytest tests/ -k "data_quality" -v
+          else
+            echo "No processed data found — skipping data-quality checks."
+          fi
+
+  # -----------------------------------------------------------------------
+  # 5. Docker build (verify it builds, don't push)
+  # -----------------------------------------------------------------------
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          tags: boreal-marche:ci-${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # -----------------------------------------------------------------------
+  # 6. Secret scan
+  # -----------------------------------------------------------------------
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # full history for scanning
+
+      - name: TruffleHog secret scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          extra_args: --only-verified
