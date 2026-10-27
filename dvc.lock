@@ -1,0 +1,176 @@
+schema: '2.0'
+stages:
+  ingest:
+    cmd: python -m src.ingest
+    deps:
+    - path: configs/pipeline.yaml
+      hash: md5
+      md5: 3b925e63d71aad81ab644f76200d565c
+      size: 5552
+    - path: src/ingest.py
+      hash: md5
+      md5: 481fa09a88e8fe8d5be04e21b8c5f5c6
+      size: 14607
+    outs:
+    - path: data/processed/cleaning_report.json
+      hash: md5
+      md5: 00f64a45c29e47b2bc109ad4eadd9c33
+      size: 3076
+    - path: data/processed/manifest.json
+      hash: md5
+      md5: 497af0db44dc142792b9e223d9bb5495
+      size: 3973
+    - path: data/processed/transactions.parquet
+      hash: md5
+      md5: d1de4d7bf627a864676e63f07254794c
+      size: 7093059
+  features:
+    cmd: python -m src.features
+    deps:
+    - path: configs/pipeline.yaml
+      hash: md5
+      md5: 3b925e63d71aad81ab644f76200d565c
+      size: 5552
+    - path: data/processed/transactions.parquet
+      hash: md5
+      md5: d1de4d7bf627a864676e63f07254794c
+      size: 7093059
+    - path: src/contracts.py
+      hash: md5
+      md5: 98a01fb58ac1fda91a7fc3cf4af6f690
+      size: 1768
+    - path: src/features.py
+      hash: md5
+      md5: d7864d6153f05b015586ecb3684ba629
+      size: 19553
+    outs:
+    - path: data/processed/X.parquet
+      hash: md5
+      md5: 4bb263c7e8e2410ba6eb9b323a60e47d
+      size: 1376665
+    - path: data/processed/customer_features.parquet
+      hash: md5
+      md5: cd7d1f77a5867a11a316e563e5387ffe
+      size: 469132
+    - path: data/processed/feature_metadata.json
+      hash: md5
+      md5: 581943ee7774a31a3985add8afe3d51f
+      size: 2642
+    - path: data/processed/snapshots.parquet
+      hash: md5
+      md5: 7c00b132f81815656206bc5d38f580ba
+      size: 65005
+    - path: data/processed/y.parquet
+      hash: md5
+      md5: ba46511742837fcdee8fcf91598fba75
+      size: 4648
+  train:
+    cmd: python -m src.train
+    deps:
+    - path: configs/pipeline.yaml
+      hash: md5
+      md5: 3b925e63d71aad81ab644f76200d565c
+      size: 5552
+    - path: data/processed/X.parquet
+      hash: md5
+      md5: 4bb263c7e8e2410ba6eb9b323a60e47d
+      size: 1376665
+    - path: data/processed/feature_metadata.json
+      hash: md5
+      md5: 581943ee7774a31a3985add8afe3d51f
+      size: 2642
+    - path: data/processed/snapshots.parquet
+      hash: md5
+      md5: 7c00b132f81815656206bc5d38f580ba
+      size: 65005
+    - path: data/processed/y.parquet
+      hash: md5
+      md5: ba46511742837fcdee8fcf91598fba75
+      size: 4648
+    - path: src/contracts.py
+      hash: md5
+      md5: 98a01fb58ac1fda91a7fc3cf4af6f690
+      size: 1768
+    - path: src/train.py
+      hash: md5
+      md5: 88adf6e4be3720276d70d5380adf1061
+      size: 18749
+    outs:
+    - path: artifacts/drift_reference.parquet
+      hash: md5
+      md5: ec7a88b8c859fd90a6373695bb7d0fe1
+      size: 645149
+    - path: artifacts/retention_model.joblib
+      hash: md5
+      md5: 3bb82bfa3244bc026394af49413ee55f
+      size: 1106523
+    - path: artifacts/retention_model_metadata.json
+      hash: md5
+      md5: cf8ffeb726e212ea157d40958c8fb0d8
+      size: 2825
+    - path: artifacts/test_predictions.parquet
+      hash: md5
+      md5: 97cc091502626a8bb2926456e9f7f9b0
+      size: 37613
+    - path: reports/current_run/retention_metrics.json
+      hash: md5
+      md5: bd3fd39012001c3bc31686667d3e74b4
+      size: 18328
+  rules:
+    cmd: python -m src.rules
+    deps:
+    - path: configs/pipeline.yaml
+      hash: md5
+      md5: 3b925e63d71aad81ab644f76200d565c
+      size: 5552
+    - path: data/processed/transactions.parquet
+      hash: md5
+      md5: d1de4d7bf627a864676e63f07254794c
+      size: 7093059
+    - path: src/features.py
+      hash: md5
+      md5: d7864d6153f05b015586ecb3684ba629
+      size: 19553
+    - path: src/recommend.py
+      hash: md5
+      md5: 765536ae564fda120b52fd7f1bc542f0
+      size: 9969
+    - path: src/rules.py
+      hash: md5
+      md5: 5c1353d93756357e8413b9f95c1cc757
+      size: 11260
+    outs:
+    - path: artifacts/popularity.json
+      hash: md5
+      md5: 6d60b5ca07e860ba8b091f68967e3736
+      size: 164417
+    - path: artifacts/rules.json
+      hash: md5
+      md5: 88526c1946f1fa15aceba5293c042b63
+      size: 991566
+    - path: reports/current_run/recommendation_metrics.json
+      hash: md5
+      md5: c51bce78af37a7aaa142ec85d424eb99
+      size: 12291
+  index:
+    cmd: python -m src.rag.index --force
+    deps:
+    - path: configs/pipeline.yaml
+      hash: md5
+      md5: 3b925e63d71aad81ab644f76200d565c
+      size: 5552
+    - path: docs/corpus/
+      hash: md5
+      md5: f00342a46fe0a97314d176b006c637d7.dir
+      size: 46947
+      nfiles: 7
+    - path: src/rag/index.py
+      hash: md5
+      md5: 1f92286a4a04fa687faf34097489d908
+      size: 13857
+    outs:
+    - path: data/chromadb/
+      hash: md5
+      md5: 2653a4e800a1263d8e302a72bdcd0c92.dir
+      size: 1458602
+      nfiles: 6

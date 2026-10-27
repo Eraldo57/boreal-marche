@@ -7,7 +7,7 @@ POST /recommend  Given a basket, suggest what to add next.
 from __future__ import annotations
 
 import structlog
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, HTTPException, Request
 
 from api.schemas import FiringRule, RecommendationRequest, RecommendationResponse
 
@@ -20,10 +20,20 @@ async def recommend(req: RecommendationRequest, request: Request) -> Recommendat
     """Return product recommendations for the given basket."""
     rule_engine = request.app.state.rule_engine
 
-    recommendations, firing_rules, strategy = rule_engine.recommend(
+    if rule_engine is None:
+        raise HTTPException(503, "Recommendation artifacts missing; run python -m src.rules")
+    result = rule_engine.recommend(
         basket=req.basket,
         top_k=req.top_k,
     )
+    if isinstance(result, tuple):  # legacy adapter used only by existing unit fixtures
+        recommendations, firing_rules, strategy = result
+    else:
+        recommendations, firing_rules, strategy = (
+            result["recommendations"],
+            result["because"],
+            result["strategy"],
+        )
 
     because = [
         FiringRule(

@@ -1,0 +1,19 @@
+{
+  "exported_at": "2026-10-21T17:12:52.577733+00:00",
+  "source": "data/processed/transactions.parquet (cleaned UCI Online Retail II)",
+  "source_data_sha256": "6f536e10bb1a34a4b1fb8dee631b6477e06e68302e4f7c6152b05ea2c78ebefb",
+  "catalogue_sha256": "55e7d111253f1c69971d1712a4bd0184a6c3a3b804e7aa8cdbdd5b8085200518",
+  "row_count": 4624,
+  "columns": [
+    "stock_code",
+    "description",
+    "other_descriptions",
+    "median_unit_price_gbp",
+    "invoice_count",
+    "first_seen",
+    "last_seen"
+  ],
+  "currency": "GBP (source currency; no conversion)",
+  "method": "positive purchases only; one row per StockCode; description is the most frequent canonical description, other variants in other_descriptions; price is the median observed unit price",
+  "not_in_source": "categories, allergens, dietary tags and stock levels"
+}

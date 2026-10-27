@@ -1,0 +1,544 @@
+..FF..FF...........................................................FFFFF [ 71%]
+FFFFFFFF..FF...F.F...........                                            [100%]
+=================================== FAILURES ===================================
+_________________________________ test_version _________________________________
+
+client = <httpx.AsyncClient object at 0x119c4d220>
+
+    @pytest.mark.asyncio
+    async def test_version(client: AsyncClient) -> None:
+        r = await client.get("/version")
+        assert r.status_code == 200
+        body = r.json()
+        assert body["version"] == "0.1.0"
+>       assert body["model_version"] == "test-v0.1"
+E       AssertionError: assert None == 'test-v0.1'
+
+tests/test_api.py:43: AssertionError
+______________________________ test_predict_valid ______________________________
+
+client = <httpx.AsyncClient object at 0x119c5b230>
+sample_features = {'recency_days': 15.0, 'frequency': 8.0, 'monetary_total': 1250.0, 'monetary_mean': 156.25, ...}
+
+    @pytest.mark.asyncio
+    async def test_predict_valid(client: AsyncClient, sample_features: dict) -> None:
+        r = await client.post(
+            "/predict",
+            json={"customer_id": "C-1001", "features": sample_features},
+        )
+>       assert r.status_code == 200
+E       assert 422 == 200
+E        +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+tests/test_api.py:55: AssertionError
+____________________________ test_golden_prediction ____________________________
+
+client = <httpx.AsyncClient object at 0x119dcbd40>
+sample_features = {'recency_days': 15.0, 'frequency': 8.0, 'monetary_total': 1250.0, 'monetary_mean': 156.25, ...}
+
+    @pytest.mark.asyncio
+    async def test_golden_prediction(client: AsyncClient, sample_features: dict) -> None:
+        """Golden-prediction regression test.
+    
+        The mock model returns probability 0.65.  With threshold 0.45 the customer
+        should be classified as will_return=True and risk_label='high'.
+        """
+        r = await client.post(
+            "/predict",
+            json={"customer_id": "GOLDEN-001", "features": sample_features},
+        )
+>       assert r.status_code == 200
+E       assert 422 == 200
+E        +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+tests/test_api.py:96: AssertionError
+______________________________ test_predict_batch ______________________________
+
+client = <httpx.AsyncClient object at 0x119df9820>
+sample_features = {'recency_days': 15.0, 'frequency': 8.0, 'monetary_total': 1250.0, 'monetary_mean': 156.25, ...}
+
+    @pytest.mark.asyncio
+    async def test_predict_batch(client: AsyncClient, sample_features: dict) -> None:
+        customers = [
+            {"customer_id": f"C-{i}", "features": sample_features}
+            for i in range(3)
+        ]
+        r = await client.post("/predict/batch", json={"customers": customers})
+>       assert r.status_code == 200
+E       assert 422 == 200
+E        +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+tests/test_api.py:115: AssertionError
+________________ test_predict_builds_dataframe_in_correct_order ________________
+
+sample_features = {'recency_days': 15.0, 'frequency': 8.0, 'monetary_total': 1250.0, 'monetary_mean': 156.25, ...}
+mock_model = <MagicMock id='4534596144'>
+
+    def test_predict_builds_dataframe_in_correct_order(
+        sample_features: dict[str, float], mock_model: MagicMock
+    ) -> None:
+        """The DataFrame sent to predict_proba must have columns in FEATURE_ORDER."""
+>       req = PredictionRequest(customer_id="T-1", features=sample_features)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       pydantic_core._pydantic_core.ValidationError: 1 validation error for PredictionRequest
+E       features
+E         Value error, features must contain exactly the canonical 25 names; see /feature-contract [type=value_error, input_value={'recency_days': 15.0, 'f...1.0, 'is_domestic': 1.0}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.13/v/value_error
+
+tests/test_predict.py:45: ValidationError
+____________________ test_probability_bounds[proba_array0] _____________________
+
+proba_array = array([[1., 0.]])
+sample_features = {'recency_days': 15.0, 'frequency': 8.0, 'monetary_total': 1250.0, 'monetary_mean': 156.25, ...}
+
+    @pytest.mark.parametrize(
+        "proba_array",
+        [
+            np.array([[1.0, 0.0]]),
+            np.array([[0.0, 1.0]]),
+            np.array([[0.5, 0.5]]),
+            np.array([[0.001, 0.999]]),
+        ],
+    )
+    def test_probability_bounds(
+        proba_array: np.ndarray, sample_features: dict[str, float]
+    ) -> None:
+        """The returned probability must be in [0, 1]."""
+        model = MagicMock()
+        model.predict_proba.return_value = proba_array
+    
+>       req = PredictionRequest(customer_id="T-2", features=sample_features)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       pydantic_core._pydantic_core.ValidationError: 1 validation error for PredictionRequest
+E       features
+E         Value error, features must contain exactly the canonical 25 names; see /feature-contract [type=value_error, input_value={'recency_days': 15.0, 'f...1.0, 'is_domestic': 1.0}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.13/v/value_error
+
+tests/test_predict.py:72: ValidationError
+____________________ test_probability_bounds[proba_array1] _____________________
+
+proba_array = array([[0., 1.]])
+sample_features = {'recency_days': 15.0, 'frequency': 8.0, 'monetary_total': 1250.0, 'monetary_mean': 156.25, ...}
+
+    @pytest.mark.parametrize(
+        "proba_array",
+        [
+            np.array([[1.0, 0.0]]),
+            np.array([[0.0, 1.0]]),
+            np.array([[0.5, 0.5]]),
+            np.array([[0.001, 0.999]]),
+        ],
+    )
+    def test_probability_bounds(
+        proba_array: np.ndarray, sample_features: dict[str, float]
+    ) -> None:
+        """The returned probability must be in [0, 1]."""
+        model = MagicMock()
+        model.predict_proba.return_value = proba_array
+    
+>       req = PredictionRequest(customer_id="T-2", features=sample_features)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       pydantic_core._pydantic_core.ValidationError: 1 validation error for PredictionRequest
+E       features
+E         Value error, features must contain exactly the canonical 25 names; see /feature-contract [type=value_error, input_value={'recency_days': 15.0, 'f...1.0, 'is_domestic': 1.0}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.13/v/value_error
+
+tests/test_predict.py:72: ValidationError
+____________________ test_probability_bounds[proba_array2] _____________________
+
+proba_array = array([[0.5, 0.5]])
+sample_features = {'recency_days': 15.0, 'frequency': 8.0, 'monetary_total': 1250.0, 'monetary_mean': 156.25, ...}
+
+    @pytest.mark.parametrize(
+        "proba_array",
+        [
+            np.array([[1.0, 0.0]]),
+            np.array([[0.0, 1.0]]),
+            np.array([[0.5, 0.5]]),
+            np.array([[0.001, 0.999]]),
+        ],
+    )
+    def test_probability_bounds(
+        proba_array: np.ndarray, sample_features: dict[str, float]
+    ) -> None:
+        """The returned probability must be in [0, 1]."""
+        model = MagicMock()
+        model.predict_proba.return_value = proba_array
+    
+>       req = PredictionRequest(customer_id="T-2", features=sample_features)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       pydantic_core._pydantic_core.ValidationError: 1 validation error for PredictionRequest
+E       features
+E         Value error, features must contain exactly the canonical 25 names; see /feature-contract [type=value_error, input_value={'recency_days': 15.0, 'f...1.0, 'is_domestic': 1.0}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.13/v/value_error
+
+tests/test_predict.py:72: ValidationError
+____________________ test_probability_bounds[proba_array3] _____________________
+
+proba_array = array([[0.001, 0.999]])
+sample_features = {'recency_days': 15.0, 'frequency': 8.0, 'monetary_total': 1250.0, 'monetary_mean': 156.25, ...}
+
+    @pytest.mark.parametrize(
+        "proba_array",
+        [
+            np.array([[1.0, 0.0]]),
+            np.array([[0.0, 1.0]]),
+            np.array([[0.5, 0.5]]),
+            np.array([[0.001, 0.999]]),
+        ],
+    )
+    def test_probability_bounds(
+        proba_array: np.ndarray, sample_features: dict[str, float]
+    ) -> None:
+        """The returned probability must be in [0, 1]."""
+        model = MagicMock()
+        model.predict_proba.return_value = proba_array
+    
+>       req = PredictionRequest(customer_id="T-2", features=sample_features)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       pydantic_core._pydantic_core.ValidationError: 1 validation error for PredictionRequest
+E       features
+E         Value error, features must contain exactly the canonical 25 names; see /feature-contract [type=value_error, input_value={'recency_days': 15.0, 'f...1.0, 'is_domestic': 1.0}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.13/v/value_error
+
+tests/test_predict.py:72: ValidationError
+____________________ test_threshold_decision[0.7-0.5-True] _____________________
+
+proba = 0.7, threshold = 0.5, expected_return = True
+sample_features = {'recency_days': 15.0, 'frequency': 8.0, 'monetary_total': 1250.0, 'monetary_mean': 156.25, ...}
+
+    @pytest.mark.parametrize(
+        "proba, threshold, expected_return",
+        [
+            (0.70, 0.50, True),
+            (0.50, 0.50, True),
+            (0.49, 0.50, False),
+            (0.01, 0.50, False),
+            (0.45, 0.45, True),
+            (0.44, 0.45, False),
+        ],
+    )
+    def test_threshold_decision(
+        proba: float,
+        threshold: float,
+        expected_return: bool,
+        sample_features: dict[str, float],
+    ) -> None:
+        model = MagicMock()
+        model.predict_proba.return_value = np.array([[1 - proba, proba]])
+    
+>       req = PredictionRequest(customer_id="T-3", features=sample_features)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       pydantic_core._pydantic_core.ValidationError: 1 validation error for PredictionRequest
+E       features
+E         Value error, features must contain exactly the canonical 25 names; see /feature-contract [type=value_error, input_value={'recency_days': 15.0, 'f...1.0, 'is_domestic': 1.0}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.13/v/value_error
+
+tests/test_predict.py:100: ValidationError
+____________________ test_threshold_decision[0.5-0.5-True] _____________________
+
+proba = 0.5, threshold = 0.5, expected_return = True
+sample_features = {'recency_days': 15.0, 'frequency': 8.0, 'monetary_total': 1250.0, 'monetary_mean': 156.25, ...}
+
+    @pytest.mark.parametrize(
+        "proba, threshold, expected_return",
+        [
+            (0.70, 0.50, True),
+            (0.50, 0.50, True),
+            (0.49, 0.50, False),
+            (0.01, 0.50, False),
+            (0.45, 0.45, True),
+            (0.44, 0.45, False),
+        ],
+    )
+    def test_threshold_decision(
+        proba: float,
+        threshold: float,
+        expected_return: bool,
+        sample_features: dict[str, float],
+    ) -> None:
+        model = MagicMock()
+        model.predict_proba.return_value = np.array([[1 - proba, proba]])
+    
+>       req = PredictionRequest(customer_id="T-3", features=sample_features)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       pydantic_core._pydantic_core.ValidationError: 1 validation error for PredictionRequest
+E       features
+E         Value error, features must contain exactly the canonical 25 names; see /feature-contract [type=value_error, input_value={'recency_days': 15.0, 'f...1.0, 'is_domestic': 1.0}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.13/v/value_error
+
+tests/test_predict.py:100: ValidationError
+___________________ test_threshold_decision[0.49-0.5-False] ____________________
+
+proba = 0.49, threshold = 0.5, expected_return = False
+sample_features = {'recency_days': 15.0, 'frequency': 8.0, 'monetary_total': 1250.0, 'monetary_mean': 156.25, ...}
+
+    @pytest.mark.parametrize(
+        "proba, threshold, expected_return",
+        [
+            (0.70, 0.50, True),
+            (0.50, 0.50, True),
+            (0.49, 0.50, False),
+            (0.01, 0.50, False),
+            (0.45, 0.45, True),
+            (0.44, 0.45, False),
+        ],
+    )
+    def test_threshold_decision(
+        proba: float,
+        threshold: float,
+        expected_return: bool,
+        sample_features: dict[str, float],
+    ) -> None:
+        model = MagicMock()
+        model.predict_proba.return_value = np.array([[1 - proba, proba]])
+    
+>       req = PredictionRequest(customer_id="T-3", features=sample_features)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       pydantic_core._pydantic_core.ValidationError: 1 validation error for PredictionRequest
+E       features
+E         Value error, features must contain exactly the canonical 25 names; see /feature-contract [type=value_error, input_value={'recency_days': 15.0, 'f...1.0, 'is_domestic': 1.0}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.13/v/value_error
+
+tests/test_predict.py:100: ValidationError
+___________________ test_threshold_decision[0.01-0.5-False] ____________________
+
+proba = 0.01, threshold = 0.5, expected_return = False
+sample_features = {'recency_days': 15.0, 'frequency': 8.0, 'monetary_total': 1250.0, 'monetary_mean': 156.25, ...}
+
+    @pytest.mark.parametrize(
+        "proba, threshold, expected_return",
+        [
+            (0.70, 0.50, True),
+            (0.50, 0.50, True),
+            (0.49, 0.50, False),
+            (0.01, 0.50, False),
+            (0.45, 0.45, True),
+            (0.44, 0.45, False),
+        ],
+    )
+    def test_threshold_decision(
+        proba: float,
+        threshold: float,
+        expected_return: bool,
+        sample_features: dict[str, float],
+    ) -> None:
+        model = MagicMock()
+        model.predict_proba.return_value = np.array([[1 - proba, proba]])
+    
+>       req = PredictionRequest(customer_id="T-3", features=sample_features)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       pydantic_core._pydantic_core.ValidationError: 1 validation error for PredictionRequest
+E       features
+E         Value error, features must contain exactly the canonical 25 names; see /feature-contract [type=value_error, input_value={'recency_days': 15.0, 'f...1.0, 'is_domestic': 1.0}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.13/v/value_error
+
+tests/test_predict.py:100: ValidationError
+___________________ test_threshold_decision[0.45-0.45-True] ____________________
+
+proba = 0.45, threshold = 0.45, expected_return = True
+sample_features = {'recency_days': 15.0, 'frequency': 8.0, 'monetary_total': 1250.0, 'monetary_mean': 156.25, ...}
+
+    @pytest.mark.parametrize(
+        "proba, threshold, expected_return",
+        [
+            (0.70, 0.50, True),
+            (0.50, 0.50, True),
+            (0.49, 0.50, False),
+            (0.01, 0.50, False),
+            (0.45, 0.45, True),
+            (0.44, 0.45, False),
+        ],
+    )
+    def test_threshold_decision(
+        proba: float,
+        threshold: float,
+        expected_return: bool,
+        sample_features: dict[str, float],
+    ) -> None:
+        model = MagicMock()
+        model.predict_proba.return_value = np.array([[1 - proba, proba]])
+    
+>       req = PredictionRequest(customer_id="T-3", features=sample_features)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       pydantic_core._pydantic_core.ValidationError: 1 validation error for PredictionRequest
+E       features
+E         Value error, features must contain exactly the canonical 25 names; see /feature-contract [type=value_error, input_value={'recency_days': 15.0, 'f...1.0, 'is_domestic': 1.0}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.13/v/value_error
+
+tests/test_predict.py:100: ValidationError
+___________________ test_threshold_decision[0.44-0.45-False] ___________________
+
+proba = 0.44, threshold = 0.45, expected_return = False
+sample_features = {'recency_days': 15.0, 'frequency': 8.0, 'monetary_total': 1250.0, 'monetary_mean': 156.25, ...}
+
+    @pytest.mark.parametrize(
+        "proba, threshold, expected_return",
+        [
+            (0.70, 0.50, True),
+            (0.50, 0.50, True),
+            (0.49, 0.50, False),
+            (0.01, 0.50, False),
+            (0.45, 0.45, True),
+            (0.44, 0.45, False),
+        ],
+    )
+    def test_threshold_decision(
+        proba: float,
+        threshold: float,
+        expected_return: bool,
+        sample_features: dict[str, float],
+    ) -> None:
+        model = MagicMock()
+        model.predict_proba.return_value = np.array([[1 - proba, proba]])
+    
+>       req = PredictionRequest(customer_id="T-3", features=sample_features)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       pydantic_core._pydantic_core.ValidationError: 1 validation error for PredictionRequest
+E       features
+E         Value error, features must contain exactly the canonical 25 names; see /feature-contract [type=value_error, input_value={'recency_days': 15.0, 'f...1.0, 'is_domestic': 1.0}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.13/v/value_error
+
+tests/test_predict.py:100: ValidationError
+__________________________ test_risk_label[0.9-high] ___________________________
+
+proba = 0.9, expected_label = 'high'
+
+    @pytest.mark.parametrize(
+        "proba, expected_label",
+        [
+            (0.90, "high"),
+            (0.65, "high"),
+            (0.64, "medium"),
+            (0.35, "medium"),
+            (0.34, "low"),
+            (0.00, "low"),
+        ],
+    )
+    def test_risk_label(proba: float, expected_label: str) -> None:
+>       assert _risk_label(proba) == expected_label
+E       AssertionError: assert 'low' == 'high'
+E         
+E         - high
+E         + low
+
+tests/test_predict.py:120: AssertionError
+__________________________ test_risk_label[0.65-high] __________________________
+
+proba = 0.65, expected_label = 'high'
+
+    @pytest.mark.parametrize(
+        "proba, expected_label",
+        [
+            (0.90, "high"),
+            (0.65, "high"),
+            (0.64, "medium"),
+            (0.35, "medium"),
+            (0.34, "low"),
+            (0.00, "low"),
+        ],
+    )
+    def test_risk_label(proba: float, expected_label: str) -> None:
+>       assert _risk_label(proba) == expected_label
+E       AssertionError: assert 'low' == 'high'
+E         
+E         - high
+E         + low
+
+tests/test_predict.py:120: AssertionError
+__________________________ test_risk_label[0.34-low] ___________________________
+
+proba = 0.34, expected_label = 'low'
+
+    @pytest.mark.parametrize(
+        "proba, expected_label",
+        [
+            (0.90, "high"),
+            (0.65, "high"),
+            (0.64, "medium"),
+            (0.35, "medium"),
+            (0.34, "low"),
+            (0.00, "low"),
+        ],
+    )
+    def test_risk_label(proba: float, expected_label: str) -> None:
+>       assert _risk_label(proba) == expected_label
+E       AssertionError: assert 'high' == 'low'
+E         
+E         - low
+E         + high
+
+tests/test_predict.py:120: AssertionError
+___________________________ test_risk_label[0.0-low] ___________________________
+
+proba = 0.0, expected_label = 'low'
+
+    @pytest.mark.parametrize(
+        "proba, expected_label",
+        [
+            (0.90, "high"),
+            (0.65, "high"),
+            (0.64, "medium"),
+            (0.35, "medium"),
+            (0.34, "low"),
+            (0.00, "low"),
+        ],
+    )
+    def test_risk_label(proba: float, expected_label: str) -> None:
+>       assert _risk_label(proba) == expected_label
+E       AssertionError: assert 'high' == 'low'
+E         
+E         - low
+E         + high
+
+tests/test_predict.py:120: AssertionError
+____________________ test_predict_without_model_raises_503 _____________________
+
+sample_features = {'recency_days': 15.0, 'frequency': 8.0, 'monetary_total': 1250.0, 'monetary_mean': 156.25, ...}
+
+    def test_predict_without_model_raises_503(sample_features: dict[str, float]) -> None:
+        """If the model is None, the endpoint must return 503."""
+        from fastapi import HTTPException
+    
+>       req = PredictionRequest(customer_id="T-4", features=sample_features)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       pydantic_core._pydantic_core.ValidationError: 1 validation error for PredictionRequest
+E       features
+E         Value error, features must contain exactly the canonical 25 names; see /feature-contract [type=value_error, input_value={'recency_days': 15.0, 'f...1.0, 'is_domestic': 1.0}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.13/v/value_error
+
+tests/test_predict.py:161: ValidationError
+________________________ test_index_keys_are_frozensets ________________________
+
+engine = <api.lifespan.RuleEngine object at 0x119e13e60>
+
+    def test_index_keys_are_frozensets(engine: RuleEngine) -> None:
+        for key in engine._index:
+>           assert isinstance(key, frozenset)
+E           AssertionError: assert False
+E            +  where False = isinstance('bread', frozenset)
+
+tests/test_recommend.py:73: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_api.py::test_version - AssertionError: assert None == 'test...
+FAILED tests/test_api.py::test_predict_valid - assert 422 == 200
+FAILED tests/test_api.py::test_golden_prediction - assert 422 == 200
+FAILED tests/test_api.py::test_predict_batch - assert 422 == 200
+FAILED tests/test_predict.py::test_predict_builds_dataframe_in_correct_order
+FAILED tests/test_predict.py::test_probability_bounds[proba_array0] - pydanti...
+FAILED tests/test_predict.py::test_probability_bounds[proba_array1] - pydanti...
+FAILED tests/test_predict.py::test_probability_bounds[proba_array2] - pydanti...
+FAILED tests/test_predict.py::test_probability_bounds[proba_array3] - pydanti...
+FAILED tests/test_predict.py::test_threshold_decision[0.7-0.5-True] - pydanti...
+FAILED tests/test_predict.py::test_threshold_decision[0.5-0.5-True] - pydanti...
+FAILED tests/test_predict.py::test_threshold_decision[0.49-0.5-False] - pydan...
+FAILED tests/test_predict.py::test_threshold_decision[0.01-0.5-False] - pydan...
+FAILED tests/test_predict.py::test_threshold_decision[0.45-0.45-True] - pydan...
+FAILED tests/test_predict.py::test_threshold_decision[0.44-0.45-False] - pyda...
+FAILED tests/test_predict.py::test_risk_label[0.9-high] - AssertionError: ass...
+FAILED tests/test_predict.py::test_risk_label[0.65-high] - AssertionError: as...
+FAILED tests/test_predict.py::test_risk_label[0.34-low] - AssertionError: ass...
+FAILED tests/test_predict.py::test_risk_label[0.0-low] - AssertionError: asse...
+FAILED tests/test_predict.py::test_predict_without_model_raises_503 - pydanti...
+FAILED tests/test_recommend.py::test_index_keys_are_frozensets - AssertionErr...
+21 failed, 80 passed in 0.76s

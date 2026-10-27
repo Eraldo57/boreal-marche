@@ -1,255 +1,62 @@
-# 🍁 Boréal Marché — Customer Intelligence Platform
+# Boréal Marché — Customer Intelligence Platform
 
-An end-to-end AI system that predicts customer retention, recommends products, and answers policy questions in French and English — from raw transactions to a monitored, deployed, governed platform.
+Vanier College capstone, Eraldo Ibrushi. **Progress milestone: integration and validation**, not a production launch.
 
-> **Capstone project for Vanier College course 420-977-VA — AI Development Project.**
+One public-data pipeline supports retention prediction and basket recommendations. A separate fictional policy/product corpus supports the assistant. FastAPI exposes all three heads; Streamlit calls the API.
 
-| | |
+## Start here
+
+- [Reproduction runbook](reports/current_run/RUNBOOK.md): setup, pipeline, servers and checks.
+- [Executed validation](reports/current_run/VALIDATION_RESULTS.md): real results and their limitations.
+- [Remaining work](reports/current_run/REMAINING_ISSUES.md): prioritized, including failing quality gates.
+- [Student technical guide](reports/STUDENT_TECHNICAL_GUIDE.md): module-by-module explanation.
+- [Architecture](ARCHITECTURE.md), [canonical feature inventory](governance/FEATURE_INVENTORY.md).
+
+## Local quickstart
+
+Use Python 3.12 (validated); Python 3.14 is not supported. Docker and paid LLM credentials are not needed.
+
+```bash
+python3.12 -m venv .venv
+.venv/bin/python -m pip install -e '.[dev]'
+.venv/bin/python -m src.ingest
+.venv/bin/python -m src.features
+.venv/bin/python -m src.train
+.venv/bin/python -m src.rules
+.venv/bin/python -m src.catalogue
+.venv/bin/python -m src.rag.index
+.venv/bin/uvicorn api.main:app --host 127.0.0.1 --port 8000
+```
+
+In another terminal:
+
+```bash
+.venv/bin/streamlit run app/streamlit_app.py --server.address 127.0.0.1
+```
+
+Open http://127.0.0.1:8501 and http://127.0.0.1:8000/docs. Use historical customer **12347**, then “Load historical customer features.” These are local demo endpoints with no authentication; do not expose them publicly.
+
+## Evidence from the current local run
+
+Measured on the real UCI workbook on 2026-09-30; detailed protocols and JSON sources are in the validation report.
+
+| Component | Executed evidence |
 |---|---|
-| **Live application** | `https://boreal-marche.example.com` *(placeholder — replace after deployment)* |
-| **API documentation** | `https://boreal-marche.example.com/docs` |
-| **MLflow dashboard** | `http://localhost:5000` (local) |
-| **CI status** | ![CI](https://github.com/YOUR_USERNAME/boreal-marche/actions/workflows/ci.yml/badge.svg) |
+| Data | 1,067,371 raw rows → 820,645 cleaned event rows, including returns |
+| Retention | 25 features; chronological holdout AP 0.7430 versus recency baseline 0.6711 |
+| Recommendations | 3,567 rules; later-basket Hit-rate@5 0.4867 versus popularity 0.1723 |
+| Assistant | Real multilingual index; regex golden-set evaluation, with source-selection gaps |
+| Integration | Live HTTP requests and Streamlit widget interactions passed |
+| Operations | Local MLflow tracking and measured demo PSI/KS; no cloud deployment |
 
----
+Average precision here measures **will_return**, not churn. Recommendation evaluation masks half of each eligible later basket; it is not an online sales experiment. Repeated training runs reproduce the same holdout, not independent evidence.
 
-## Architecture
+## Current limitations
 
-```mermaid
-graph TB
-    subgraph Frontend
-        ST[Streamlit App<br/>5 sections + FR/EN toggle]
-    end
+Strict mypy and coverage gates still fail. Docker configuration parses, but the Docker daemon was unavailable for building/running containers. OpenAI/Ollama integrations exist but were not executed. Fluent French generation, authenticated customer access, full fairness evaluation, deletion enforcement, human approval, registry promotion and cloud operations remain unfinished.
 
-    subgraph API[FastAPI + Pydantic v2]
-        H[/health /ready /version/]
-        P[/predict /predict/batch/]
-        R[/recommend/]
-        C[/chat/]
-        M[/metrics/]
-    end
+## Provenance and safe use
 
-    subgraph Models
-        HA[Head A<br/>Retention<br/>HistGBT + Isotonic]
-        HB[Head B<br/>Recommendations<br/>FP-Growth Rules]
-        HC[Head C<br/>Assistant<br/>RAG + Tools]
-    end
+[UCI Online Retail II](https://archive.ics.uci.edu/dataset/502/online+retail+ii) is a public UK giftware dataset, re-skinned as fictional Boréal Marché. Original monetary values remain **GBP**, never silently CAD. The assistant's product lookup reads `artifacts/product_catalogue.csv`, exported from the same cleaned purchases by `python -m src.catalogue` (one row per StockCode, median observed unit price in GBP). The data has no categories, allergens or dietary tags, so the assistant cannot answer product questions about them.
 
-    subgraph Infrastructure
-        ML[MLflow<br/>Tracking + Registry]
-        MON[Monitoring<br/>PSI + KS Drift]
-        DK[Docker + Compose]
-        CI[GitHub Actions<br/>CI/CD + OIDC]
-        AWS[AWS App Runner<br/>+ ECR]
-    end
-
-    subgraph Data
-        UCI[UCI Online Retail II<br/>1.07M transactions]
-        ETL[Ingestion + Cleaning<br/>DVC tracked]
-        FT[25 Engineered Features]
-    end
-
-    ST --> API
-    P --> HA
-    R --> HB
-    C --> HC
-    HA --> ML
-    HB --> ML
-    ETL --> FT --> HA
-    UCI --> ETL
-    M --> MON
-    DK --> AWS
-    CI --> DK
-```
-
----
-
-## Three Model Heads
-
-| Head | Technique | Business Question | Primary Metric |
-|---|---|---|---|
-| **A — Prédiction** | HistGradientBoosting (calibrated) | Will this customer return in 90 days? | PR-AUC |
-| **B — Recommandation** | FP-Growth association rules | What should we suggest next? | Hit-rate@5 |
-| **C — Assistant** | RAG + tool calling (3 providers) | Answer policy questions bilingually | Tool-choice accuracy |
-
----
-
-## Results
-
-### Head A — Retention Prediction
-
-| Model | PR-AUC | ROC-AUC | Brier | Recall@10% |
-|---|---|---|---|---|
-| DummyClassifier (baseline) | — | 0.500 | — | — |
-| Business heuristic (recency < 60d) | ~0.60 | ~0.65 | — | — |
-| LogisticRegression | — | — | — | — |
-| RandomForest | — | — | — | — |
-| **HistGradientBoosting** | **—** | **—** | **—** | **—** |
-
-*Cells are populated after training. Run `python src/train.py` to fill them.*
-
-### Head B — Recommendations
-
-| Metric | Value |
-|---|---|
-| Rule count | — |
-| Hit-rate@5 | — |
-| Coverage | — |
-
-### Head C — Assistant
-
-| Provider | Tool-choice accuracy | Refusal rate (OOS) | Avg. latency |
-|---|---|---|---|
-| Regex (baseline) | — | — | — |
-| OpenAI (gpt-4o-mini) | — | — | — |
-| Ollama (llama3.1) | — | — | — |
-
----
-
-## Quickstart
-
-### Prerequisites
-- Python 3.11+
-- Docker & Docker Compose
-- (Optional) An OpenAI API key for Head C
-- (Optional) Ollama for local LLM
-
-### Run locally
-
-```bash
-# 1. Clone
-git clone https://github.com/YOUR_USERNAME/boreal-marche.git
-cd boreal-marche
-
-# 2. Create virtual environment
-python -m venv .venv
-source .venv/bin/activate
-
-# 3. Install
-pip install -e ".[dev]"
-
-# 4. Download and prepare data
-python src/ingest.py
-
-# 5. Build features and train
-python src/features.py
-python src/train.py
-
-# 6. Mine association rules
-python src/rules.py
-
-# 7. Build RAG index
-python src/rag/index.py
-
-# 8. Start the API
-uvicorn api.main:app --reload --port 8000
-
-# 9. Start the frontend (new terminal)
-streamlit run app/streamlit_app.py
-```
-
-### Run with Docker
-
-```bash
-# Full stack (API + Streamlit + MLflow)
-docker compose up --build
-
-# With local Ollama for Head C
-docker compose --profile with-ollama up --build
-```
-
-### Run tests
-
-```bash
-pytest tests/ -v --tb=short
-coverage run -m pytest && coverage report --fail-under=80
-```
-
----
-
-## Repository Structure
-
-```
-boreal-marche/
-├── api/                    # FastAPI application
-│   ├── main.py             # App entrypoint + lifespan
-│   ├── schemas.py          # Pydantic v2 request/response models
-│   └── routers/            # Route handlers (predict, recommend, chat, monitor)
-├── app/
-│   └── streamlit_app.py    # Five-section Streamlit interface
-├── src/                    # Core ML pipeline
-│   ├── ingest.py           # Data download, validation, Parquet conversion
-│   ├── features.py         # 25+ feature engineering
-│   ├── train.py            # Spot-check, Optuna HPO, calibration, threshold
-│   ├── rules.py            # Apriori + FP-Growth rule mining
-│   ├── recommend.py        # Rule-based recommendation engine
-│   └── rag/                # Head C — grounded assistant
-│       ├── index.py        # Document chunking + embedding
-│       ├── tools.py        # Typed Pydantic tool definitions
-│       ├── providers.py    # Regex / OpenAI / Ollama backends
-│       └── guardrails.py   # Refusal, similarity floor, citations
-├── configs/
-│   └── pipeline.yaml       # All configuration in one place
-├── tests/                  # pytest suite with golden-prediction regression
-├── scripts/
-│   ├── simulate_traffic.py # Traffic simulation with drift injection
-│   └── retrain.py          # Scheduled retraining pipeline
-├── docs/corpus/            # Policy documents for Head C RAG
-├── governance/             # Law 25 compliance
-│   ├── GOVERNANCE_LOI25.md # Automated-decision register + data minimisation
-│   ├── MODEL_CARD.md       # Model card (Mitchell et al. format)
-│   ├── DATA_CARD.md        # Data provenance and bias
-│   ├── decision_register.md
-│   └── fairness_audit.md   # Subgroup fairness analysis
-├── artifacts/              # Serialised models and rule files
-├── notebooks/              # Development notebooks (EDA, tuning, evaluation)
-├── Dockerfile              # Multi-stage, non-root, health-checked
-├── docker-compose.yml      # API + Streamlit + MLflow + Ollama
-└── .github/workflows/      # CI (lint, test, build) + CD (OIDC, deploy, retrain)
-```
-
----
-
-## Data Provenance
-
-⚠️ **This project uses the [UCI Online Retail II](https://archive.ics.uci.edu/dataset/502/online+retail+ii) dataset (CC BY 4.0), a public dataset re-skinned as "Boréal Marché" for pedagogical purposes. No real Boréal Marché company or customer data exists.** See [`governance/DATA_CARD.md`](governance/DATA_CARD.md) for full provenance.
-
----
-
-## Governance
-
-This project complies with Québec's Law 25 (Loi modernisant des dispositions législatives en matière de protection des renseignements personnels). Key documents:
-
-- [`GOVERNANCE_LOI25.md`](governance/GOVERNANCE_LOI25.md) — Automated-decision register, human-review design, data-minimisation audit
-- [`MODEL_CARD.md`](governance/MODEL_CARD.md) — Model details, intended use, ethical considerations
-- [`DATA_CARD.md`](governance/DATA_CARD.md) — Data source, schema, known quality issues, bias
-- [`fairness_audit.md`](governance/fairness_audit.md) — Subgroup analysis with mitigations
-
----
-
-## What I Would Do Next
-
-1. **Real data.** Replace the UCI dataset with actual Boréal Marché transaction data and re-validate all models.
-2. **Embedding-based recommendations.** Replace association rules with a collaborative-filtering or neural model for better coverage on long-tail products.
-3. **Online learning.** Implement incremental model updates as new transactions arrive, rather than full weekly retraining.
-4. **A/B testing framework.** Measure the actual business impact of retention coupons against a control group.
-5. **Multi-armed bandit for thresholds.** Automatically adjust the retention threshold per customer segment based on observed coupon effectiveness.
-6. **Proper RAG evaluation.** Expand the golden set to 100+ questions and implement RAGAS-style automated evaluation.
-7. **Next.js frontend.** Build a production-grade frontend on Vercel (stretch goal per the assignment).
-
----
-
-## Built With
-
-- [scikit-learn](https://scikit-learn.org/) — ML pipeline
-- [MLflow](https://mlflow.org/) — experiment tracking and model registry
-- [Optuna](https://optuna.org/) — hyperparameter optimisation
-- [FastAPI](https://fastapi.tiangolo.com/) — API framework
-- [Pydantic v2](https://docs.pydantic.dev/) — data validation
-- [Streamlit](https://streamlit.io/) — frontend
-- [Docker](https://www.docker.com/) — containerisation
-- [GitHub Actions](https://github.com/features/actions) — CI/CD
-
----
-
-*Built by Eraldo Ibrushi for Vanier College course 420-977-VA.*
+Governance documents describe actual controls and planned work; this repository makes **no Law 25 compliance certification**. Load only trusted joblib artifacts: serialization is executable, and a hash is an integrity check, not a trust guarantee.

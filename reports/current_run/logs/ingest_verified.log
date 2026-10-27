@@ -1,0 +1,20 @@
+======================================================================
+Boréal Marché — Data Ingestion
+======================================================================
+[ingest] Found existing file: /Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/data/raw/online_retail_II.xlsx
+[ingest] SHA-256 verified: bcbe73b35f5b7bab…
+[ingest] Reading Excel sheets …
+[ingest] Loaded 1,067,371 rows from 2 sheet(s)
+[ingest] Cleaning …
+[ingest]   remove_invalid_schema: 1,067,371 → 1,067,371  (−0 rows)
+[ingest]   remove_zero_quantity: 1,067,371 → 1,067,371  (−0 rows)
+[ingest]   remove_non_positive_price: 1,067,371 → 1,061,164  (−6,207 rows)
+[ingest]   remove_null_customer: 1,061,164 → 824,293  (−236,871 rows)
+[ingest]   remove_service_skus: 824,293 → 820,645  (−3,648 rows)
+[ingest]   canonicalise_descriptions: 820,645 → 820,645  (−0 rows)
+[ingest]   cap_extreme_values: 820,645 → 820,645  (−0 rows)
+[ingest]   flag_events: 820,645 → 820,645  (−0 rows)
+[ingest] Parquet written: /Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/data/processed/transactions.parquet  (820,645 rows)
+[ingest] Manifest written: /Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/data/processed/manifest.json
+======================================================================
+[ingest] Done.

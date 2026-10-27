@@ -1,0 +1,60 @@
+INFO:     Started server process [76478]
+INFO:     Waiting for application startup.
+[2m2026-09-30T22:13:51.986244Z[0m [[32m[1minfo     [0m] [1mstartup_complete              [0m [36merrors[0m=[35m{}[0m
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:54777 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54777 - "GET /ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54777 - "GET /version HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54777 - "GET /feature-contract HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54777 - "GET /customers/12347/features HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54777 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54777 - "POST /predict/batch HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54777 - "POST /predict HTTP/1.1" 422 Unprocessable Entity
+[2m2026-09-30T22:14:16.795049Z[0m [[32m[1minfo     [0m] [1mrecommendation_served         [0m [36mbasket_size[0m=[35m1[0m [36mcustomer_id[0m=[35mNone[0m [36mn_recommendations[0m=[35m5[0m [36mstrategy[0m=[35mrule_based[0m
+INFO:     127.0.0.1:54777 - "POST /recommend HTTP/1.1" 200 OK
+[2m2026-09-30T22:14:16.795797Z[0m [[32m[1minfo     [0m] [1mrecommendation_served         [0m [36mbasket_size[0m=[35m0[0m [36mcustomer_id[0m=[35mNone[0m [36mn_recommendations[0m=[35m5[0m [36mstrategy[0m=[35mempty_basket[0m
+INFO:     127.0.0.1:54777 - "POST /recommend HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54777 - "POST /chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54777 - "POST /chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54777 - "POST /chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54777 - "POST /chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54777 - "POST /chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54777 - "GET /metrics HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54938 - "GET /metrics HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54938 - "POST /predict/batch HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54938 - "POST /predict/batch HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54938 - "POST /predict/batch HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54938 - "POST /predict/batch HTTP/1.1" 200 OK
+[2m2026-09-30T22:17:08.667630Z[0m [[32m[1minfo     [0m] [1mrecommendation_served         [0m [36mbasket_size[0m=[35m0[0m [36mcustomer_id[0m=[35mNone[0m [36mn_recommendations[0m=[35m5[0m [36mstrategy[0m=[35mempty_basket[0m
+INFO:     127.0.0.1:54938 - "POST /recommend HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54938 - "POST /chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54938 - "GET /metrics HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54950 - "GET /ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54952 - "GET /version HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54954 - "GET /ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54956 - "GET /customers/12347/features HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54958 - "GET /feature-contract HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54960 - "GET /version HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54962 - "GET /ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54964 - "GET /feature-contract HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54966 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54968 - "GET /version HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54970 - "GET /ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54972 - "GET /feature-contract HTTP/1.1" 200 OK
+[2m2026-09-30T22:17:21.793700Z[0m [[32m[1minfo     [0m] [1mrecommendation_served         [0m [36mbasket_size[0m=[35m1[0m [36mcustomer_id[0m=[35mNone[0m [36mn_recommendations[0m=[35m5[0m [36mstrategy[0m=[35mrule_based[0m
+INFO:     127.0.0.1:54974 - "POST /recommend HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54976 - "GET /version HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54978 - "GET /ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54980 - "GET /feature-contract HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54982 - "POST /chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54984 - "GET /version HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54986 - "GET /ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54988 - "GET /feature-contract HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54990 - "GET /metrics HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54992 - "GET /version HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+[2m2026-09-30T22:38:19.821508Z[0m [[32m[1minfo     [0m] [1mshutdown                      [0m
+INFO:     Application shutdown complete.
+INFO:     Finished server process [76478]

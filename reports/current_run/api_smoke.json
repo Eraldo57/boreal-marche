@@ -1,0 +1,881 @@
+{
+  "executed_at": "2026-09-30T22:38:37.570380+00:00",
+  "base_url": "http://127.0.0.1:8000",
+  "passed_requests": 16,
+  "checks": [
+    {
+      "method": "GET",
+      "route": "/health",
+      "status": 200,
+      "response": {
+        "status": "ok",
+        "message": "Bor\u00e9al March\u00e9 API is running."
+      }
+    },
+    {
+      "method": "GET",
+      "route": "/ready",
+      "status": 200,
+      "response": {
+        "ready": true,
+        "models_loaded": [
+          "retention_model",
+          "recommendation_rules",
+          "rag_index"
+        ],
+        "errors": {}
+      }
+    },
+    {
+      "method": "GET",
+      "route": "/version",
+      "status": 200,
+      "response": {
+        "version": "0.1.0",
+        "git_sha": "03f006394d63a229eb7d244ba8e98ff4977f9791",
+        "model_version": "0.2.0",
+        "trained_at": "2026-09-30T22:18:43.851782+00:00",
+        "model_family": "RandomForestClassifier",
+        "calibration_method": "isotonic",
+        "metrics": {
+          "pr_auc": 0.7430379084309567,
+          "roc_auc": 0.7809627606139234,
+          "brier_score": 0.19539851063119004,
+          "recall_top_decile": 0.21556350626118068,
+          "fit_time_s": 0.4538198749651201,
+          "assumed_test_utility": 29605.0
+        },
+        "decision_threshold": 0.22
+      }
+    },
+    {
+      "method": "GET",
+      "route": "/feature-contract",
+      "status": 200,
+      "response": {
+        "feature_names": [
+          "recency_days",
+          "frequency",
+          "monetary_total",
+          "monetary_mean",
+          "monetary_std",
+          "days_since_first_purchase",
+          "avg_days_between_orders",
+          "std_days_between_orders",
+          "is_one_time_buyer",
+          "avg_basket_size",
+          "avg_basket_value",
+          "max_basket_value",
+          "avg_unique_items_per_basket",
+          "single_item_basket_ratio",
+          "top_category_share",
+          "n_unique_categories",
+          "category_entropy",
+          "has_ever_cancelled",
+          "cancellation_rate",
+          "return_rate",
+          "weekend_purchase_ratio",
+          "morning_purchase_ratio",
+          "country_code",
+          "is_domestic",
+          "n_countries"
+        ],
+        "contract_version": "1.0",
+        "target": "will_return",
+        "positive_means": "purchase within the next 90 days",
+        "currency": "GBP",
+        "risk_label_means": "risk of NOT returning"
+      }
+    },
+    {
+      "method": "GET",
+      "route": "/customers/12347/features",
+      "status": 200,
+      "response": {
+        "customer_id": "12347",
+        "features": {
+          "recency_days": 29.0,
+          "frequency": 6.0,
+          "monetary_total": 4114.18,
+          "monetary_mean": 685.6966666666667,
+          "monetary_std": 373.82359966522534,
+          "days_since_first_purchase": 304.0,
+          "avg_days_between_orders": 54.4,
+          "std_days_between_orders": 12.759310326189265,
+          "is_one_time_buyer": 0.0,
+          "avg_basket_size": 32.5,
+          "avg_basket_value": 685.6966666666667,
+          "max_basket_value": 1423.58,
+          "avg_unique_items_per_basket": 27.333333333333332,
+          "single_item_basket_ratio": 0.0,
+          "top_category_share": 0.09100233825452461,
+          "n_unique_categories": 61.0,
+          "category_entropy": 5.048832897163167,
+          "has_ever_cancelled": 0.0,
+          "cancellation_rate": 0.0,
+          "return_rate": 0.0,
+          "weekend_purchase_ratio": 0.16666666666666666,
+          "morning_purchase_ratio": 0.3333333333333333,
+          "country_code": -1.0,
+          "is_domestic": 0.0,
+          "n_countries": 1.0
+        },
+        "snapshot": "2011-09-01",
+        "demonstration_only": true
+      }
+    },
+    {
+      "method": "POST",
+      "route": "/predict",
+      "status": 200,
+      "response": {
+        "customer_id": "12347",
+        "probability": 0.711864,
+        "will_return": true,
+        "threshold": 0.22,
+        "risk_label": "low",
+        "top_factors": [],
+        "model_version": "0.2.0",
+        "timestamp": "2026-09-30T22:38:37.421899Z"
+      }
+    },
+    {
+      "method": "POST",
+      "route": "/predict/batch",
+      "status": 200,
+      "response": {
+        "predictions": [
+          {
+            "customer_id": "12347",
+            "probability": 0.711864,
+            "will_return": true,
+            "threshold": 0.22,
+            "risk_label": "low",
+            "top_factors": [],
+            "model_version": "0.2.0",
+            "timestamp": "2026-09-30T22:38:37.437928Z"
+          },
+          {
+            "customer_id": "12347",
+            "probability": 0.711864,
+            "will_return": true,
+            "threshold": 0.22,
+            "risk_label": "low",
+            "top_factors": [],
+            "model_version": "0.2.0",
+            "timestamp": "2026-09-30T22:38:37.451868Z"
+          }
+        ],
+        "count": 2
+      }
+    },
+    {
+      "method": "POST",
+      "route": "/predict",
+      "status": 422,
+      "response": {
+        "detail": [
+          {
+            "type": "value_error",
+            "loc": [
+              "body",
+              "features"
+            ],
+            "msg": "Value error, features must contain exactly the canonical 25 names; see /feature-contract",
+            "input": {},
+            "ctx": {
+              "error": {}
+            }
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "route": "/recommend",
+      "status": 200,
+      "response": {
+        "recommendations": [
+          "red hanging heart t-light holder",
+          "cream heart card holder",
+          "wooden picture frame white finish",
+          "wooden frame antique white",
+          "zinc metal heart decoration"
+        ],
+        "because": [
+          {
+            "antecedent": [
+              "white hanging heart t-light holder"
+            ],
+            "consequent": [
+              "red hanging heart t-light holder"
+            ],
+            "confidence": 0.23110316649642496,
+            "lift": 4.6993424666203145,
+            "support": 0.03535018163352994
+          },
+          {
+            "antecedent": [
+              "white hanging heart t-light holder"
+            ],
+            "consequent": [
+              "cream heart card holder"
+            ],
+            "confidence": 0.10393258426966293,
+            "lift": 3.016755203954241,
+            "support": 0.015897816491543298
+          },
+          {
+            "antecedent": [
+              "white hanging heart t-light holder"
+            ],
+            "consequent": [
+              "wooden picture frame white finish"
+            ],
+            "confidence": 0.13100102145045966,
+            "lift": 2.883712080957195,
+            "support": 0.02003827975469708
+          },
+          {
+            "antecedent": [
+              "white hanging heart t-light holder"
+            ],
+            "consequent": [
+              "wooden frame antique white"
+            ],
+            "confidence": 0.1371297242083759,
+            "lift": 2.806281430422567,
+            "support": 0.020975743135033788
+          },
+          {
+            "antecedent": [
+              "white hanging heart t-light holder"
+            ],
+            "consequent": [
+              "zinc metal heart decoration"
+            ],
+            "confidence": 0.10163432073544434,
+            "lift": 2.7274006762558813,
+            "support": 0.015546267723917035
+          }
+        ],
+        "strategy": "rule_based",
+        "timestamp": "2026-09-30T22:38:37.454503Z"
+      }
+    },
+    {
+      "method": "POST",
+      "route": "/recommend",
+      "status": 200,
+      "response": {
+        "recommendations": [
+          "white hanging heart t-light holder",
+          "regency cakestand 3 tier",
+          "assorted colour bird ornament",
+          "jumbo bag red retrospot",
+          "strawberry ceramic trinket box"
+        ],
+        "because": [],
+        "strategy": "empty_basket",
+        "timestamp": "2026-09-30T22:38:37.455382Z"
+      }
+    },
+    {
+      "method": "POST",
+      "route": "/chat",
+      "status": 200,
+      "response": {
+        "reply": "Based on our documents: or a refund subject to the\nconditions described in this policy. All return and refund requests must be submitted within the applicable timeframe\ncounted from the date of delivery (or the date of pickup for click-and-collect\norders).\n\n## 2. Non-Perishable Products\n\n### 2.1 Eligibility\n\nNon-perishable products (canned goods, dry goods, household items, cleaning\nsupplies, personal care) may be returned if:",
+        "citations": [
+          {
+            "source": "return_policy.md",
+            "chunk": "or a refund subject to the\nconditions described in this policy. All return and refund requests must be submitted within the applicable timeframe\ncounted from the date of delivery (or the date of pickup for click-and-collect\norders).\n\n## 2. Non-Perishable Products\n\n### 2.1 Eligibility\n\nNon-perishable products (canned goods, dry goods, household items, cleaning\nsupplies, personal care) may be returned if:",
+            "score": 0.6022119522094727
+          }
+        ],
+        "tool_calls": [
+          {
+            "tool_name": "policy_search",
+            "arguments": {
+              "question": "What is the return policy?"
+            },
+            "result": {
+              "chunks": [
+                {
+                  "text": "or a refund subject to the\nconditions described in this policy. All return and refund requests must be submitted within the applicable timeframe\ncounted from the date of delivery (or the date of pickup for click-and-collect\norders).\n\n## 2. Non-Perishable Products\n\n### 2.1 Eligibility\n\nNon-perishable products (canned goods, dry goods, household items, cleaning\nsupplies, personal care) may be returned if:",
+                  "source": "return_policy.md",
+                  "score": 0.6022119522094727,
+                  "language": "en"
+                },
+                {
+                  "text": "# Bor\u00e9al March\u00e9 \u2014 Return and Refund Policy\n\n*Last updated: 2024-11-01*\n\n## 1. General Principles\n\nBor\u00e9al March\u00e9 wants every customer to be satisfied with their purchase. If you\nare not happy with an item, you may request a return or a refund subject to the\nconditions described in this policy.",
+                  "source": "return_policy.md",
+                  "score": 0.5742428302764893,
+                  "language": "en"
+                },
+                {
+                  "text": "ng\n  points on the same order).\n\n## 7. Returns and Cancellations - If an order is returned or cancelled, the points earned on that order are\n  deducted from the member's balance.\n- If a member redeemed points on an order that is later returned, the points are\n  restored and the refund is reduced by the discount amount.\n\n## 8. Program Changes",
+                  "source": "loyalty_terms.md",
+                  "score": 0.5344459414482117,
+                  "language": "en"
+                },
+                {
+                  "text": "ically: do not consume, discard or return for a full refund). 4. A full refund is issued automatically \u2014 no action is required from the\n   customer.\n\n### 5.2 Voluntary recalls by manufacturers\n\nBor\u00e9al March\u00e9 cooperates with manufacturers who initiate voluntary recalls. The\nsame notification process applies.\n\n### 5.3 Internal quality alerts",
+                  "source": "allergen_policy.md",
+                  "score": 0.5206199884414673,
+                  "language": "en"
+                },
+                {
+                  "text": "processed to the\noriginal payment method within 5 business days. ### 2.3 Return shipping cost\n\nFor non-perishable returns, the return shipping cost is borne by the customer\nunless the return is due to a Bor\u00e9al March\u00e9 error (wrong item shipped, item\ndefective on arrival). A flat return shipping fee of $7.95 is deducted from the\nrefund.\n\n## 3. Perishable Products\n\n### 3.1 General rule",
+                  "source": "return_policy.md",
+                  "score": 0.5158478617668152,
+                  "language": "en"
+                }
+              ],
+              "query": "What is the return policy?"
+            }
+          }
+        ],
+        "provider_used": "regex",
+        "refused": false,
+        "refusal_reason": null,
+        "language": "en",
+        "provider_latency_ms": 0.14741701306775212,
+        "token_usage": null,
+        "cost_usd": 0.0,
+        "timestamp": "2026-09-30T22:38:37.480437Z"
+      }
+    },
+    {
+      "method": "POST",
+      "route": "/chat",
+      "status": 200,
+      "response": {
+        "reply": "D'apr\u00e8s nos documents (extrait dans la langue source) : # Bor\u00e9al March\u00e9 \u2014 Return and Refund Policy\n\n*Last updated: 2024-11-01*\n\n## 1. General Principles\n\nBor\u00e9al March\u00e9 wants every customer to be satisfied with their purchase. If you\nare not happy with an item, you may request a return or a refund subject to the\nconditions described in this policy.",
+        "citations": [
+          {
+            "source": "return_policy.md",
+            "chunk": "# Bor\u00e9al March\u00e9 \u2014 Return and Refund Policy\n\n*Last updated: 2024-11-01*\n\n## 1. General Principles\n\nBor\u00e9al March\u00e9 wants every customer to be satisfied with their purchase. If you\nare not happy with an item, you may request a return or a refund subject to the\nconditions described in this policy.",
+            "score": 0.5432543158531189
+          }
+        ],
+        "tool_calls": [
+          {
+            "tool_name": "policy_search",
+            "arguments": {
+              "question": "Quelle est la politique de retour ?"
+            },
+            "result": {
+              "chunks": [
+                {
+                  "text": "# Bor\u00e9al March\u00e9 \u2014 Return and Refund Policy\n\n*Last updated: 2024-11-01*\n\n## 1. General Principles\n\nBor\u00e9al March\u00e9 wants every customer to be satisfied with their purchase. If you\nare not happy with an item, you may request a return or a refund subject to the\nconditions described in this policy.",
+                  "source": "return_policy.md",
+                  "score": 0.5432543158531189,
+                  "language": "en"
+                },
+                {
+                  "text": "or a refund subject to the\nconditions described in this policy. All return and refund requests must be submitted within the applicable timeframe\ncounted from the date of delivery (or the date of pickup for click-and-collect\norders).\n\n## 2. Non-Perishable Products\n\n### 2.1 Eligibility\n\nNon-perishable products (canned goods, dry goods, household items, cleaning\nsupplies, personal care) may be returned if:",
+                  "source": "return_policy.md",
+                  "score": 0.48459887504577637,
+                  "language": "en"
+                },
+                {
+                  "text": "ng\n  points on the same order).\n\n## 7. Returns and Cancellations - If an order is returned or cancelled, the points earned on that order are\n  deducted from the member's balance.\n- If a member redeemed points on an order that is later returned, the points are\n  restored and the refund is reduced by the discount amount.\n\n## 8. Program Changes",
+                  "source": "loyalty_terms.md",
+                  "score": 0.42713308334350586,
+                  "language": "en"
+                },
+                {
+                  "text": "ically: do not consume, discard or return for a full refund). 4. A full refund is issued automatically \u2014 no action is required from the\n   customer.\n\n### 5.2 Voluntary recalls by manufacturers\n\nBor\u00e9al March\u00e9 cooperates with manufacturers who initiate voluntary recalls. The\nsame notification process applies.\n\n### 5.3 Internal quality alerts",
+                  "source": "allergen_policy.md",
+                  "score": 0.40548384189605713,
+                  "language": "en"
+                },
+                {
+                  "text": "business days |\n\n## 9. Contact\n\nFor return and refund inquiries: - **Email:** retours@borealmarche.ca\n- **Phone:** 1-877-BOREAL-1, option 2\n- **Live chat:** borealmarche.ca, Monday\u2013Saturday, 9 h\u201321 h Eastern",
+                  "source": "return_policy.md",
+                  "score": 0.3569929599761963,
+                  "language": "en"
+                }
+              ],
+              "query": "Quelle est la politique de retour ?"
+            }
+          }
+        ],
+        "provider_used": "regex",
+        "refused": false,
+        "refusal_reason": null,
+        "language": "fr",
+        "provider_latency_ms": 0.01654197694733739,
+        "token_usage": null,
+        "cost_usd": 0.0,
+        "timestamp": "2026-09-30T22:38:37.496241Z"
+      }
+    },
+    {
+      "method": "POST",
+      "route": "/chat",
+      "status": 200,
+      "response": {
+        "reply": "I can only access your own account information. I cannot look up or share another customer's data. / Je ne peux acc\u00e9der qu'\u00e0 vos propres informations. Je ne peux ni consulter ni partager les donn\u00e9es d'un autre client.",
+        "citations": [],
+        "tool_calls": [],
+        "provider_used": "regex",
+        "refused": true,
+        "refusal_reason": "I can only access your own account information. I cannot look up or share another customer's data. / Je ne peux acc\u00e9der qu'\u00e0 vos propres informations. Je ne peux ni consulter ni partager les donn\u00e9es d'un autre client.",
+        "language": "en",
+        "provider_latency_ms": null,
+        "token_usage": null,
+        "cost_usd": null,
+        "timestamp": "2026-09-30T22:38:37.497366Z"
+      }
+    },
+    {
+      "method": "POST",
+      "route": "/chat",
+      "status": 200,
+      "response": {
+        "reply": "Probability of purchase within 90 days: 71.2%. Non-return risk: low. Historical public-data demo / d\u00e9monstration historique.",
+        "citations": [],
+        "tool_calls": [
+          {
+            "tool_name": "retention_score",
+            "arguments": {
+              "customer_id": "12347"
+            },
+            "result": {
+              "customer_id": "12347",
+              "probability": 0.711864,
+              "will_return": true,
+              "risk_label": "low",
+              "threshold": 0.22,
+              "error": null
+            }
+          }
+        ],
+        "provider_used": "regex",
+        "refused": false,
+        "refusal_reason": null,
+        "language": "en",
+        "provider_latency_ms": 0.013749988283962011,
+        "token_usage": null,
+        "cost_usd": 0.0,
+        "timestamp": "2026-09-30T22:38:37.521595Z"
+      }
+    },
+    {
+      "method": "POST",
+      "route": "/chat",
+      "status": 200,
+      "response": {
+        "reply": "Fictional demonstration catalogue (CAD): BM-PG-005 \u2014 Maple Syrup Grade A \u2014 \u00c9rabli\u00e8re du Cap: 14.99",
+        "citations": [
+          {
+            "source": "product_catalogue.md",
+            "chunk": "Authored fictional catalogue; not mapped to UCI items",
+            "score": 1.0
+          }
+        ],
+        "tool_calls": [
+          {
+            "tool_name": "product_lookup",
+            "arguments": {
+              "query": "Do you sell maple syrup?"
+            },
+            "result": {
+              "products": [
+                {
+                  "sku": "BM-PG-005",
+                  "name": "Maple Syrup Grade A \u2014 \u00c9rabli\u00e8re du Cap",
+                  "category": "Pantry",
+                  "price": 14.99,
+                  "unit": "540 mL",
+                  "temperature": "ambient",
+                  "allergens": "",
+                  "tags": "\ud83c\udf43 Organic"
+                }
+              ],
+              "query": "Do you sell maple syrup?",
+              "total_matches": 1
+            }
+          }
+        ],
+        "provider_used": "regex",
+        "refused": false,
+        "refusal_reason": null,
+        "language": "en",
+        "provider_latency_ms": 0.019666971638798714,
+        "token_usage": null,
+        "cost_usd": 0.0,
+        "timestamp": "2026-09-30T22:38:37.533770Z"
+      }
+    },
+    {
+      "method": "GET",
+      "route": "/metrics",
+      "status": 200,
+      "response": {
+        "request_count": 136,
+        "error_rate": 0.0441,
+        "latency_p50_ms": 14.63,
+        "latency_p95_ms": 29.29,
+        "latency_p99_ms": 410.13,
+        "drift_metrics": [
+          {
+            "feature": "recency_days",
+            "statistic": "psi",
+            "value": 4.103664203089896,
+            "threshold": 0.2,
+            "alert": true
+          },
+          {
+            "feature": "recency_days",
+            "statistic": "ks_pvalue",
+            "value": 1.1442080417965884e-122,
+            "threshold": 0.05,
+            "alert": true
+          },
+          {
+            "feature": "frequency",
+            "statistic": "psi",
+            "value": 0.2008300970488977,
+            "threshold": 0.2,
+            "alert": true
+          },
+          {
+            "feature": "frequency",
+            "statistic": "ks_pvalue",
+            "value": 0.0002575370688022557,
+            "threshold": 0.05,
+            "alert": true
+          },
+          {
+            "feature": "monetary_total",
+            "statistic": "psi",
+            "value": 0.1670846406656194,
+            "threshold": 0.2,
+            "alert": false
+          },
+          {
+            "feature": "monetary_total",
+            "statistic": "ks_pvalue",
+            "value": 0.0012184543968065675,
+            "threshold": 0.05,
+            "alert": true
+          },
+          {
+            "feature": "monetary_mean",
+            "statistic": "psi",
+            "value": 0.10521707381098144,
+            "threshold": 0.2,
+            "alert": false
+          },
+          {
+            "feature": "monetary_mean",
+            "statistic": "ks_pvalue",
+            "value": 0.10593225221379854,
+            "threshold": 0.05,
+            "alert": false
+          },
+          {
+            "feature": "monetary_std",
+            "statistic": "psi",
+            "value": 0.13456171513758738,
+            "threshold": 0.2,
+            "alert": false
+          },
+          {
+            "feature": "monetary_std",
+            "statistic": "ks_pvalue",
+            "value": 0.00022461115015599392,
+            "threshold": 0.05,
+            "alert": true
+          },
+          {
+            "feature": "days_since_first_purchase",
+            "statistic": "psi",
+            "value": 2.0838563383345328,
+            "threshold": 0.2,
+            "alert": true
+          },
+          {
+            "feature": "days_since_first_purchase",
+            "statistic": "ks_pvalue",
+            "value": 3.770470947922545e-61,
+            "threshold": 0.05,
+            "alert": true
+          },
+          {
+            "feature": "avg_days_between_orders",
+            "statistic": "psi",
+            "value": 0.28918744123610296,
+            "threshold": 0.2,
+            "alert": true
+          },
+          {
+            "feature": "avg_days_between_orders",
+            "statistic": "ks_pvalue",
+            "value": 2.6051628981008328e-05,
+            "threshold": 0.05,
+            "alert": true
+          },
+          {
+            "feature": "std_days_between_orders",
+            "statistic": "psi",
+            "value": 0.2478608617161498,
+            "threshold": 0.2,
+            "alert": true
+          },
+          {
+            "feature": "std_days_between_orders",
+            "statistic": "ks_pvalue",
+            "value": 9.953675715083806e-06,
+            "threshold": 0.05,
+            "alert": true
+          },
+          {
+            "feature": "is_one_time_buyer",
+            "statistic": "psi",
+            "value": 0.12988435842759527,
+            "threshold": 0.2,
+            "alert": false
+          },
+          {
+            "feature": "is_one_time_buyer",
+            "statistic": "ks_pvalue",
+            "value": 0.002310600013777697,
+            "threshold": 0.05,
+            "alert": true
+          },
+          {
+            "feature": "avg_basket_size",
+            "statistic": "psi",
+            "value": 0.13160409496223122,
+            "threshold": 0.2,
+            "alert": false
+          },
+          {
+            "feature": "avg_basket_size",
+            "statistic": "ks_pvalue",
+            "value": 0.05899768115650306,
+            "threshold": 0.05,
+            "alert": false
+          },
+          {
+            "feature": "avg_basket_value",
+            "statistic": "psi",
+            "value": 0.10521707381098144,
+            "threshold": 0.2,
+            "alert": false
+          },
+          {
+            "feature": "avg_basket_value",
+            "statistic": "ks_pvalue",
+            "value": 0.10593225221379854,
+            "threshold": 0.05,
+            "alert": false
+          },
+          {
+            "feature": "max_basket_value",
+            "statistic": "psi",
+            "value": 0.13708911400003687,
+            "threshold": 0.2,
+            "alert": false
+          },
+          {
+            "feature": "max_basket_value",
+            "statistic": "ks_pvalue",
+            "value": 0.030637772627699955,
+            "threshold": 0.05,
+            "alert": true
+          },
+          {
+            "feature": "avg_unique_items_per_basket",
+            "statistic": "psi",
+            "value": 0.1040719753364306,
+            "threshold": 0.2,
+            "alert": false
+          },
+          {
+            "feature": "avg_unique_items_per_basket",
+            "statistic": "ks_pvalue",
+            "value": 0.2174078202608345,
+            "threshold": 0.05,
+            "alert": false
+          },
+          {
+            "feature": "single_item_basket_ratio",
+            "statistic": "psi",
+            "value": 0.0037796873035375184,
+            "threshold": 0.2,
+            "alert": false
+          },
+          {
+            "feature": "single_item_basket_ratio",
+            "statistic": "ks_pvalue",
+            "value": 0.9999885306382356,
+            "threshold": 0.05,
+            "alert": false
+          },
+          {
+            "feature": "top_category_share",
+            "statistic": "psi",
+            "value": 0.15871354125263032,
+            "threshold": 0.2,
+            "alert": false
+          },
+          {
+            "feature": "top_category_share",
+            "statistic": "ks_pvalue",
+            "value": 0.025050172780316515,
+            "threshold": 0.05,
+            "alert": true
+          },
+          {
+            "feature": "n_unique_categories",
+            "statistic": "psi",
+            "value": 0.17236917872735308,
+            "threshold": 0.2,
+            "alert": false
+          },
+          {
+            "feature": "n_unique_categories",
+            "statistic": "ks_pvalue",
+            "value": 0.0017024625862277487,
+            "threshold": 0.05,
+            "alert": true
+          },
+          {
+            "feature": "category_entropy",
+            "statistic": "psi",
+            "value": 0.14251064782522724,
+            "threshold": 0.2,
+            "alert": false
+          },
+          {
+            "feature": "category_entropy",
+            "statistic": "ks_pvalue",
+            "value": 0.0014736601062267374,
+            "threshold": 0.05,
+            "alert": true
+          },
+          {
+            "feature": "has_ever_cancelled",
+            "statistic": "psi",
+            "value": 0.016794341259996293,
+            "threshold": 0.2,
+            "alert": false
+          },
+          {
+            "feature": "has_ever_cancelled",
+            "statistic": "ks_pvalue",
+            "value": 0.9999999966466356,
+            "threshold": 0.05,
+            "alert": false
+          },
+          {
+            "feature": "cancellation_rate",
+            "statistic": "psi",
+            "value": 0.037369324110326604,
+            "threshold": 0.2,
+            "alert": false
+          },
+          {
+            "feature": "cancellation_rate",
+            "statistic": "ks_pvalue",
+            "value": 0.34883898326499385,
+            "threshold": 0.05,
+            "alert": false
+          },
+          {
+            "feature": "return_rate",
+            "statistic": "psi",
+            "value": 0.001487061246843264,
+            "threshold": 0.2,
+            "alert": false
+          },
+          {
+            "feature": "return_rate",
+            "statistic": "ks_pvalue",
+            "value": 0.9952418408902992,
+            "threshold": 0.05,
+            "alert": false
+          },
+          {
+            "feature": "weekend_purchase_ratio",
+            "statistic": "psi",
+            "value": 0.003760818264695413,
+            "threshold": 0.2,
+            "alert": false
+          },
+          {
+            "feature": "weekend_purchase_ratio",
+            "statistic": "ks_pvalue",
+            "value": 0.013037981239820251,
+            "threshold": 0.05,
+            "alert": true
+          },
+          {
+            "feature": "morning_purchase_ratio",
+            "statistic": "psi",
+            "value": 0.16290589645956902,
+            "threshold": 0.2,
+            "alert": false
+          },
+          {
+            "feature": "morning_purchase_ratio",
+            "statistic": "ks_pvalue",
+            "value": 0.03855043989468332,
+            "threshold": 0.05,
+            "alert": true
+          },
+          {
+            "feature": "country_code",
+            "statistic": "psi",
+            "value": 0.10053287217186754,
+            "threshold": 0.2,
+            "alert": false
+          },
+          {
+            "feature": "country_code",
+            "statistic": "ks_pvalue",
+            "value": 0.042740399462950496,
+            "threshold": 0.05,
+            "alert": true
+          },
+          {
+            "feature": "is_domestic",
+            "statistic": "psi",
+            "value": 0.12559051803372995,
+            "threshold": 0.2,
+            "alert": false
+          },
+          {
+            "feature": "is_domestic",
+            "statistic": "ks_pvalue",
+            "value": 0.08636709676665932,
+            "threshold": 0.05,
+            "alert": false
+          },
+          {
+            "feature": "n_countries",
+            "statistic": "psi",
+            "value": 0.01827644470571247,
+            "threshold": 0.2,
+            "alert": false
+          },
+          {
+            "feature": "n_countries",
+            "statistic": "ks_pvalue",
+            "value": 1.0,
+            "threshold": 0.05,
+            "alert": false
+          }
+        ],
+        "status": "red",
+        "drift_status": "measured",
+        "window_description": "bounded local request log"
+      }
+    }
+  ]
+}

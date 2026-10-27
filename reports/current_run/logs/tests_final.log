@@ -1,0 +1,49 @@
+........................................................................ [ 58%]
+.....................................F.............                      [100%]
+=================================== FAILURES ===================================
+_________________ test_startup_and_predictions_real_artifacts __________________
+
+    def test_startup_and_predictions_real_artifacts():
+        with TestClient(app) as client:
+            assert client.get("/health").status_code == 200
+            assert client.get("/ready").json()["ready"] is True
+            record = client.get("/customers/12347/features").json()
+            payload = {"customer_id": "12347", "features": record["features"]}
+            single = client.post("/predict", json=payload)
+            assert single.status_code == 200
+            batch = client.post("/predict/batch", json={"customers": [payload]}).json()
+            assert batch["predictions"][0]["probability"] == single.json()["probability"]
+            assert 0 <= single.json()["probability"] <= 1
+            recommendation = client.post("/recommend", json={"basket": []}).json()
+>           assert recommendation["strategy"] == "popularity_fallback"
+E           AssertionError: assert 'empty_basket' == 'popularity_fallback'
+E             
+E             - popularity_fallback
+E             + empty_basket
+
+tests/test_real_artifacts.py:51: AssertionError
+----------------------------- Captured stdout call -----------------------------
+[2m2026-09-30T22:17:32.109092Z[0m [[32m[1minfo     [0m] [1mstartup_complete              [0m [36merrors[0m=[35m{}[0m
+[2m2026-09-30T22:17:32.148046Z[0m [[32m[1minfo     [0m] [1mrecommendation_served         [0m [36mbasket_size[0m=[35m0[0m [36mcustomer_id[0m=[35mNone[0m [36mn_recommendations[0m=[35m5[0m [36mstrategy[0m=[35mempty_basket[0m
+[2m2026-09-30T22:17:32.149009Z[0m [[32m[1minfo     [0m] [1mshutdown                      [0m
+=============================== warnings summary ===============================
+.venv/lib/python3.12/site-packages/mlflow/utils/pydantic_utils.py:33
+  /Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/mlflow/utils/pydantic_utils.py:33: PydanticDeprecatedSince212: Using `@model_validator` with mode='after' on a classmethod is deprecated. Instead, use an instance method. See the documentation at https://docs.pydantic.dev/2.13/concepts/validators/#model-after-validator. Deprecated in Pydantic V2.12 to be removed in V3.0.
+    return pydantic_model_validator(mode=mode)(func)
+
+.venv/lib/python3.12/site-packages/mlflow/gateway/config.py:454
+  /Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/mlflow/gateway/config.py:454: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class Route(ConfigModel):
+
+tests/test_pipeline.py::test_temporal_partitions_require_mature_labels
+  /Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/tests/test_pipeline.py:101: DeprecationWarning: The 'generic' unit for NumPy timedelta is deprecated, and will raise an error in the future. This includes implicit conversion of bare integers (e.g. `+ 1`). Please use a specific unit instead.
+    snapshots["label_end"] = pd.to_datetime(snapshots["cutoff"]) + pd.Timedelta(days=90)
+
+tests/test_pipeline.py::test_sparse_matrix_and_no_future_mining
+  /Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/src/rules.py:43: FutureWarning: Allowing arbitrary scalar fill_value in SparseDtype is deprecated. In a future version, the fill_value must be a valid value for the SparseDtype.subtype.
+    return pd.DataFrame.sparse.from_spmatrix(matrix, columns=encoder.columns_), report
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_real_artifacts.py::test_startup_and_predictions_real_artifacts
+1 failed, 122 passed, 4 warnings in 8.89s

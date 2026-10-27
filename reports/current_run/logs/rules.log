@@ -1,0 +1,23 @@
+/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/src/rules.py:37: FutureWarning: Allowing arbitrary scalar fill_value in SparseDtype is deprecated. In a future version, the fill_value must be a valid value for the SparseDtype.subtype.
+  return pd.DataFrame.sparse.from_spmatrix(matrix, columns=encoder.columns_), report
+[rules] support=0.005 itemsets=2571 eligible_rules=3567
+[rules] support=0.01 itemsets=783 eligible_rules=450
+[rules] support=0.02 itemsets=193 eligible_rules=24
+[rules] support=0.03 itemsets=70 eligible_rules=2
+[rules] support=0.05 itemsets=11 eligible_rules=0
+{
+  "rules": 3567,
+  "final_test": {
+    "baskets_total": 6284,
+    "baskets_evaluated": 5884,
+    "single_item_excluded": 400,
+    "hit_rate_at_5": 0.486743711760707,
+    "popularity_hit_rate_at_5": 0.17233174711080898,
+    "catalogue_coverage": 0.07680819287390656,
+    "popularity_catalogue_coverage": 0.0019202048218476637,
+    "rule_firing_coverage": 0.8366757307953773,
+    "coverage_denominator": "distinct training descriptions",
+    "k": 5,
+    "mask_seed": 42
+  }
+}

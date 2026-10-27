@@ -1,323 +1,221 @@
-"""
-Head C — Grounded bilingual assistant endpoint.
-
-POST /chat  Ask a question; the assistant answers using retrieval,
-            tool calls, and guardrails.
-"""
+"""One grounded orchestration path for regex, OpenAI and Ollama providers."""
 
 from __future__ import annotations
 
-import re
-from typing import Any
+import asyncio
+import os
+import time
 
-import structlog
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, HTTPException, Request
+from pydantic import ValidationError
 
-from api.schemas import ChatRequest, ChatResponse, Citation, Provider, ToolCall
+from api.schemas import ChatRequest, ChatResponse, Citation, ToolCall
+from src.ingest import load_config
+from src.rag.guardrails import (
+    check_no_cross_customer,
+    check_out_of_scope,
+    check_require_citations,
+    detect_language,
+)
+from src.rag.providers import RegexProvider, get_provider
+from src.rag.tools import TOOL_REGISTRY
 
-logger = structlog.get_logger(__name__)
 router = APIRouter(tags=["assistant"])
 
-# ---------------------------------------------------------------------------
-# Guardrails
-# ---------------------------------------------------------------------------
-_OUT_OF_SCOPE_PATTERNS = re.compile(
-    r"(stock\s*price|invest|lottery|medical\s*diagnosis|lawsuit|"
-    r"hack|exploit|password|credit\s*card\s*number)",
-    re.IGNORECASE,
-)
 
-_CROSS_CUSTOMER_PATTERN = re.compile(
-    r"(another\s*customer|other\s*customer'?s?|someone\s*else'?s?\s*(order|account|data))",
-    re.IGNORECASE,
-)
-
-
-def _check_guardrails(
-    message: str, customer_id: str | None
-) -> tuple[bool, str | None]:
-    """Return (refused, reason).  refused=False means the message is safe."""
-    if _OUT_OF_SCOPE_PATTERNS.search(message):
-        return True, (
-            "This question is outside Boréal Marché's scope. "
-            "I can help with delivery, returns, allergens, loyalty, and product questions. "
-            "For anything else, please contact a human agent."
-        )
-    if _CROSS_CUSTOMER_PATTERN.search(message):
-        return True, (
-            "I cannot share information about another customer's account. "
-            "I can only help with your own orders and account."
-        )
+def _check_guardrails(message, customer_id):
+    for outcome in [
+        check_out_of_scope(message),
+        check_no_cross_customer(message, current_customer_id=customer_id),
+    ]:
+        if not outcome.passed:
+            return True, outcome.reason
     return False, None
 
 
-# ---------------------------------------------------------------------------
-# Retrieval helpers
-# ---------------------------------------------------------------------------
-def _retrieve_chunks(
-    rag_index: Any, query: str, top_k: int = 5, floor: float = 0.25
-) -> list[dict[str, Any]]:
-    """Query the RAG index and return chunks above the similarity floor."""
-    if rag_index is None:
+_detect_language = detect_language
+
+
+def _detect_tool_intent(message):
+    """Synchronous compatibility helper for unit tests; same provider logic."""
+    return asyncio.run(RegexProvider().answer(message, [], [], "en")).tool_name
+
+
+def _retrieve_chunks(index, query, top_k=5, floor=0.25):
+    if index is None:
         return []
-
-    try:
-        results = rag_index.query(query, top_k=top_k)
-    except Exception as exc:
-        logger.warning("rag_query_failed", error=str(exc))
-        return []
-
-    return [r for r in results if r.get("score", 0) >= floor]
+    return [r for r in index.query(query, top_k=top_k) if r["score"] >= floor]
 
 
-def _format_context(chunks: list[dict[str, Any]]) -> str:
-    """Turn retrieved chunks into a prompt context block."""
+def _format_context(chunks):
+    return "\n".join(f"[{i}] (source: {c['source']}) {c['text']}" for i, c in enumerate(chunks, 1))
+
+
+def _generate_regex(message, context, chunks, language):
+    """Extractive answer: source wording is preserved, never presented as translation."""
     if not chunks:
-        return ""
-    parts = []
-    for i, c in enumerate(chunks, 1):
-        parts.append(f"[{i}] (source: {c.get('source', 'unknown')}) {c.get('text', '')}")
-    return "\n".join(parts)
-
-
-# ---------------------------------------------------------------------------
-# Tool dispatch
-# ---------------------------------------------------------------------------
-def _detect_tool_intent(message: str) -> str | None:
-    """Simple keyword-based tool detection (regex provider baseline)."""
-    lower = message.lower()
-
-    if any(w in lower for w in ("policy", "return", "delivery", "allergen",
-                                 "privacy", "politique", "livraison",
-                                 "retour", "allergène")):
-        return "policy_search"
-
-    if any(w in lower for w in ("retention", "churn", "will.*return",
-                                 "rétention", "prédiction")):
-        return "retention_score"
-
-    if any(w in lower for w in ("recommend", "suggest", "also like",
-                                 "recommand", "suggér")):
-        return "recommendations"
-
-    if any(w in lower for w in ("product", "item", "sku", "produit",
-                                 "catalogue", "price", "prix")):
-        return "product_lookup"
-
-    return None
-
-
-def _execute_tool(
-    tool_name: str, message: str, request: Request, customer_id: str | None
-) -> ToolCall:
-    """Execute a tool and return a ToolCall record."""
-    if tool_name == "retention_score" and customer_id:
-        # Call our own /predict endpoint logic
-        return ToolCall(
-            tool_name="retention_score",
-            arguments={"customer_id": customer_id},
-            result={"note": "Retention score requires feature vector — not available in chat context."},
+        return (
+            "Je n'ai pas trouvé de source pertinente."
+            if language == "fr"
+            else "I couldn't find relevant information."
         )
-
-    if tool_name == "recommendations":
-        # Parse a basket from the message — very basic regex extraction
-        return ToolCall(
-            tool_name="recommendations",
-            arguments={"message": message},
-            result={"note": "Use /recommend endpoint with an explicit basket."},
-        )
-
-    if tool_name == "product_lookup":
-        return ToolCall(
-            tool_name="product_lookup",
-            arguments={"query": message},
-            result={"note": "Product catalogue lookup."},
-        )
-
-    # Default: policy_search
-    return ToolCall(
-        tool_name="policy_search",
-        arguments={"query": message},
-        result={"note": "Searching policy documents."},
+    intro = (
+        "D'après nos documents (extrait dans la langue source) : "
+        if language == "fr"
+        else "Based on our documents: "
     )
+    return intro + chunks[0]["text"]
 
 
-# ---------------------------------------------------------------------------
-# Provider dispatch
-# ---------------------------------------------------------------------------
-def _generate_regex(
-    message: str,
-    context: str,
-    chunks: list[dict[str, Any]],
-    language: str,
-) -> str:
-    """Keyword-matching baseline — no LLM required."""
-    if not context:
-        if language == "fr":
-            return "Je n'ai pas trouvé d'information pertinente dans nos documents. Pourriez-vous reformuler votre question ?"
-        return "I couldn't find relevant information in our documents. Could you rephrase your question?"
-
-    # Return the best chunk as the answer
-    best = chunks[0] if chunks else {}
-    text = best.get("text", context.split("\n")[0] if context else "")
-
-    if language == "fr":
-        return f"D'après nos documents : {text}"
-    return f"Based on our documents: {text}"
-
-
-def _generate_openai(
-    message: str, context: str, language: str
-) -> str:
-    """OpenAI provider — calls the API."""
-    try:
-        from openai import OpenAI
-        import os
-
-        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-        lang_instruction = "Respond in French." if language == "fr" else "Respond in English."
-        system_prompt = (
-            f"You are a customer-support assistant for Boréal Marché, a Québec online grocery retailer. "
-            f"Answer ONLY using the provided context. If the context does not contain the answer, say so. "
-            f"Always cite your source. {lang_instruction}\n\nContext:\n{context}"
-        )
-        r = client.chat.completions.create(
-            model="gpt-4o-mini",
-            temperature=0,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": message},
-            ],
-        )
-        return r.choices[0].message.content or ""
-    except Exception as exc:
-        logger.error("openai_call_failed", error=str(exc))
-        return f"OpenAI provider error: {exc}"
-
-
-def _generate_ollama(
-    message: str, context: str, language: str
-) -> str:
-    """Ollama provider — calls a local LLM."""
-    try:
-        import httpx
-
-        lang_instruction = "Respond in French." if language == "fr" else "Respond in English."
-        system_prompt = (
-            f"You are a customer-support assistant for Boréal Marché, a Québec online grocery retailer. "
-            f"Answer ONLY using the provided context. If the context does not contain the answer, say so. "
-            f"Always cite your source. {lang_instruction}\n\nContext:\n{context}"
-        )
-        host = "http://localhost:11434"
-        r = httpx.post(
-            f"{host}/api/chat",
-            timeout=90,
-            json={
-                "model": "llama3.1",
-                "stream": False,
-                "options": {"temperature": 0},
-                "messages": [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": message},
-                ],
-            },
-        )
-        r.raise_for_status()
-        return r.json()["message"]["content"]
-    except Exception as exc:
-        logger.error("ollama_call_failed", error=str(exc))
-        return f"Ollama provider error: {exc}"
-
-
-def _detect_language(message: str) -> str:
-    """Heuristic language detection — French vs English."""
-    french_markers = {"je", "le", "la", "les", "de", "du", "des", "un", "une",
-                      "est", "et", "en", "que", "qui", "pour", "dans", "sur",
-                      "mon", "ma", "mes", "votre", "notre", "avec", "pas",
-                      "cette", "quel", "quelle", "comment", "pourquoi", "quand"}
-    words = set(re.findall(r"\b\w+\b", message.lower()))
-    fr_count = len(words & french_markers)
-    return "fr" if fr_count >= 2 else "en"
-
-
-# ---------------------------------------------------------------------------
-# Main endpoint
-# ---------------------------------------------------------------------------
 @router.post("/chat", response_model=ChatResponse)
 async def chat(req: ChatRequest, request: Request) -> ChatResponse:
-    """Answer a customer question with grounded, cited information."""
-    # Step 0 — detect language if client didn't specify explicitly
-    language = req.language or _detect_language(req.message)
+    language, provider_name = req.language, req.provider.value
 
-    # Step 1 — guardrails
-    refused, reason = _check_guardrails(req.message, req.customer_id)
-    if refused:
+    def refusal(reason):
         return ChatResponse(
-            reply=reason or "",
-            provider_used=req.provider.value,
+            reply=reason,
+            provider_used=provider_name,
             refused=True,
             refusal_reason=reason,
             language=language,
         )
 
-    # Step 2 — tool detection
-    tool_calls: list[ToolCall] = []
-    tool_name = _detect_tool_intent(req.message)
-    if tool_name:
-        tc = _execute_tool(tool_name, req.message, request, req.customer_id)
-        tool_calls.append(tc)
-
-    # Step 3 — retrieval
-    rag_index = request.app.state.rag_index
-    chunks = _retrieve_chunks(rag_index, req.message, top_k=5, floor=0.25)
-    context = _format_context(chunks)
-
-    # If no context and no tool calls, return a handoff message
-    if not context and not tool_calls:
-        no_info_msg = (
-            "Je n'ai pas assez d'information pour répondre. Veuillez contacter notre service client."
-            if language == "fr"
-            else "I don't have enough information to answer. Please contact our customer service."
-        )
-        return ChatResponse(
-            reply=no_info_msg,
-            provider_used=req.provider.value,
-            refused=False,
-            language=language,
-        )
-
-    # Step 4 — generate answer
-    if req.provider == Provider.OPENAI:
-        reply = _generate_openai(req.message, context, language)
-    elif req.provider == Provider.OLLAMA:
-        reply = _generate_ollama(req.message, context, language)
-    else:
-        reply = _generate_regex(req.message, context, chunks, language)
-
-    # Step 5 — build citations
-    citations = [
-        Citation(
-            source=c.get("source", "unknown"),
-            chunk=c.get("text", "")[:200],
-            score=round(c.get("score", 0.0), 4),
-        )
-        for c in chunks
-    ]
-
-    logger.info(
-        "chat_served",
-        provider=req.provider.value,
-        tool_calls=[tc.tool_name for tc in tool_calls],
-        n_citations=len(citations),
-        language=language,
-        refused=False,
+    denied, reason = _check_guardrails(req.message, req.customer_id)
+    if denied:
+        return refusal(reason)
+    cfg = load_config()["assistant"]
+    index = request.app.state.rag_index
+    chunks = await asyncio.to_thread(
+        _retrieve_chunks, index, req.message, cfg["max_chunks_per_query"], cfg["similarity_floor"]
     )
-
+    if provider_name == "openai" and not os.getenv("OPENAI_API_KEY"):
+        raise HTTPException(
+            503, "OpenAI provider requires OPENAI_API_KEY; regex is available locally"
+        )
+    provider = get_provider(
+        provider_name,
+        openai_model=cfg["openai"]["model"],
+        ollama_model=cfg["ollama"]["model"],
+        ollama_host=os.getenv("OLLAMA_HOST", cfg["ollama"]["host"]),
+    )
+    start = time.perf_counter()
+    try:
+        decision = await provider.answer(
+            req.message, [c["text"] for c in chunks], TOOL_REGISTRY, language
+        )
+    except Exception as exc:
+        raise HTTPException(
+            503,
+            f"{provider_name} provider unavailable ({type(exc).__name__}); verify provider setup",
+        ) from exc
+    latency = (time.perf_counter() - start) * 1000
+    registry = {t.name: t for t in TOOL_REGISTRY}
+    tool = registry.get(decision.tool_name)
+    if tool is None:
+        return refusal(
+            "No supported, grounded answer was found. / Aucune réponse fondée disponible."
+        )
+    arguments = dict(decision.tool_args)
+    if tool.name == "retention_score":
+        cid = arguments.get("customer_id") or req.customer_id
+        # Request identity is demonstration context, NOT authenticated identity.
+        if (
+            not req.customer_id
+            or not cid
+            or cid.removeprefix("BM-") != req.customer_id.removeprefix("BM-")
+        ):
+            return refusal(
+                "Provide your matching demo customer ID; another customer's score cannot "
+                "be requested. / Indiquez votre identifiant de démonstration correspondant."
+            )
+        arguments["customer_id"] = cid.removeprefix("BM-")
+    if tool.name == "policy_search":
+        if not chunks:
+            return refusal(
+                "No policy source meets the relevance threshold. / "
+                "Aucune source suffisamment pertinente."
+            )
+        arguments["question"] = req.message
+    try:
+        validated = tool.input_model.model_validate(arguments)
+        output = await tool.execute(validated, app=request.app)
+    except (ValidationError, RuntimeError) as exc:
+        return refusal(
+            f"Tool request could not be validated: {type(exc).__name__}. / Requête non validée."
+        )
+    data = output.model_dump()
+    if data.get("error"):
+        return refusal(
+            "The requested data is unavailable; no score or result was invented. / "
+            "Données indisponibles."
+        )
+    calls = [ToolCall(tool_name=tool.name, arguments=arguments, result=data)]
+    citations = []
+    if tool.name == "policy_search":
+        grounded = [c for c in data["chunks"] if c["score"] >= cfg["similarity_floor"]]
+        if not grounded:
+            return refusal("No relevant policy evidence found. / Aucune source pertinente.")
+        reply = _generate_regex(req.message, _format_context(grounded), grounded, language)
+        citations = [
+            Citation(
+                source=grounded[0]["source"], chunk=grounded[0]["text"], score=grounded[0]["score"]
+            )
+        ]
+        if not check_require_citations(reply, [c.model_dump() for c in citations]).passed:
+            return refusal("Missing policy citation. / Citation absente.")
+    elif tool.name == "retention_score":
+        reply = (
+            f"Probabilité d'achat dans les 90 jours : {data['probability']:.1%}. "
+            f"Risque de non-retour : {data['risk_label']}."
+            if language == "fr"
+            else f"Probability of purchase within 90 days: {data['probability']:.1%}. "
+            f"Non-return risk: {data['risk_label']}."
+        )
+        reply += " Historical public-data demo / démonstration historique."
+    elif tool.name == "recommendations":
+        reply = (
+            "Suggestions issues des transactions UCI : "
+            if language == "fr"
+            else "Suggestions from UCI transaction history: "
+        ) + ", ".join(data["recommendations"])
+        reply += f" ({data['strategy']})"
+    else:
+        fr = language == "fr"
+        reply = (
+            "Catalogue Boréal Marché (export des achats UCI, prix unitaire médian en GBP) : "
+            if fr
+            else "Boréal Marché catalogue (export of UCI purchases, median unit price in GBP): "
+        )
+        if data["corrections"]:
+            pairs = ", ".join(f"'{k}' → '{v}'" for k, v in data["corrections"].items())
+            reply += f"(interprété : {pairs}) " if fr else f"(read as: {pairs}) "
+        if data["products"] and not data["all_terms_matched"]:
+            words = ", ".join(data["search_terms"])
+            reply += (
+                f"aucun produit ne contient tous ces mots ({words}) ; articles les plus proches : "
+                if fr
+                else f"no product matches all of ({words}); closest items: "
+            )
+        reply += "; ".join(
+            f"{p['stock_code']} — {p['description']}: £{p['median_unit_price_gbp']:.2f}"
+            for p in data["products"]
+        )
+        if not data["products"]:
+            reply += "aucun produit correspondant." if fr else "no matching products."
+        citations = [
+            Citation(
+                source="artifacts/product_catalogue.csv",
+                chunk="Exported from cleaned UCI Online Retail II purchases; one row per StockCode",
+                score=1.0,
+            )
+        ]
     return ChatResponse(
         reply=reply,
         citations=citations,
-        tool_calls=tool_calls,
-        provider_used=req.provider.value,
-        refused=False,
+        tool_calls=calls,
+        provider_used=provider_name,
         language=language,
+        provider_latency_ms=latency,
+        token_usage=decision.token_usage,
+        cost_usd=0.0 if provider_name == "regex" else None,
     )

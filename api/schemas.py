@@ -7,11 +7,18 @@ Extra fields are FORBIDDEN so a misspelled key fails loudly.
 
 from __future__ import annotations
 
-from datetime import datetime
-from enum import Enum
+import math
+from datetime import UTC, datetime
+from enum import StrEnum
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+from src.contracts import FEATURE_NAMES
+
+
+class StrictModel(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
 
 
 # ---------------------------------------------------------------------------
@@ -21,29 +28,66 @@ class HealthResponse(BaseModel):
     status: str = "ok"
     message: str = "Boréal Marché API is running."
 
+
 class ReadyResponse(BaseModel):
     ready: bool
     models_loaded: list[str] = []
+    errors: dict[str, str] = Field(default_factory=dict)
+
 
 class VersionResponse(BaseModel):
     version: str
     git_sha: str | None = None
     model_version: str | None = None
     trained_at: str | None = None
+    model_family: str | None = None
+    calibration_method: str | None = None
+    metrics: dict[str, Any] = Field(default_factory=dict)
+    decision_threshold: float | None = None
 
 
 # ---------------------------------------------------------------------------
 # Head A — Retention prediction
 # ---------------------------------------------------------------------------
-class PredictionRequest(BaseModel):
+class PredictionRequest(StrictModel):
     """Single-customer retention prediction."""
-    model_config = ConfigDict(extra="forbid")
 
-    customer_id: str = Field(..., description="Boréal Marché customer identifier")
+    customer_id: str = Field(
+        ..., min_length=1, max_length=100, description="Demo customer identifier"
+    )
     features: dict[str, float] = Field(
         ...,
         description="Pre-computed feature vector keyed by feature name",
     )
+
+    @field_validator("features", mode="before")
+    @classmethod
+    def canonical_features(cls, value):
+        if not isinstance(value, dict) or set(value) != set(FEATURE_NAMES):
+            raise ValueError(
+                "features must contain exactly the canonical 25 names; see /feature-contract"
+            )
+        for name, number in value.items():
+            if (
+                isinstance(number, bool)
+                or not isinstance(number, (int, float))
+                or not math.isfinite(number)
+            ):
+                raise ValueError(f"{name} must be a finite number")
+            if number < (-1 if name == "country_code" else 0):
+                raise ValueError(f"{name} is outside its valid range")
+            if (
+                name.endswith("_ratio") or name.endswith("_rate") or name == "top_category_share"
+            ) and number > 1:
+                raise ValueError(f"{name} must be between zero and one")
+            if name in (
+                "is_one_time_buyer",
+                "has_ever_cancelled",
+                "is_domestic",
+            ) and number not in (0, 1):
+                raise ValueError(f"{name} must be 0 or 1")
+        return value
+
 
 class PredictionResponse(BaseModel):
     customer_id: str
@@ -53,11 +97,13 @@ class PredictionResponse(BaseModel):
     risk_label: str  # "high", "medium", "low"
     top_factors: list[dict[str, Any]] = []
     model_version: str | None = None
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
-class BatchPredictionRequest(BaseModel):
+
+class BatchPredictionRequest(StrictModel):
     model_config = ConfigDict(extra="forbid")
-    customers: list[PredictionRequest] = Field(..., max_length=500)
+    customers: list[PredictionRequest] = Field(..., min_length=1, max_length=500)
+
 
 class BatchPredictionResponse(BaseModel):
     predictions: list[PredictionResponse]
@@ -67,16 +113,19 @@ class BatchPredictionResponse(BaseModel):
 # ---------------------------------------------------------------------------
 # Head B — Recommendation
 # ---------------------------------------------------------------------------
-class RecommendationRequest(BaseModel):
+class RecommendationRequest(StrictModel):
     """Given a basket of item descriptions, recommend next items."""
+
     model_config = ConfigDict(extra="forbid")
 
     basket: list[str] = Field(
         ...,
         description="List of product descriptions currently in the basket",
+        max_length=100,
     )
     top_k: int = Field(default=5, ge=1, le=20)
     customer_id: str | None = None
+
 
 class FiringRule(BaseModel):
     antecedent: list[str]
@@ -84,6 +133,7 @@ class FiringRule(BaseModel):
     confidence: float
     lift: float
     support: float
+
 
 class RecommendationResponse(BaseModel):
     recommendations: list[str]
@@ -95,16 +145,17 @@ class RecommendationResponse(BaseModel):
         default="rule_based",
         description="'rule_based' | 'popularity_fallback' | 'empty_basket'",
     )
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 # ---------------------------------------------------------------------------
 # Head C — Assistant
 # ---------------------------------------------------------------------------
-class Provider(str, Enum):
+class Provider(StrEnum):
     REGEX = "regex"
     OPENAI = "openai"
     OLLAMA = "ollama"
+
 
 class ChatRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -115,15 +166,18 @@ class ChatRequest(BaseModel):
     provider: Provider = Provider.REGEX
     language: str = Field(default="en", pattern="^(en|fr)$")
 
+
 class Citation(BaseModel):
     source: str
     chunk: str
     score: float
 
+
 class ToolCall(BaseModel):
     tool_name: str
     arguments: dict[str, Any]
     result: Any
+
 
 class ChatResponse(BaseModel):
     reply: str
@@ -133,7 +187,10 @@ class ChatResponse(BaseModel):
     refused: bool = False
     refusal_reason: str | None = None
     language: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    provider_latency_ms: float | None = None
+    token_usage: dict[str, int] | None = None
+    cost_usd: float | None = None
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 # ---------------------------------------------------------------------------
@@ -146,6 +203,7 @@ class DriftMetric(BaseModel):
     threshold: float
     alert: bool
 
+
 class MonitoringResponse(BaseModel):
     request_count: int
     error_rate: float
@@ -154,3 +212,5 @@ class MonitoringResponse(BaseModel):
     latency_p99_ms: float
     drift_metrics: list[DriftMetric] = []
     status: str  # "green", "yellow", "red"
+    drift_status: str = "not_evaluated"
+    window_description: str = "bounded local request log"

@@ -10,12 +10,10 @@ from __future__ import annotations
 import time
 from typing import Any
 
-import numpy as np
 import pandas as pd
 import structlog
 from fastapi import APIRouter, HTTPException, Request
 
-from api.lifespan import log_prediction
 from api.schemas import (
     BatchPredictionRequest,
     BatchPredictionResponse,
@@ -29,34 +27,46 @@ router = APIRouter(tags=["prediction"])
 
 def _risk_label(probability: float) -> str:
     if probability >= 0.65:
-        return "high"
+        return "low"
     if probability >= 0.35:
         return "medium"
-    return "low"
+    return "high"
+
+
+def _final_estimator(model: Any) -> Any | None:
+    """Walk through wrappers (calibration, freezing, pipelines) to the fitted classifier."""
+    estimator = model
+    for _ in range(5):
+        if hasattr(estimator, "feature_importances_"):
+            return estimator
+        if hasattr(estimator, "calibrated_classifiers_"):
+            estimator = estimator.calibrated_classifiers_[0].estimator
+        elif hasattr(estimator, "named_steps"):
+            estimator = list(estimator.named_steps.values())[-1]
+        elif hasattr(estimator, "estimator"):
+            estimator = estimator.estimator
+        else:
+            return None
+    return None
 
 
 def _top_factors(
     features: dict[str, float], feature_order: list[str], model: Any
 ) -> list[dict[str, Any]]:
-    """Extract rough feature-importance hints when the model exposes them."""
+    """Global feature importances of the underlying classifier, not per-customer explanations."""
     try:
-        # Works for tree-based pipelines that have a final estimator with
-        # feature_importances_ (RandomForest, GradientBoosting, etc.)
-        estimator = model
-        if hasattr(model, "named_steps"):
-            # last step of a Pipeline
-            estimator = list(model.named_steps.values())[-1]
-        if hasattr(estimator, "feature_importances_"):
-            importances = estimator.feature_importances_
-            names = feature_order or list(features.keys())
-            pairs = sorted(zip(names, importances), key=lambda p: p[1], reverse=True)
-            return [
-                {"feature": name, "importance": round(float(imp), 4), "value": features.get(name)}
-                for name, imp in pairs[:5]
-            ]
+        estimator = _final_estimator(model)
+        if estimator is None:
+            return []
+        names = feature_order or list(features.keys())
+        pairs = sorted(zip(names, estimator.feature_importances_), key=lambda p: p[1], reverse=True)
+        return [
+            {"feature": name, "importance": round(float(imp), 4), "value": features.get(name)}
+            for name, imp in pairs[:5]
+        ]
     except Exception:
-        pass
-    return []
+        logger.warning("top_factors_failed", exc_info=True)
+        return []
 
 
 def _predict_one(
@@ -91,7 +101,7 @@ def _predict_one(
         threshold=threshold,
         risk_label=_risk_label(proba),
         top_factors=_top_factors(req.features, feature_order, model),
-        model_version=metadata.get("version"),
+        model_version=metadata.get("model_version"),
     )
 
 
@@ -99,7 +109,6 @@ def _predict_one(
 async def predict(req: PredictionRequest, request: Request) -> PredictionResponse:
     """Predict whether a single customer will return within 90 days."""
     t0 = time.perf_counter()
-    prediction_log = request.app.state.prediction_log
 
     try:
         result = _predict_one(
@@ -110,33 +119,28 @@ async def predict(req: PredictionRequest, request: Request) -> PredictionRespons
             metadata=request.app.state.metadata,
         )
     except HTTPException:
-        prediction_log.record_error()
         raise
     except Exception as exc:
-        prediction_log.record_error()
         logger.error("prediction_failed", customer_id=req.customer_id, error=str(exc))
         raise HTTPException(status_code=500, detail="Internal prediction error.") from exc
 
     latency_ms = (time.perf_counter() - t0) * 1000
-    log_prediction(
-        prediction_log,
+    request.state.prediction_records = [
         {
-            "customer_id": req.customer_id,
             "probability": result.probability,
             "will_return": result.will_return,
             "latency_ms": round(latency_ms, 2),
             "features": req.features,
-        },
-    )
+        }
+    ]
     return result
 
 
 @router.post("/predict/batch", response_model=BatchPredictionResponse)
-async def predict_batch(
-    req: BatchPredictionRequest, request: Request
-) -> BatchPredictionResponse:
+async def predict_batch(req: BatchPredictionRequest, request: Request) -> BatchPredictionResponse:
     """Predict retention for up to 500 customers in one call."""
     results: list[PredictionResponse] = []
+    request.state.prediction_records = []
     for customer in req.customers:
         result = _predict_one(
             customer,
@@ -146,5 +150,8 @@ async def predict_batch(
             metadata=request.app.state.metadata,
         )
         results.append(result)
+        request.state.prediction_records.append(
+            {"features": customer.features, "probability": result.probability}
+        )
 
     return BatchPredictionResponse(predictions=results, count=len(results))

@@ -79,7 +79,6 @@ class TestGuardrails:
 # Tool detection (regex provider)
 # ---------------------------------------------------------------------------
 class TestToolDetection:
-
     @pytest.mark.parametrize(
         "message, expected_tool",
         [
@@ -101,7 +100,6 @@ class TestToolDetection:
 # Retrieval
 # ---------------------------------------------------------------------------
 class TestRetrieval:
-
     def test_retrieve_delivery_chunks(self) -> None:
         index = MockRagIndex()
         chunks = _retrieve_chunks(index, "delivery policy", top_k=5, floor=0.25)
@@ -140,7 +138,6 @@ def test_format_context_empty() -> None:
 # Regex provider — citations must always be present
 # ---------------------------------------------------------------------------
 class TestRegexProvider:
-
     def test_english_with_context(self) -> None:
         chunks = [{"source": "test.md", "text": "Delivery takes 3 days.", "score": 0.9}]
         reply = _generate_regex("delivery?", _format_context(chunks), chunks, "en")
@@ -165,7 +162,6 @@ class TestRegexProvider:
 # Language detection
 # ---------------------------------------------------------------------------
 class TestLanguageDetection:
-
     @pytest.mark.parametrize(
         "message, expected",
         [

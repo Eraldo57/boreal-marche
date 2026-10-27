@@ -18,18 +18,19 @@ Endpoints:
 
 from __future__ import annotations
 
-import json
 import logging
 import os
 import subprocess
-from pathlib import Path
+import time
+from datetime import UTC, datetime
 
 import structlog
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Request, Response
 
 from api.lifespan import lifespan
 from api.routers import chat, monitor, predict, recommend
 from api.schemas import HealthResponse, ReadyResponse, VersionResponse
+from src.contracts import CONTRACT_VERSION, FEATURE_NAMES
 
 # ---------------------------------------------------------------------------
 # Structured logging
@@ -39,7 +40,8 @@ structlog.configure(
         structlog.contextvars.merge_contextvars,
         structlog.processors.add_log_level,
         structlog.processors.TimeStamper(fmt="iso"),
-        structlog.dev.ConsoleRenderer() if os.getenv("ENV") != "production"
+        structlog.dev.ConsoleRenderer()
+        if os.getenv("ENV") != "production"
         else structlog.processors.JSONRenderer(),
     ],
     wrapper_class=structlog.make_filtering_bound_logger(logging.INFO),
@@ -70,6 +72,24 @@ app.include_router(chat.router)
 app.include_router(monitor.router)
 
 
+@app.middleware("http")
+async def record_traffic(request: Request, call_next):
+    """Measure all business routes, including validation failures and batch traffic."""
+    start = time.perf_counter()
+    response = await call_next(request)
+    if request.url.path in {"/predict", "/predict/batch", "/recommend", "/chat"}:
+        request.app.state.prediction_log.append(
+            {
+                "timestamp": datetime.now(UTC).isoformat(),
+                "path": request.url.path,
+                "status_code": response.status_code,
+                "latency_ms": (time.perf_counter() - start) * 1000,
+                "predictions": getattr(request.state, "prediction_records", []),
+            }
+        )
+    return response
+
+
 # ---------------------------------------------------------------------------
 # Core endpoints
 # ---------------------------------------------------------------------------
@@ -80,29 +100,34 @@ async def health() -> HealthResponse:
 
 
 @app.get("/ready", response_model=ReadyResponse, tags=["infra"])
-async def ready() -> ReadyResponse:
+async def ready(request: Request, response: Response) -> ReadyResponse:
     """Readiness probe — reports which models are loaded."""
     loaded: list[str] = []
-    if app.state.model is not None:
+    state = request.app.state
+    if state.model is not None:
         loaded.append("retention_model")
-    if app.state.rule_engine and app.state.rule_engine.rules:
+    if state.rule_engine is not None:
         loaded.append("recommendation_rules")
-    if app.state.rag_index is not None:
+    if state.rag_index is not None:
         loaded.append("rag_index")
 
-    return ReadyResponse(ready=len(loaded) > 0, models_loaded=loaded)
+    errors = getattr(state, "startup_errors", {})
+    is_ready = len(loaded) == 3 and not errors
+    if not is_ready:
+        response.status_code = 503
+    return ReadyResponse(ready=is_ready, models_loaded=loaded, errors=errors)
 
 
 @app.get("/version", response_model=VersionResponse, tags=["infra"])
-async def version() -> VersionResponse:
+async def version(request: Request) -> VersionResponse:
     """Application and model version information."""
-    meta = getattr(app.state, "metadata", {})
+    meta = getattr(request.app.state, "metadata", {})
 
     # Try to read the git SHA
     git_sha = None
     try:
         result = subprocess.run(
-            ["git", "rev-parse", "--short", "HEAD"],
+            ["git", "rev-parse", "HEAD"],
             capture_output=True,
             text=True,
             timeout=5,
@@ -114,7 +139,40 @@ async def version() -> VersionResponse:
 
     return VersionResponse(
         version=app.version,
-        git_sha=git_sha,
-        model_version=meta.get("version"),
+        git_sha=os.getenv("GIT_SHA") or git_sha,
+        model_version=meta.get("model_version"),
         trained_at=meta.get("trained_at"),
+        model_family=meta.get("model_family"),
+        calibration_method=meta.get("calibration_method"),
+        metrics=meta.get("metrics", {}),
+        decision_threshold=meta.get("decision_threshold"),
     )
+
+
+@app.get("/feature-contract", tags=["prediction"])
+async def feature_contract():
+    return {
+        "feature_names": FEATURE_NAMES,
+        "contract_version": CONTRACT_VERSION,
+        "target": "will_return",
+        "positive_means": "purchase within the next 90 days",
+        "currency": "GBP",
+        "risk_label_means": "risk of NOT returning",
+    }
+
+
+@app.get("/customers/{customer_id}/features", tags=["prediction"])
+async def customer_features(customer_id: str, request: Request):
+    """Historical public-data demonstration only; no authentication is implemented."""
+    store = getattr(request.app.state, "customer_features", None)
+    if store is None:
+        raise HTTPException(503, "Historical feature store missing; run python -m src.features")
+    customer_id = customer_id.removeprefix("BM-")
+    if customer_id not in store.index:
+        raise HTTPException(404, "Customer absent from historical demonstration snapshot")
+    return {
+        "customer_id": customer_id,
+        "features": store.loc[customer_id, FEATURE_NAMES].to_dict(),
+        "snapshot": "2011-09-01",
+        "demonstration_only": True,
+    }

@@ -9,29 +9,27 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
+import joblib
 import numpy as np
+import pandas as pd
 import pytest
 
 from api.routers.predict import _predict_one, _risk_label, _top_factors
 from api.schemas import PredictionRequest
-
-FEATURE_ORDER = [
-    "recency_days", "frequency", "monetary_total", "monetary_mean", "monetary_std",
-    "days_since_first_purchase", "avg_days_between_orders", "std_days_between_orders",
-    "is_one_time_buyer", "avg_basket_size", "avg_basket_value", "max_basket_value",
-    "avg_unique_items_per_basket", "single_item_basket_ratio", "top_category_share",
-    "n_unique_categories", "category_entropy", "has_ever_cancelled", "cancellation_rate",
-    "return_rate", "weekend_purchase_ratio", "morning_purchase_ratio",
-    "country_code", "is_domestic",
-]
+from src.contracts import ARTIFACTS
+from src.contracts import FEATURE_NAMES as FEATURE_ORDER
 
 
 # ---------------------------------------------------------------------------
 # Feature ordering
 # ---------------------------------------------------------------------------
 def test_feature_order_length() -> None:
-    """Pipeline config declares exactly 24 features."""
-    assert len(FEATURE_ORDER) == 24
+    """Generation and serving share the 25-feature contract."""
+    from src.ingest import load_config
+
+    declared = [f for group in load_config()["features"]["groups"].values() for f in group]
+    assert FEATURE_ORDER == declared
+    assert len(FEATURE_ORDER) == 25
 
 
 def test_feature_order_no_duplicates() -> None:
@@ -62,9 +60,7 @@ def test_predict_builds_dataframe_in_correct_order(
         np.array([[0.001, 0.999]]),
     ],
 )
-def test_probability_bounds(
-    proba_array: np.ndarray, sample_features: dict[str, float]
-) -> None:
+def test_probability_bounds(proba_array: np.ndarray, sample_features: dict[str, float]) -> None:
     """The returned probability must be in [0, 1]."""
     model = MagicMock()
     model.predict_proba.return_value = proba_array
@@ -108,12 +104,12 @@ def test_threshold_decision(
 @pytest.mark.parametrize(
     "proba, expected_label",
     [
-        (0.90, "high"),
-        (0.65, "high"),
+        (0.90, "low"),
+        (0.65, "low"),
         (0.64, "medium"),
         (0.35, "medium"),
-        (0.34, "low"),
-        (0.00, "low"),
+        (0.34, "high"),
+        (0.00, "high"),
     ],
 )
 def test_risk_label(proba: float, expected_label: str) -> None:
@@ -133,15 +129,40 @@ def test_model_pipeline_has_steps(mock_model: MagicMock) -> None:
 # ---------------------------------------------------------------------------
 # Top factors extraction
 # ---------------------------------------------------------------------------
-def test_top_factors_returns_list(
-    sample_features: dict[str, float], mock_model: MagicMock
-) -> None:
-    factors = _top_factors(sample_features, FEATURE_ORDER, mock_model)
-    assert isinstance(factors, list)
-    assert len(factors) <= 5
-    for f in factors:
-        assert "feature" in f
-        assert "importance" in f
+def test_top_factors_unwraps_calibrated_pipeline() -> None:
+    """Same wrapper structure as the saved model, fitted on synthetic rows (not real data)."""
+    from sklearn.calibration import CalibratedClassifierCV
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.frozen import FrozenEstimator
+    from sklearn.impute import SimpleImputer
+    from sklearn.pipeline import Pipeline
+
+    rng = np.random.default_rng(0)
+    frame = pd.DataFrame(rng.normal(size=(200, len(FEATURE_ORDER))), columns=FEATURE_ORDER)
+    y = (frame[FEATURE_ORDER[0]] > 0).astype(int)
+    pipe = Pipeline(
+        [
+            ("imputer", SimpleImputer()),
+            ("classifier", RandomForestClassifier(n_estimators=10, random_state=0)),
+        ]
+    ).fit(frame, y)
+    model = CalibratedClassifierCV(FrozenEstimator(pipe), method="isotonic").fit(frame, y)
+
+    factors = _top_factors(frame.iloc[0].to_dict(), FEATURE_ORDER, model)
+
+    assert len(factors) == 5
+    assert factors[0]["feature"] == FEATURE_ORDER[0]  # the only feature that drives y
+    importances = [f["importance"] for f in factors]
+    assert importances == sorted(importances, reverse=True)
+
+
+def test_top_factors_real_saved_model(sample_features: dict[str, float]) -> None:
+    path = ARTIFACTS / "retention_model.joblib"
+    if not path.exists():
+        pytest.skip("retention_model.joblib not built; run make train")
+    factors = _top_factors(sample_features, FEATURE_ORDER, joblib.load(path))
+    assert len(factors) == 5
+    assert {f["feature"] for f in factors} <= set(FEATURE_ORDER)
 
 
 def test_top_factors_with_no_importances(sample_features: dict[str, float]) -> None:

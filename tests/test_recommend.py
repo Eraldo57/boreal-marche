@@ -8,7 +8,6 @@ import pytest
 
 from api.lifespan import RuleEngine
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -68,9 +67,10 @@ def test_index_built(engine: RuleEngine) -> None:
     assert len(engine._index) > 0
 
 
-def test_index_keys_are_frozensets(engine: RuleEngine) -> None:
+def test_index_is_by_individual_item(engine: RuleEngine) -> None:
     for key in engine._index:
-        assert isinstance(key, frozenset)
+        assert isinstance(key, str)
+        assert all(key in rule.antecedent for rule in engine._index[key])
 
 
 # ---------------------------------------------------------------------------

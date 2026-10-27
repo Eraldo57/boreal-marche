@@ -9,6 +9,7 @@ from __future__ import annotations
 import numpy as np
 import structlog
 from fastapi import APIRouter, Request
+from scipy.stats import ks_2samp
 
 from api.schemas import DriftMetric, MonitoringResponse
 
@@ -25,16 +26,13 @@ def _percentile(values: list[float], q: float) -> float:
 
 def _compute_drift(
     entries: list[dict],
+    reference=None,
     psi_threshold: float = 0.2,
     ks_threshold: float = 0.05,
 ) -> list[DriftMetric]:
-    """Placeholder drift computation.
-
-    Real implementation would compare the feature distributions in ``entries``
-    against a stored training-time reference.  Here we return empty until the
-    reference window is populated.
-    """
-    if len(entries) < 100:
+    """Measured PSI and two-sided KS p-values; empty means unavailable, not zero."""
+    entries = [p for entry in entries for p in entry.get("predictions", [])]
+    if reference is None or len(entries) < 100:
         return []
 
     # Collect feature names from the first entry
@@ -43,22 +41,41 @@ def _compute_drift(
         return []
 
     metrics: list[DriftMetric] = []
-    feature_names = list(sample.keys())[:10]  # limit to first 10 for performance
+    feature_names = list(reference.columns)
 
     for fname in feature_names:
         values = [e["features"][fname] for e in entries if fname in e.get("features", {})]
         if len(values) < 50:
             continue
 
-        # PSI placeholder — a real implementation would bucket against the
-        # reference distribution.  For now, report 0 (no drift).
+        expected = reference[fname].dropna().to_numpy()
+        edges = np.unique(np.quantile(expected, np.linspace(0, 1, 11)))
+        if len(edges) < 3:
+            edges = np.unique(np.r_[-np.inf, np.unique(expected) + 0.5, np.inf])
+        else:
+            edges[0], edges[-1] = -np.inf, np.inf
+        ref_hist = np.histogram(expected, bins=edges)[0].astype(float) + 0.5
+        now_hist = np.histogram(values, bins=edges)[0].astype(float) + 0.5
+        ref_hist /= ref_hist.sum()
+        now_hist /= now_hist.sum()
+        psi = float(np.sum((now_hist - ref_hist) * np.log(now_hist / ref_hist)))
+        ks_p = float(ks_2samp(expected, values).pvalue)
         metrics.append(
             DriftMetric(
                 feature=fname,
                 statistic="psi",
-                value=0.0,
+                value=psi,
                 threshold=psi_threshold,
-                alert=False,
+                alert=psi > psi_threshold,
+            )
+        )
+        metrics.append(
+            DriftMetric(
+                feature=fname,
+                statistic="ks_pvalue",
+                value=ks_p,
+                threshold=ks_threshold,
+                alert=ks_p < ks_threshold,
             )
         )
 
@@ -88,7 +105,7 @@ async def metrics(request: Request) -> MonitoringResponse:
     latencies = prediction_log.latencies_ms
 
     entries = prediction_log.entries
-    drift_metrics = _compute_drift(entries)
+    drift_metrics = _compute_drift(entries, getattr(request.app.state, "drift_reference", None))
 
     status = _traffic_light(error_rate, drift_metrics)
 
@@ -100,4 +117,5 @@ async def metrics(request: Request) -> MonitoringResponse:
         latency_p99_ms=round(_percentile(latencies, 99), 2),
         drift_metrics=drift_metrics,
         status=status,
+        drift_status="measured" if drift_metrics else "insufficient_data_or_reference",
     )

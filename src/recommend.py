@@ -39,7 +39,6 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 RULES_PATH = PROJECT_ROOT / "artifacts" / "rules.json"
 POPULARITY_PATH = PROJECT_ROOT / "artifacts" / "popularity.json"
@@ -115,7 +114,7 @@ class RecommendationEngine:
         rules_path: str | Path = RULES_PATH,
         popularity_path: str | Path = POPULARITY_PATH,
         default_k: int = 5,
-    ) -> "RecommendationEngine":
+    ) -> RecommendationEngine:
         """Load rules and popularity from their JSON artifacts.
 
         Parameters
@@ -141,21 +140,39 @@ class RecommendationEngine:
 
         rules: list[_Rule] = []
         for r in data["rules"]:
-            rules.append(_Rule(
-                antecedent=frozenset(r["antecedent"]),
-                consequent=frozenset(r["consequent"]),
-                confidence=r["confidence"],
-                lift=r["lift"],
-                support=r["support"],
-            ))
+            rules.append(
+                _Rule(
+                    antecedent=frozenset(r["antecedent"]),
+                    consequent=frozenset(r["consequent"]),
+                    confidence=r["confidence"],
+                    lift=r["lift"],
+                    support=r["support"],
+                )
+            )
 
         popularity: list[str] = []
         pop_path = Path(popularity_path)
-        if pop_path.exists():
-            with open(pop_path) as f:
-                popularity = json.load(f).get("items", [])
+        with open(pop_path) as f:
+            popularity = json.load(f)["items"]
 
         return cls(rules, popularity, default_k)
+
+    @classmethod
+    def from_records(cls, rules: list[dict], popularity: list[str]):
+        """Construct the same engine for evaluation, tests and JSON serving."""
+        return cls(
+            [
+                _Rule(
+                    frozenset(x.lower().strip() for x in r["antecedent"]),
+                    frozenset(x.lower().strip() for x in r["consequent"]),
+                    r["confidence"],
+                    r["lift"],
+                    r["support"],
+                )
+                for r in rules
+            ],
+            list(dict.fromkeys(x.lower().strip() for x in popularity)),
+        )
 
     # -----------------------------------------------------------------
     # Query
@@ -231,7 +248,7 @@ class RecommendationEngine:
             }
 
         # --- Rank by lift and take top-k ----------------------------------
-        ranked = sorted(best_by_item.items(), key=lambda x: -x[1].lift)[:k]
+        ranked = sorted(best_by_item.items(), key=lambda x: (-x[1].lift, x[0]))[:k]
 
         recommendations = [item for item, _ in ranked]
         because = [rule.to_dict() for _, rule in ranked]

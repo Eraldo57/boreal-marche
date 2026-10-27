@@ -1,14 +1,9 @@
 # ===========================================================================
 # CD — deploy on merge to main + weekly scheduled retraining
 # ===========================================================================
-name: CD
+name: CD (next phase, explicitly enabled only)
 
 on:
-  push:
-    branches: [main]
-  schedule:
-    # Weekly retraining: every Sunday at 03:00 UTC
-    - cron: "0 3 * * 0"
   workflow_dispatch:
     inputs:
       retrain:
@@ -31,7 +26,7 @@ jobs:
   # 1. Build, tag, and push Docker image
   # -----------------------------------------------------------------------
   build-and-push:
-    if: github.event_name == 'push'
+    if: vars.ENABLE_CLOUD_DEPLOYMENT == 'true' && !inputs.retrain
     runs-on: ubuntu-latest
     outputs:
       image_tag: ${{ steps.meta.outputs.tags }}
@@ -67,6 +62,7 @@ jobs:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
+          build-args: GIT_SHA=${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -75,7 +71,7 @@ jobs:
   # -----------------------------------------------------------------------
   deploy:
     needs: build-and-push
-    if: github.event_name == 'push'
+    if: vars.ENABLE_CLOUD_DEPLOYMENT == 'true' && !inputs.retrain
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -114,7 +110,7 @@ jobs:
   # -----------------------------------------------------------------------
   smoke-test:
     needs: deploy
-    if: github.event_name == 'push'
+    if: vars.ENABLE_CLOUD_DEPLOYMENT == 'true' && !inputs.retrain
     runs-on: ubuntu-latest
     steps:
       - name: Wait for deployment to stabilise
@@ -150,7 +146,7 @@ jobs:
   # 4. Scheduled retraining
   # -----------------------------------------------------------------------
   retrain:
-    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.retrain)
+    if: vars.ENABLE_CLOUD_RETRAINING == 'true' && inputs.retrain
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -171,7 +167,7 @@ jobs:
       - name: Run retraining pipeline
         env:
           MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
-        run: python scripts/retrain.py --config configs/pipeline.yaml
+        run: python -m scripts.retrain
 
       - name: Create PR if metrics improved
         env:

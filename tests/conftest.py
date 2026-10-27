@@ -6,9 +6,6 @@ All fixtures use mocks so the test suite runs without trained model files.
 
 from __future__ import annotations
 
-from collections import deque
-from dataclasses import dataclass, field
-from threading import Lock
 from typing import Any
 from unittest.mock import MagicMock
 
@@ -18,19 +15,10 @@ from httpx import ASGITransport, AsyncClient
 
 from api.lifespan import PredictionLog, RuleEngine
 
-
 # ---------------------------------------------------------------------------
 # Feature fixtures
 # ---------------------------------------------------------------------------
-FEATURE_ORDER = [
-    "recency_days", "frequency", "monetary_total", "monetary_mean", "monetary_std",
-    "days_since_first_purchase", "avg_days_between_orders", "std_days_between_orders",
-    "is_one_time_buyer", "avg_basket_size", "avg_basket_value", "max_basket_value",
-    "avg_unique_items_per_basket", "single_item_basket_ratio", "top_category_share",
-    "n_unique_categories", "category_entropy", "has_ever_cancelled", "cancellation_rate",
-    "return_rate", "weekend_purchase_ratio", "morning_purchase_ratio",
-    "country_code", "is_domestic",
-]
+from src.contracts import FEATURE_NAMES as FEATURE_ORDER
 
 
 @pytest.fixture
@@ -61,6 +49,7 @@ def sample_features() -> dict[str, float]:
         "morning_purchase_ratio": 0.5,
         "country_code": 1.0,
         "is_domestic": 1.0,
+        "n_countries": 1.0,
     }
 
 
@@ -87,9 +76,7 @@ def mock_model() -> MagicMock:
 
     # Simulate a pipeline with feature_importances_
     inner_estimator = MagicMock()
-    inner_estimator.feature_importances_ = np.random.dirichlet(
-        np.ones(len(FEATURE_ORDER))
-    )
+    inner_estimator.feature_importances_ = np.random.dirichlet(np.ones(len(FEATURE_ORDER)))
     model.named_steps = {"scaler": MagicMock(), "classifier": inner_estimator}
 
     return model
@@ -174,7 +161,8 @@ class MockRagIndex:
             return [
                 {
                     "source": "allergen_policy.md",
-                    "text": "All products list allergens on their packaging per Health Canada requirements.",
+                    "text": "All products list allergens on their packaging "
+                    "per Health Canada requirements.",
                     "score": 0.78,
                 },
             ]
@@ -211,16 +199,19 @@ async def client(
     # Inject mocks
     app.state.model = mock_model
     app.state.metadata = {
-        "version": "test-v0.1",
+        "model_version": "test-v0.1",
         "trained_at": "2026-08-30T12:00:00",
-        "threshold": 0.45,
-        "feature_order": FEATURE_ORDER,
+        "decision_threshold": 0.45,
+        "feature_names": FEATURE_ORDER,
     }
     app.state.threshold = 0.45
     app.state.feature_order = FEATURE_ORDER
     app.state.rule_engine = mock_rule_engine
     app.state.rag_index = mock_rag_index
     app.state.prediction_log = prediction_log
+    app.state.startup_errors = {}
+    app.state.customer_features = None
+    app.state.drift_reference = None
 
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:

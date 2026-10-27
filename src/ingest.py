@@ -26,14 +26,13 @@ import hashlib
 import io
 import json
 import re
-import sys
 import zipfile
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import yaml
-
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -87,10 +86,13 @@ def download_dataset(cfg: dict, *, force: bool = False) -> Path:
         return xlsx_path
 
     url = cfg["source_url"]
-    print(f"[ingest] Downloading {url} …")
-    resp = urllib.request.urlopen(url)  # noqa: S310
-    zip_bytes = resp.read()
+    print(f"[ingest] Downloading {url} …", flush=True)
+    with urllib.request.urlopen(url, timeout=120) as resp:  # noqa: S310
+        zip_bytes = resp.read()
     print(f"[ingest] Downloaded {len(zip_bytes) / 1e6:.1f} MB")
+    if url.lower().endswith(".xlsx"):
+        xlsx_path.write_bytes(zip_bytes)
+        return xlsx_path
 
     # Extract xlsx from the zip archive
     with zipfile.ZipFile(io.BytesIO(zip_bytes)) as zf:
@@ -98,7 +100,10 @@ def download_dataset(cfg: dict, *, force: bool = False) -> Path:
         xlsx_names = [n for n in zf.namelist() if n.lower().endswith(".xlsx")]
         if not xlsx_names:
             raise FileNotFoundError("No .xlsx found inside the downloaded zip.")
-        chosen = xlsx_names[0]
+        matches = [n for n in xlsx_names if Path(n).name == cfg["raw_filename"]]
+        if len(matches) != 1:
+            raise ValueError(f"Expected exactly one {cfg['raw_filename']} in source archive")
+        chosen = matches[0]
         print(f"[ingest] Extracting {chosen}")
         data = zf.read(chosen)
         xlsx_path.write_bytes(data)
@@ -124,12 +129,14 @@ def verify_checksum(path: Path, expected_sha: str | None) -> str:
         The computed SHA-256 hex digest.
     """
     actual = _sha256(path)
-    if expected_sha is not None and actual != expected_sha:
-        print(
-            f"[ingest] WARNING — SHA-256 mismatch!\n"
+    if not expected_sha:
+        raise ValueError("A pinned source_sha256 is required before ingestion")
+    if actual != expected_sha:
+        raise ValueError(
+            f"[ingest] SHA-256 mismatch; refusing to process input.\n"
             f"  expected: {expected_sha}\n"
             f"  actual:   {actual}\n"
-            f"  The dataset may have been updated upstream. Proceeding anyway."
+            f"  Verify the official source before updating the pinned checksum."
         )
     else:
         status = "verified" if expected_sha else "recorded (no expected value)"
@@ -140,8 +147,7 @@ def verify_checksum(path: Path, expected_sha: str | None) -> str:
 # ---------------------------------------------------------------------------
 # Cleaning
 # ---------------------------------------------------------------------------
-SERVICE_SKUS = {"POST", "DOT", "BANK CHARGES", "M", "PADS", "D",
-                "C2", "CRUK", "S", "AMAZONFEE"}
+SERVICE_SKUS = {"POST", "DOT", "BANK CHARGES", "M", "PADS", "D", "C2", "CRUK", "S", "AMAZONFEE"}
 
 
 def clean(df: pd.DataFrame, rules: list[dict]) -> tuple[pd.DataFrame, list[dict]]:
@@ -162,16 +168,42 @@ def clean(df: pd.DataFrame, rules: list[dict]) -> tuple[pd.DataFrame, list[dict]
         rows_affected).
     """
     report: list[dict] = []
+    df = df.rename(
+        columns={"InvoiceNo": "Invoice", "UnitPrice": "Price", "CustomerID": "Customer ID"}
+    ).copy()
+    required = {
+        "Invoice",
+        "StockCode",
+        "Description",
+        "Quantity",
+        "Price",
+        "Customer ID",
+        "Country",
+        "InvoiceDate",
+    }
+    if not required.issubset(df.columns):
+        raise ValueError(f"Missing source columns: {sorted(required - set(df.columns))}")
+    original_rows = len(df)
+    for col in ["Quantity", "Price", "Customer ID"]:
+        df[col] = pd.to_numeric(df[col], errors="coerce")
+    df["InvoiceDate"] = pd.to_datetime(df["InvoiceDate"], errors="coerce")
 
     for rule in rules:
         name = rule["name"]
         before = len(df)
+        modified = 0
 
-        if name == "remove_cancellations":
-            df = df[~df["Invoice"].astype(str).str.startswith("C")]
+        if name == "remove_invalid_schema":
+            valid = df[["Invoice", "StockCode", "InvoiceDate"]].notna().all(axis=1)
+            valid &= np.isfinite(df[["Quantity", "Price"]]).all(axis=1)
+            valid &= df["Quantity"].mod(1).eq(0)
+            valid &= df["Customer ID"].isna() | (
+                np.isfinite(df["Customer ID"]) & df["Customer ID"].mod(1).eq(0)
+            )
+            df = df.loc[valid].copy()
 
-        elif name == "remove_non_positive_quantity":
-            df = df[df["Quantity"] > 0]
+        elif name == "remove_zero_quantity":
+            df = df.loc[df["Quantity"] != 0].copy()
 
         elif name == "remove_non_positive_price":
             df = df[df["Price"] > 0]
@@ -183,17 +215,35 @@ def clean(df: pd.DataFrame, rules: list[dict]) -> tuple[pd.DataFrame, list[dict]
             df = df[~df["StockCode"].astype(str).str.upper().isin(SERVICE_SKUS)]
 
         elif name == "canonicalise_descriptions":
-            df["Description"] = (
+            canonical = (
                 df["Description"]
+                .fillna("unknown")
                 .astype(str)
                 .str.lower()
                 .str.strip()
                 .apply(lambda s: re.sub(r"\s+", " ", s))
             )
+            modified = int((canonical != df["Description"]).sum())
+            df = df.copy()
+            df["Description"] = canonical.replace("", "unknown")
+
+        elif name == "cap_extreme_values":
+            df = df.copy()
+            qmax, pmax = rule["max_abs_quantity"], rule["max_unit_price"]
+            df["WasCapped"] = (df["Quantity"].abs() > qmax) | (df["Price"] > pmax)
+            modified = int(df["WasCapped"].sum())
+            df["Quantity"] = df["Quantity"].clip(-qmax, qmax)
+            df["Price"] = df["Price"].clip(upper=pmax)
+
+        elif name == "flag_events":
+            df = df.copy()
+            df["IsCancellation"] = df["Invoice"].astype(str).str.upper().str.startswith("C")
+            df["IsReturn"] = df["Quantity"] < 0
+            df["IsPurchase"] = ~df["IsCancellation"] & (df["Quantity"] > 0)
+            modified = len(df)
 
         else:
-            print(f"[ingest] Unknown cleaning rule: {name}, skipping")
-            continue
+            raise ValueError(f"Unknown cleaning rule: {name}")
 
         after = len(df)
         entry = {
@@ -202,12 +252,13 @@ def clean(df: pd.DataFrame, rules: list[dict]) -> tuple[pd.DataFrame, list[dict]
             "rows_before": before,
             "rows_after": after,
             "rows_removed": before - after,
+            "rows_modified": modified,
+            "rows_affected": before - after + modified,
+            "pct_of_original": 100 * (before - after + modified) / max(original_rows, 1),
+            "pct_of_step_input": 100 * (before - after + modified) / max(before, 1),
         }
         report.append(entry)
-        print(
-            f"[ingest]   {name}: {before:,} → {after:,}  "
-            f"(−{before - after:,} rows)"
-        )
+        print(f"[ingest]   {name}: {before:,} → {after:,}  (−{before - after:,} rows)")
 
     return df.reset_index(drop=True), report
 
@@ -215,8 +266,7 @@ def clean(df: pd.DataFrame, rules: list[dict]) -> tuple[pd.DataFrame, list[dict]
 # ---------------------------------------------------------------------------
 # Parquet conversion & manifest
 # ---------------------------------------------------------------------------
-def to_parquet(df: pd.DataFrame, cfg: dict, actual_sha: str,
-               cleaning_report: list[dict]) -> Path:
+def to_parquet(df: pd.DataFrame, cfg: dict, actual_sha: str, cleaning_report: list[dict]) -> Path:
     """Write cleaned data to Parquet and produce the provenance manifest.
 
     Parameters
@@ -263,8 +313,17 @@ def to_parquet(df: pd.DataFrame, cfg: dict, actual_sha: str,
     manifest = {
         "source": data_cfg["source_url"],
         "source_sha256": actual_sha,
-        "retrieval_date": datetime.now(timezone.utc).isoformat(),
+        "processed_sha256": _sha256(parquet_path),
+        "config_sha256": _sha256(CONFIG_PATH),
+        "retrieval_date": datetime.now(UTC).isoformat(),
         "row_count": len(df),
+        "original_row_count": cleaning_report[0]["rows_before"],
+        "purchase_rows": int(df["IsPurchase"].sum()),
+        "cancellation_rows": int(df["IsCancellation"].sum()),
+        "return_rows": int(df["IsReturn"].sum()),
+        "date_min": str(df["InvoiceDate"].min()),
+        "date_max": str(df["InvoiceDate"].max()),
+        "currency": "GBP (original source; no currency conversion)",
         "columns": list(df.columns),
         "licence": "CC BY 4.0 (UCI Machine Learning Repository)",
         "provenance": (
@@ -277,6 +336,21 @@ def to_parquet(df: pd.DataFrame, cfg: dict, actual_sha: str,
     }
     with open(manifest_path, "w") as f:
         json.dump(manifest, f, indent=2, default=str)
+    report_path = parquet_path.parent / "cleaning_report.json"
+    report_path.write_text(
+        json.dumps(
+            {
+                "original_row_count": manifest["original_row_count"],
+                "final_row_count": len(df),
+                "retained_pct": 100 * len(df) / manifest["original_row_count"],
+                "rules": cleaning_report,
+                "outlier_policy": "Fixed caps of absolute quantity 10000 and price GBP 1000; "
+                "not statistical errors or learned quantiles. Raw workbook preserved. "
+                "Wholesale sensitivity analysis remains future work.",
+            },
+            indent=2,
+        )
+    )
     print(f"[ingest] Manifest written: {manifest_path}")
 
     return parquet_path
@@ -331,7 +405,8 @@ def main() -> None:
     """CLI wrapper so the module can be run with ``python -m src.ingest``."""
     parser = argparse.ArgumentParser(description="Boréal Marché data ingestion")
     parser.add_argument(
-        "--force", action="store_true",
+        "--force",
+        action="store_true",
         help="Re-download even if the raw file exists",
     )
     args = parser.parse_args()

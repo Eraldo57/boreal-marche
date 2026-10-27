@@ -1,136 +1,41 @@
-# Data Card — Boréal Marché
+# Data card — measured local dataset
 
----
+Updated 2026-09-30. Public UCI data; fictional Boréal Marché narrative, not client data.
 
-## ⚠️ Provenance Disclosure
+## Source and provenance
 
-**This application uses the UCI Online Retail II dataset, a publicly available dataset
-re-skinned under the name "Boréal Marché" for a pedagogical capstone project at Vanier
-College (course 420-977-VA). No real Boréal Marché company or customer data exists.
-Presenting this public data as proprietary client data would be an academic integrity
-violation.**
+[UCI Online Retail II](https://archive.ics.uci.edu/dataset/502/online+retail+ii), Daqing Chen (2012), DOI 10.24432/C5CG6D, CC BY 4.0. The original retailer is UK-based and sells giftware, including wholesale purchases. The workbook spans December 2009–December 2011. Prices remain GBP.
 
----
+The exact workbook URL and SHA-256 are pinned in configs/pipeline.yaml. Ingestion fails closed on a mismatch. The pin was measured from the official download, not supplied as a publisher-signed checksum; see reports/current_run/SOURCE_VERIFICATION.md.
 
-## Source
+## Measured cleaning
 
-| Field | Value |
-|---|---|
-| **Dataset name** | Online Retail II |
-| **Source** | UCI Machine Learning Repository |
-| **URL** | https://archive.ics.uci.edu/dataset/502/online+retail+ii |
-| **Original authors** | Daqing Chen, School of Engineering, London South Bank University |
-| **Year** | 2019 (deposited); data spans December 2009 – December 2011 |
-| **Licence** | Creative Commons Attribution 4.0 International (CC BY 4.0) |
-| **Citation** | Chen, D. (2019). Online Retail II. UCI Machine Learning Repository. https://doi.org/10.24432/C5CG6D |
+Source: data/processed/manifest.json and cleaning_report.json. Counts are sequential rule effects, not overlapping raw-condition counts.
 
----
+| Stage | Removed | Modified without removal |
+|---|---:|---:|
+| Original workbook, both sheets | — | 1,067,371 input rows |
+| Invalid schema / zero quantity | 0 | 0 |
+| Non-positive price | 6,207 | 0 |
+| Missing customer ID | 236,871 | 0 |
+| Service SKUs | 3,648 | 0 |
+| Description canonicalization | 0 | 820,645 |
+| Fixed extreme-value caps | 0 | 9 |
+| Purchase/cancellation/return flags | 0 | 820,645 |
+| Final event ledger | — | 820,645 output rows |
 
-## Description
+The output includes 802,679 purchase rows and 17,966 cancellation/return rows. Cancellation and return flags overlap; do not add them as disjoint counts. Percentages and per-rule denominators are saved in the cleaning report.
 
-The dataset contains all transactions occurring between 01/12/2009 and 09/12/2011 for a
-UK-based and registered non-store online retail company. The company mainly sells unique
-all-occasion gifts. Many customers of the company are wholesalers.
+## Schema and treatment
 
----
+Original columns: Invoice, StockCode, Description, Quantity, InvoiceDate, Price, Customer ID, Country. Added: WasCapped, IsCancellation, IsReturn, IsPurchase, LineTotal. Negative quantities and C invoices are preserved in the event ledger but excluded from purchase labels, revenue features and baskets.
 
-## Schema
+Fixed caps are abs(Quantity) ≤ 10,000 and Price ≤ GBP 1,000. They preserve sign and invoice presence, flag affected rows, and do not learn thresholds from future data. This is a transparent engineering sensitivity treatment, **not** proof that capped wholesale orders are errors. The raw workbook remains intact; uncapped sensitivity analysis is future work. Exact duplicate rows are retained because the source supplies no stable line identifier proving accidental duplication.
 
-| Column | Type | Description | Example |
-|---|---|---|---|
-| `Invoice` | string | 6-digit invoice number. Prefix "C" indicates a cancellation. | `489434`, `C489449` |
-| `StockCode` | string | 5-digit product code. Some codes are service charges (POST, DOT, M, etc.). | `85048`, `POST` |
-| `Description` | string | Product name (free text, English). | `"15CM CHRISTMAS GLASS BALL 20 LIGHTS"` |
-| `Quantity` | integer | Quantity purchased per transaction line. Negative for cancellations. | `12`, `-2` |
-| `InvoiceDate` | datetime | Date and time of the invoice. | `2009-12-01 07:45:00` |
-| `Price` | float | Unit price in GBP (£). | `6.95` |
-| `Customer ID` | float | 5-digit customer identifier. May be null for unregistered purchases. | `13085.0`, `NaN` |
-| `Country` | string | Country of the customer. | `"United Kingdom"`, `"France"` |
+Head A counts distinct StockCodes for basket variety; Head B intentionally identifies items by canonical lowercase description. Different SKUs can merge or description variants can split products. The assistant catalogue (`src/catalogue.py`) keys products by StockCode, names each by its most frequent description and keeps the other variants for search.
 
----
+## Limits
 
-## Size
+Customer identifiers are pseudonymous source identifiers, not proof of anonymization. Rows without usable IDs are excluded, causing selection bias. Geographic/temporal/wholesale patterns may not transfer to Québec grocery shoppers. The first description token is only a category proxy. No demographic fairness inference is supported.
 
-| Metric | Value |
-|---|---|
-| **Raw rows** | 1,067,371 |
-| **Raw columns** | 8 |
-| **File size (Excel)** | ~45 MB |
-| **Unique invoices** | ~28,000 |
-| **Unique customers** | ~5,942 (with Customer ID) |
-| **Unique stock codes** | ~4,631 |
-| **Countries** | 43 |
-| **Date range** | 2009-12-01 to 2011-12-09 |
-
----
-
-## Known Quality Issues
-
-| Issue | Rows affected | Treatment |
-|---|---|---|
-| **Null Customer ID** | ~243,000 (22.8%) | Dropped — cannot build customer-level features without an identifier |
-| **Cancellations** | ~16,000 invoices with "C" prefix | Dropped from positive transactions; used to compute `cancellation_rate` and `has_ever_cancelled` features |
-| **Non-positive quantities** | ~11,000 rows | Dropped — represent returns or data errors |
-| **Non-positive prices** | ~2,500 rows | Dropped — free samples or errors |
-| **Service SKUs** | ~1,500 rows (POST, DOT, BANK CHARGES, M, etc.) | Dropped — not real products |
-| **Description inconsistencies** | Widespread | Canonicalised: lowercased, whitespace stripped and collapsed |
-| **Duplicate descriptions for different SKUs** | Minor | Accepted — description is used for display, SKU for identity |
-| **Extreme outliers** | ~200 rows with Quantity > 10,000 or Price > £1,000 | Investigated individually; genuine wholesale orders are retained, obvious errors are dropped |
-
----
-
-## Re-skinning as Boréal Marché
-
-The dataset is presented in this project under the fictional name "Boréal Marché" to
-create a realistic capstone scenario. The re-skinning involves:
-
-1. **Company name:** "UK-based online retailer" → "Boréal Marché" (fictional Québec
-   online grocery and specialty-goods retailer)
-2. **Currency:** GBP → CAD (for presentation only; no exchange-rate conversion applied
-   to the underlying values)
-3. **Context:** The business problems (retention, recommendation, customer support) are
-   adapted to a Québec market context, including bilingual (French/English) requirements
-
-**No values in the dataset are altered.** The re-skinning is a narrative wrapper only.
-
----
-
-## Bias Considerations
-
-1. **Geographic bias:** ~90% of transactions are from the United Kingdom. The model's
-   understanding of "domestic" vs. "international" customer behaviour is dominated by
-   UK patterns, which may not generalise to a Québec context.
-
-2. **Temporal bias:** The data spans 2009–2011. Consumer purchasing patterns, especially
-   in e-commerce, have evolved substantially since then.
-
-3. **Wholesale bias:** Many customers are wholesalers who buy in bulk. Their purchasing
-   patterns (high frequency, large quantities, narrow product range) differ from
-   individual consumers. The model may over-weight wholesale behaviour.
-
-4. **Missing-customer bias:** 22.8% of transactions lack a Customer ID. These
-   unregistered purchases are dropped entirely, which may systematically exclude
-   certain customer types (e.g., one-time buyers, privacy-conscious customers).
-
-5. **Product-category proxy:** The dataset is dominated by gift items. A real grocery
-   retailer would have very different basket dynamics (perishables, staples, seasonal
-   produce).
-
-6. **No demographic data:** The dataset contains no age, gender, ethnicity, or income
-   data. While this limits the fairness audit, it also means the model cannot directly
-   discriminate on protected characteristics. Indirect discrimination through geographic
-   features remains possible.
-
----
-
-## Ethical Use
-
-This dataset should be used only for:
-- Educational purposes (coursework, capstone projects)
-- Research into customer analytics methodologies
-- Demonstrations of ML engineering practices
-
-It should NOT be used to:
-- Make decisions about real individuals
-- Train models deployed on real customer data without fresh validation
-- Present as proprietary data in a commercial setting
+The authored policy documents describe a fictional retailer's rules. Product facts come only from the catalogue export of UCI purchases: 4,624 StockCodes with median observed unit price in GBP. It has no categories, allergens or dietary tags because the source has none.

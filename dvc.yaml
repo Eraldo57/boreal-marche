@@ -1,0 +1,77 @@
+stages:
+  ingest:
+    cmd: python -m src.ingest
+    deps:
+      - src/ingest.py
+      - configs/pipeline.yaml
+    outs:
+      - data/processed/transactions.parquet
+      - data/processed/manifest.json
+      - data/processed/cleaning_report.json
+
+  features:
+    cmd: python -m src.features
+    deps:
+      - src/features.py
+      - src/contracts.py
+      - data/processed/transactions.parquet
+      - configs/pipeline.yaml
+    outs:
+      - data/processed/X.parquet
+      - data/processed/y.parquet
+      - data/processed/feature_metadata.json
+      - data/processed/snapshots.parquet
+      - data/processed/customer_features.parquet
+
+  train:
+    cmd: python -m src.train
+    deps:
+      - src/train.py
+      - src/contracts.py
+      - data/processed/snapshots.parquet
+      - data/processed/feature_metadata.json
+      - data/processed/X.parquet
+      - data/processed/y.parquet
+      - configs/pipeline.yaml
+    outs:
+      - artifacts/retention_model.joblib
+      - artifacts/retention_model_metadata.json
+      - artifacts/drift_reference.parquet
+      - artifacts/test_predictions.parquet
+    metrics:
+      - reports/current_run/retention_metrics.json:
+          cache: false
+
+  rules:
+    cmd: python -m src.rules
+    deps:
+      - src/rules.py
+      - src/recommend.py
+      - src/features.py
+      - data/processed/transactions.parquet
+      - configs/pipeline.yaml
+    outs:
+      - artifacts/rules.json
+      - artifacts/popularity.json
+    metrics:
+      - reports/current_run/recommendation_metrics.json:
+          cache: false
+
+  catalogue:
+    cmd: python -m src.catalogue
+    deps:
+      - src/catalogue.py
+      - src/features.py
+      - data/processed/transactions.parquet
+    outs:
+      - artifacts/product_catalogue.csv
+      - artifacts/product_catalogue_meta.json
+
+  index:
+    cmd: python -m src.rag.index --force
+    deps:
+      - src/rag/index.py
+      - docs/corpus/
+      - configs/pipeline.yaml
+    outs:
+      - data/chromadb/

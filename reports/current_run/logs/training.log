@@ -1,0 +1,36 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/src/train.py", line 273, in <module>
+    main()
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/src/train.py", line 269, in main
+    run(n_trials=args.trials, output_dir=args.output_dir)
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/src/train.py", line 169, in run
+    mlflow.set_experiment("boreal-marche-temporal")
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/mlflow/tracking/fluent.py", line 153, in set_experiment
+    client = MlflowClient()
+             ^^^^^^^^^^^^^^
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/mlflow/tracking/client.py", line 159, in __init__
+    self._tracking_client = TrackingServiceClient(final_tracking_uri)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/mlflow/tracking/_tracking_service/client.py", line 85, in __init__
+    self.store
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/mlflow/tracking/_tracking_service/client.py", line 89, in store
+    return utils._get_store(self.tracking_uri)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/mlflow/tracking/_tracking_service/utils.py", line 210, in _get_store
+    return _tracking_store_registry.get_store(store_uri, artifact_uri)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/mlflow/tracking/_tracking_service/registry.py", line 45, in get_store
+    return self._get_store_with_resolved_uri(resolved_store_uri, artifact_uri)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/mlflow/tracking/_tracking_service/registry.py", line 56, in _get_store_with_resolved_uri
+    return builder(store_uri=resolved_store_uri, artifact_uri=artifact_uri)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/mlflow/tracking/_tracking_service/utils.py", line 138, in _get_sqlalchemy_store
+    from mlflow.store.tracking.sqlalchemy_store import SqlAlchemyStore
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/mlflow/store/tracking/sqlalchemy_store.py", line 17, in <module>
+    import mlflow.store.db.utils
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/mlflow/store/db/utils.py", line 12, in <module>
+    from sqlalchemy.pool import (
+ImportError: cannot import name 'FallbackAsyncAdaptedQueuePool' from 'sqlalchemy.pool' (/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/sqlalchemy/pool/__init__.py). Did you mean: 'AsyncAdaptedQueuePool'?

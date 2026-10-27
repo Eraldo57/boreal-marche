@@ -2,8 +2,6 @@
 # Boréal Marché — Full Stack
 # Launch:  docker compose up --build
 # ===========================================================================
-version: "3.9"
-
 services:
   # -------------------------------------------------------------------------
   # FastAPI backend
@@ -13,21 +11,21 @@ services:
       context: .
       target: runtime
     container_name: boreal-api
+    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
     ports:
       - "8000:8000"
     environment:
-      - MLFLOW_TRACKING_URI=http://mlflow:5000
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - OLLAMA_HOST=http://ollama:11434
     volumes:
       - ./artifacts:/app/artifacts:ro
       - ./data/processed:/app/data/processed:ro
+      - ./data/chromadb:/app/data/chromadb
+      - ./data/model_cache:/app/data/model_cache
+      - ./data/logs:/app/data/logs
       - ./docs/corpus:/app/docs/corpus:ro
-    depends_on:
-      mlflow:
-        condition: service_healthy
     healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health').raise_for_status()"]
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/ready').raise_for_status()"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -47,6 +45,8 @@ services:
       - "8501:8501"
     environment:
       - API_BASE_URL=http://api:8000
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8501/_stcore/health').raise_for_status()"]
     depends_on:
       api:
         condition: service_healthy
@@ -56,20 +56,21 @@ services:
   # MLflow tracking server
   # -------------------------------------------------------------------------
   mlflow:
-    image: ghcr.io/mlflow/mlflow:v2.15.1
+    image: ghcr.io/mlflow/mlflow:v2.22.5
+    profiles: ["tracking"]
     container_name: boreal-mlflow
     command: >
       mlflow server
       --host 0.0.0.0
       --port 5000
-      --backend-store-uri sqlite:///mlflow/mlflow.db
+      --backend-store-uri sqlite:////mlflow/mlflow.db
       --default-artifact-root /mlflow/artifacts
     ports:
       - "5000:5000"
     volumes:
       - mlflow-data:/mlflow
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
       interval: 15s
       timeout: 5s
       retries: 5

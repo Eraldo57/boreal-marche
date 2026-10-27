@@ -23,7 +23,7 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Install ruff
         run: pip install ruff
@@ -44,7 +44,7 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Install dependencies
         run: pip install ".[dev]"
@@ -62,14 +62,14 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Install dependencies
         run: pip install ".[dev]"
 
       - name: Run tests with coverage
         run: |
-          coverage run -m pytest tests/ -v --tb=short
+          coverage run --source=src,api -m pytest tests/ -v --tb=short
           coverage report --fail-under=80
           coverage xml -o coverage.xml
 
@@ -90,7 +90,7 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Install dependencies
         run: pip install ".[dev]"

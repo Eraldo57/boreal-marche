@@ -4,8 +4,10 @@
 # Every magic number lives HERE, not buried in a notebook cell.
 
 data:
-  source_url: "https://archive.ics.uci.edu/static/public/502/online+retail+ii.zip"
-  source_sha256: "62ca00ab6e20bead1e2e7a39ef8a9e59a719dfa1e9acc71093de1c3e6a234e45"
+  source_url: "https://archive.ics.uci.edu/ml/machine-learning-databases/00502/online_retail_II.xlsx"
+  archive_url: "https://archive.ics.uci.edu/static/public/502/online+retail+ii.zip"
+  # Measured from the official UCI workbook on 2026-09-30; not a publisher-signed hash.
+  source_sha256: "bcbe73b35f5b7babf197fb0cb983a11f5d9ff929078d4aa53d171b1f2df2e980"
   raw_filename: "online_retail_II.xlsx"
   parquet_path: "data/processed/transactions.parquet"
   manifest_path: "data/processed/manifest.json"
@@ -24,13 +26,21 @@ labelling:
   label_window_days: 90
   # Target: did the customer place at least one order in the label window?
   target_column: "will_return"
+  # Labels mature before the next stage's cutoff. Customers may recur across
+  # snapshots: this evaluates forecasting known customers, not unseen people.
+  snapshots:
+    train: ["2010-06-01", "2010-09-01"]
+    validation: ["2010-12-01"]
+    calibration: ["2011-03-01"]
+    decision: ["2011-06-01"]
+    test: ["2011-09-01"]
 
 cleaning:
   rules:
-    - name: "remove_cancellations"
-      description: "Drop rows where InvoiceNo starts with 'C'"
-    - name: "remove_non_positive_quantity"
-      description: "Drop rows where Quantity <= 0"
+    - name: "remove_invalid_schema"
+      description: "Reject missing dates/IDs/SKUs and non-finite numeric values"
+    - name: "remove_zero_quantity"
+      description: "Drop zero quantity; preserve negative returns and C invoices"
     - name: "remove_non_positive_price"
       description: "Drop rows where Price <= 0"
     - name: "remove_null_customer"
@@ -39,6 +49,12 @@ cleaning:
       description: "Drop non-product SKUs (POST, DOT, BANK, M, etc.)"
     - name: "canonicalise_descriptions"
       description: "Lowercase, strip whitespace, collapse runs"
+    - name: "cap_extreme_values"
+      description: "Fixed sensitivity caps; preserve invoice presence and sign"
+      max_abs_quantity: 10000
+      max_unit_price: 1000
+    - name: "flag_events"
+      description: "Separate cancellations/returns from positive purchases"
 
 features:
   # At least 25 documented features covering RFM, basket shape,
@@ -74,8 +90,9 @@ features:
     geography:
       - country_code
       - is_domestic
+      - n_countries
 
-  missingness_policy: "explicit"  # never silently fill with zero
+  missingness_policy: "structural zeros; remaining missing values imputed on training only"
 
 modelling:
   primary_metric: "average_precision"  # PR-AUC
@@ -84,8 +101,7 @@ modelling:
     - "brier_score_loss"
     - "recall_at_top_decile"
     - "fit_time"
-  cv_folds: 5
-  test_size: 0.2
+  evaluation: "chronological_snapshots"
 
   spot_check_families:
     - LogisticRegression
@@ -103,9 +119,9 @@ modelling:
 
   tuning:
     engine: optuna
-    n_trials: 100
+    n_trials: 12  # local milestone budget per tunable family; increase for final study
     direction: maximize
-    pruning: true
+    pruning: false  # single chronological validation score; no fake intermediate pruning
 
   calibration:
     methods: ["isotonic", "sigmoid"]
@@ -121,17 +137,23 @@ rules:
   algorithm_prod: "fpgrowth"
   min_support_sweep: [0.005, 0.01, 0.02, 0.03, 0.05]
   min_confidence: 0.1
-  min_lift: 1.0
+  min_confidence_sweep: [0.1, 0.3, 0.5]
+  min_lift: 1.2
+  max_itemset_length: 3  # bound combinatorial growth; identical Apriori/FP-Growth protocol
+  train_end: "2011-06-01"
+  validation_end: "2011-09-01"
+  test_end: "2011-12-01"
+  identity: "canonical_description"
   max_rules: 5000
   top_k_recommendations: 5
 
 assistant:
   providers: ["regex", "openai", "ollama"]
   default_provider: "regex"
-  embedding_model: "all-MiniLM-L6-v2"
+  embedding_model: "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
   similarity_floor: 0.25
   max_chunks_per_query: 5
-  chunk_size: 512
+  chunk_size: 420  # chars, to reduce truncation at encoder's 128 token limit
   chunk_overlap: 64
 
   openai:

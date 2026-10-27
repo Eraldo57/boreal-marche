@@ -87,7 +87,7 @@ async def test_golden_prediction(client: AsyncClient, sample_features: dict) -> 
     """Golden-prediction regression test.
 
     The mock model returns probability 0.65.  With threshold 0.45 the customer
-    should be classified as will_return=True and risk_label='high'.
+    should be classified as will_return=True and non-return risk_label='low'.
     """
     r = await client.post(
         "/predict",
@@ -99,7 +99,7 @@ async def test_golden_prediction(client: AsyncClient, sample_features: dict) -> 
         f"Golden prediction drift: expected ~0.65, got {body['probability']}"
     )
     assert body["will_return"] is True
-    assert body["risk_label"] == "high"
+    assert body["risk_label"] == "low"
 
 
 # ---------------------------------------------------------------------------
@@ -107,10 +107,7 @@ async def test_golden_prediction(client: AsyncClient, sample_features: dict) -> 
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_predict_batch(client: AsyncClient, sample_features: dict) -> None:
-    customers = [
-        {"customer_id": f"C-{i}", "features": sample_features}
-        for i in range(3)
-    ]
+    customers = [{"customer_id": f"C-{i}", "features": sample_features} for i in range(3)]
     r = await client.post("/predict/batch", json={"customers": customers})
     assert r.status_code == 200
     body = r.json()

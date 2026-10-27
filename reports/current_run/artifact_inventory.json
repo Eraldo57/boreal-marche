@@ -1,0 +1,72 @@
+[
+  {
+    "path": "artifacts/drift_reference.parquet",
+    "bytes": 645149,
+    "sha256": "4c922d37a6a3115ab5a33a7e0b411db70675d35688834f4fe1eeb42f76b91aef"
+  },
+  {
+    "path": "artifacts/popularity.json",
+    "bytes": 164417,
+    "sha256": "88b1e1db4b5dda4085b7db60b3d1fbc026f9ff37f5d3571d9fb0167c890614f6"
+  },
+  {
+    "path": "artifacts/retention_model.joblib",
+    "bytes": 1106523,
+    "sha256": "885fc335660bc6105f735be657492241d1aa996b75a4245afdcd0735bfc5b4b4"
+  },
+  {
+    "path": "artifacts/retention_model_metadata.json",
+    "bytes": 2825,
+    "sha256": "c3645401f760269c1001b4e04c223b0292b881346b68d3104698abf7a314c486"
+  },
+  {
+    "path": "artifacts/rules.json",
+    "bytes": 991566,
+    "sha256": "ed866555ba068dff88310ed5f7cb1df48c843ebcf7daa03312d878e1b4354355"
+  },
+  {
+    "path": "artifacts/test_predictions.parquet",
+    "bytes": 37613,
+    "sha256": "4a5536d005d0b5ff8d4d82dc272c17f2fc115e0c06d014c3d2dde3b4bc40aeb3"
+  },
+  {
+    "path": "data/processed/X.parquet",
+    "bytes": 1376665,
+    "sha256": "1099065df7cc13f3ded7f9d4610d19ccf76844827a1277e84d21ab282676b20f"
+  },
+  {
+    "path": "data/processed/cleaning_report.json",
+    "bytes": 3076,
+    "sha256": "9ab1932b28d03845844438d5e01b9742027d02960f7a6440af54d50539a1a7b4"
+  },
+  {
+    "path": "data/processed/customer_features.parquet",
+    "bytes": 469132,
+    "sha256": "4c92c439140474d0e8272dcd10dfc64ceb618f8644d057db01b09ccde3d96239"
+  },
+  {
+    "path": "data/processed/feature_metadata.json",
+    "bytes": 2642,
+    "sha256": "dd2307e8a288191ad1c68d1ae08df547259914bf9c66d2bd05a97b48a56bc025"
+  },
+  {
+    "path": "data/processed/manifest.json",
+    "bytes": 3973,
+    "sha256": "c48f0acc8ea7374038ff4c01cce23d1398818b5cf1ed6a45e7872276d958db00"
+  },
+  {
+    "path": "data/processed/snapshots.parquet",
+    "bytes": 65005,
+    "sha256": "618ff644eb9245160a7302b217f3b36a937869d4c99e053a73f891c0a33bd4ef"
+  },
+  {
+    "path": "data/processed/transactions.parquet",
+    "bytes": 7093059,
+    "sha256": "6f536e10bb1a34a4b1fb8dee631b6477e06e68302e4f7c6152b05ea2c78ebefb"
+  },
+  {
+    "path": "data/processed/y.parquet",
+    "bytes": 4648,
+    "sha256": "63474311a730f0690276871c122823721acecea0c7112f6e306434ad8a2bcbb4"
+  }
+]

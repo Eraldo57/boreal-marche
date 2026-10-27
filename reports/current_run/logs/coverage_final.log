@@ -1,0 +1,26 @@
+Name                       Stmts   Miss  Cover
+----------------------------------------------
+api/__init__.py                0      0   100%
+api/lifespan.py              107     10    91%
+api/main.py                   67      5    93%
+api/routers/__init__.py        0      0   100%
+api/routers/chat.py           95     19    80%
+api/routers/monitor.py        58      6    90%
+api/routers/predict.py        61      7    89%
+api/routers/recommend.py      18      1    94%
+api/schemas.py               121      3    98%
+src/__init__.py                0      0   100%
+src/contracts.py              18      3    83%
+src/features.py              179     59    67%
+src/ingest.py                164     79    52%
+src/rag/__init__.py            0      0   100%
+src/rag/guardrails.py         56     18    68%
+src/rag/index.py             167    113    32%
+src/rag/providers.py         122     51    58%
+src/rag/tools.py             125     40    68%
+src/recommend.py              91     12    87%
+src/rules.py                 116     78    33%
+src/train.py                 191    126    34%
+----------------------------------------------
+TOTAL                       1756    630    64%
+Coverage failure: total of 64 is less than fail-under=80

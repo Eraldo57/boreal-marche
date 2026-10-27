@@ -1,0 +1,63 @@
+Traceback (most recent call last):
+  File "/Users/eraldoibrushi/.cache/tool-runtimes/primary-runtime/dependencies/python/lib/python3.12/urllib/request.py", line 1344, in do_open
+    h.request(req.get_method(), req.selector, req.data, headers,
+  File "/Users/eraldoibrushi/.cache/tool-runtimes/primary-runtime/dependencies/python/lib/python3.12/http/client.py", line 1358, in request
+    self._send_request(method, url, body, headers, encode_chunked)
+  File "/Users/eraldoibrushi/.cache/tool-runtimes/primary-runtime/dependencies/python/lib/python3.12/http/client.py", line 1404, in _send_request
+    self.endheaders(body, encode_chunked=encode_chunked)
+  File "/Users/eraldoibrushi/.cache/tool-runtimes/primary-runtime/dependencies/python/lib/python3.12/http/client.py", line 1353, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+  File "/Users/eraldoibrushi/.cache/tool-runtimes/primary-runtime/dependencies/python/lib/python3.12/http/client.py", line 1113, in _send_output
+    self.send(msg)
+  File "/Users/eraldoibrushi/.cache/tool-runtimes/primary-runtime/dependencies/python/lib/python3.12/http/client.py", line 1057, in send
+    self.connect()
+  File "/Users/eraldoibrushi/.cache/tool-runtimes/primary-runtime/dependencies/python/lib/python3.12/http/client.py", line 1492, in connect
+    super().connect()
+  File "/Users/eraldoibrushi/.cache/tool-runtimes/primary-runtime/dependencies/python/lib/python3.12/http/client.py", line 1023, in connect
+    self.sock = self._create_connection(
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eraldoibrushi/.cache/tool-runtimes/primary-runtime/dependencies/python/lib/python3.12/socket.py", line 841, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eraldoibrushi/.cache/tool-runtimes/primary-runtime/dependencies/python/lib/python3.12/socket.py", line 978, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 8] nodename nor servname provided, or not known
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/src/ingest.py", line 406, in <module>
+    main()
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/src/ingest.py", line 402, in main
+    run(force=args.force)
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/src/ingest.py", line 368, in run
+    xlsx_path = download_dataset(data_cfg, force=force)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/src/ingest.py", line 92, in download_dataset
+    with urllib.request.urlopen(url, timeout=120) as resp:  # noqa: S310
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eraldoibrushi/.cache/tool-runtimes/primary-runtime/dependencies/python/lib/python3.12/urllib/request.py", line 215, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eraldoibrushi/.cache/tool-runtimes/primary-runtime/dependencies/python/lib/python3.12/urllib/request.py", line 515, in open
+    response = self._open(req, data)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eraldoibrushi/.cache/tool-runtimes/primary-runtime/dependencies/python/lib/python3.12/urllib/request.py", line 532, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eraldoibrushi/.cache/tool-runtimes/primary-runtime/dependencies/python/lib/python3.12/urllib/request.py", line 492, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/Users/eraldoibrushi/.cache/tool-runtimes/primary-runtime/dependencies/python/lib/python3.12/urllib/request.py", line 1392, in https_open
+    return self.do_open(http.client.HTTPSConnection, req,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eraldoibrushi/.cache/tool-runtimes/primary-runtime/dependencies/python/lib/python3.12/urllib/request.py", line 1347, in do_open
+    raise URLError(err)
+urllib.error.URLError: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+======================================================================
+Boréal Marché — Data Ingestion
+======================================================================
+[ingest] Downloading https://archive.ics.uci.edu/static/public/502/online+retail+ii.zip …

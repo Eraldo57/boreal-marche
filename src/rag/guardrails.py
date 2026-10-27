@@ -19,6 +19,7 @@ from typing import Any
 @dataclass(frozen=True)
 class GuardrailResult:
     """Outcome of a single guardrail check."""
+
     passed: bool
     reason: str | None = None
 
@@ -52,16 +53,20 @@ _OUT_OF_SCOPE_SIGNALS = re.compile(
     re.IGNORECASE,
 )
 
+_UNSAFE = re.compile(
+    r"stock\s*(?:price|market)|invest|medical|diagnos|hack|exploit|password|credit\s*card\s*number|ignore.*(?:instruction|rule)|(?:system|developer)\s*prompt|write.*(?:python|script|poem|code)|translate.*(?:paragraph|spanish)",
+    re.I,
+)
+
 
 def check_out_of_scope(query: str, **_: Any) -> GuardrailResult:
     """Refuse questions clearly outside Boréal Marché's domain."""
-    if _IN_SCOPE_SIGNALS.search(query):
-        return GuardrailResult(passed=True)
-    if _OUT_OF_SCOPE_SIGNALS.search(query):
+    if _UNSAFE.search(query) or _OUT_OF_SCOPE_SIGNALS.search(query):
         return GuardrailResult(
             passed=False,
             reason=(
-                "I'm the Boréal Marché assistant — I can help with delivery, "
+                "This request is outside my scope. I'm the Boréal Marché assistant — "
+                "I can help with delivery, "
                 "returns, allergens, loyalty points, product questions, and our "
                 "privacy policy. For anything outside that, please contact the "
                 "appropriate service. / Je suis l'assistant Boréal Marché — je "
@@ -78,6 +83,7 @@ def check_out_of_scope(query: str, **_: Any) -> GuardrailResult:
 # ---------------------------------------------------------------------------
 # 2. similarity_floor — refuse when retrieval found nothing relevant
 # ---------------------------------------------------------------------------
+
 
 def check_similarity_floor(
     query: str,
@@ -150,7 +156,9 @@ def check_no_cross_customer(
     **_: Any,
 ) -> GuardrailResult:
     """Refuse to disclose personal data belonging to another customer."""
-    if _DIRECT_CROSS.search(query):
+    if _DIRECT_CROSS.search(query) or re.search(
+        r"another\s*customer|other\s*customers?|someone\s*else|autre\s*client", query, re.I
+    ):
         return GuardrailResult(
             passed=False,
             reason=(
@@ -163,10 +171,12 @@ def check_no_cross_customer(
     # If the query mentions a specific customer id that differs from the
     # current user, block it.
     if current_customer_id:
-        mentioned_ids = re.findall(r"\b(?:BM-?)?(\d{4,8})\b", query)
+        mentioned_ids = re.findall(
+            r"(?:customer|client|account|compte)\s*(?:#|id)?\s*(?:BM-)?(\d{4,8})\b", query, re.I
+        )
         for mid in mentioned_ids:
             normalised = mid.lstrip("0")
-            current_normalised = current_customer_id.lstrip("BM-").lstrip("0")
+            current_normalised = current_customer_id.removeprefix("BM-").lstrip("0")
             if normalised and normalised != current_normalised:
                 return GuardrailResult(
                     passed=False,
@@ -183,6 +193,7 @@ def check_no_cross_customer(
 # ---------------------------------------------------------------------------
 # 4. require_citations — every grounded answer must cite its sources
 # ---------------------------------------------------------------------------
+
 
 def check_require_citations(
     reply: str,
@@ -207,11 +218,48 @@ def check_require_citations(
 # ---------------------------------------------------------------------------
 
 _FR_STOP = {
-    "le", "la", "les", "de", "du", "des", "un", "une", "et", "est",
-    "en", "dans", "pour", "sur", "avec", "par", "au", "aux", "ce",
-    "cette", "nous", "vous", "sont", "qui", "que", "pas", "mon", "ma",
-    "mes", "ton", "ta", "tes", "je", "tu", "il", "elle", "quoi",
-    "comment", "pourquoi", "combien", "quel", "quelle",
+    "le",
+    "la",
+    "les",
+    "de",
+    "du",
+    "des",
+    "un",
+    "une",
+    "et",
+    "est",
+    "en",
+    "dans",
+    "pour",
+    "sur",
+    "avec",
+    "par",
+    "au",
+    "aux",
+    "ce",
+    "cette",
+    "nous",
+    "vous",
+    "sont",
+    "qui",
+    "que",
+    "pas",
+    "mon",
+    "ma",
+    "mes",
+    "ton",
+    "ta",
+    "tes",
+    "je",
+    "tu",
+    "il",
+    "elle",
+    "quoi",
+    "comment",
+    "pourquoi",
+    "combien",
+    "quel",
+    "quelle",
 }
 
 
@@ -245,6 +293,7 @@ def check_language_match(
 # Convenience: run all pre-generation guardrails
 # ---------------------------------------------------------------------------
 
+
 def run_pre_guardrails(
     query: str,
     context_chunks: list[dict[str, Any]],
@@ -258,15 +307,21 @@ def run_pre_guardrails(
     """
     for check_fn, kwargs in [
         (check_out_of_scope, {"query": query}),
-        (check_no_cross_customer, {
-            "query": query,
-            "current_customer_id": current_customer_id,
-        }),
-        (check_similarity_floor, {
-            "query": query,
-            "context_chunks": context_chunks,
-            "threshold": similarity_threshold,
-        }),
+        (
+            check_no_cross_customer,
+            {
+                "query": query,
+                "current_customer_id": current_customer_id,
+            },
+        ),
+        (
+            check_similarity_floor,
+            {
+                "query": query,
+                "context_chunks": context_chunks,
+                "threshold": similarity_threshold,
+            },
+        ),
     ]:
         result = check_fn(**kwargs)
         if not result.passed:

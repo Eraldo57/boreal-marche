@@ -22,6 +22,14 @@ data/raw/
 # MLflow local runs
 mlruns/
 mlartifacts/
+mlflow.db*
+outputs/
+node_modules/
+data/model_cache/
+data/chromadb/
+data/processed/
+data/logs/
+reports/
 
 # IDE
 .vscode/

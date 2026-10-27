@@ -1,0 +1,38 @@
+api/routers/chat.py:128:101: E501 Line too long (164 > 100)
+api/routers/chat.py:134:101: E501 Line too long (106 > 100)
+api/routers/chat.py:147:101: E501 Line too long (106 > 100)
+api/routers/chat.py:165:101: E501 Line too long (126 > 100)
+api/routers/chat.py:167:101: E501 Line too long (125 > 100)
+api/routers/predict.py:100:5: F841 Local variable `prediction_log` is assigned to but never used
+api/schemas.py:154:7: UP042 Class Provider inherits from both `str` and `enum.Enum`
+app/streamlit_app.py:45:101: E501 Line too long (101 > 100)
+app/streamlit_app.py:56:101: E501 Line too long (106 > 100)
+app/streamlit_app.py:76:101: E501 Line too long (103 > 100)
+app/streamlit_app.py:79:101: E501 Line too long (109 > 100)
+app/streamlit_app.py:82:101: E501 Line too long (107 > 100)
+app/streamlit_app.py:93:101: E501 Line too long (111 > 100)
+app/streamlit_app.py:113:101: E501 Line too long (132 > 100)
+app/streamlit_app.py:148:101: E501 Line too long (151 > 100)
+app/streamlit_app.py:157:101: E501 Line too long (160 > 100)
+app/streamlit_app.py:160:101: E501 Line too long (142 > 100)
+app/streamlit_app.py:163:101: E501 Line too long (147 > 100)
+app/streamlit_app.py:166:101: E501 Line too long (147 > 100)
+scripts/evaluate_assistant.py:104:101: E501 Line too long (105 > 100)
+src/features.py:391:5: N806 Variable `X` in function should be lowercase
+src/features.py:398:5: N806 Variable `X` in function should be lowercase
+src/features.py:401:5: N806 Variable `X` in function should be lowercase
+src/features.py:411:5: N803 Argument name `X` should be lowercase
+src/features.py:489:13: N806 Variable `X` in function should be lowercase
+src/features.py:502:5: N806 Variable `X` in function should be lowercase
+src/rag/guardrails.py:68:101: E501 Line too long (112 > 100)
+src/rag/index.py:316:5: N806 Variable `BATCH` in function should be lowercase
+src/rag/providers.py:185:101: E501 Line too long (199 > 100)
+src/rules.py:266:101: E501 Line too long (145 > 100)
+src/train.py:87:19: N803 Argument name `X` should be lowercase
+src/train.py:90:29: N803 Argument name `X` should be lowercase
+src/train.py:128:24: N803 Argument name `X` should be lowercase
+src/train.py:197:26: N803 Argument name `X` should be lowercase
+src/train.py:222:5: N806 Variable `X` in function should be lowercase
+tests/conftest.py:164:101: E501 Line too long (109 > 100)
+Found 36 errors.
+No fixes available (2 hidden fixes can be enabled with the `--unsafe-fixes` option).

@@ -1,0 +1,86 @@
+2026/09/30 18:10:02 INFO mlflow.store.db.utils: Creating initial MLflow database tables...
+2026/09/30 18:10:02 INFO mlflow.store.db.utils: Updating database tables
+INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 451aebb31d03, add metric step
+INFO  [alembic.runtime.migration] Running upgrade 451aebb31d03 -> 90e64c465722, migrate user column to tags
+INFO  [alembic.runtime.migration] Running upgrade 90e64c465722 -> 181f10493468, allow nulls for metric values
+INFO  [alembic.runtime.migration] Running upgrade 181f10493468 -> df50e92ffc5e, Add Experiment Tags Table
+INFO  [alembic.runtime.migration] Running upgrade df50e92ffc5e -> 7ac759974ad8, Update run tags with larger limit
+INFO  [alembic.runtime.migration] Running upgrade 7ac759974ad8 -> 89d4b8295536, create latest metrics table
+INFO  [89d4b8295536_create_latest_metrics_table_py] Migration complete!
+INFO  [alembic.runtime.migration] Running upgrade 89d4b8295536 -> 2b4d017a5e9b, add model registry tables to db
+INFO  [2b4d017a5e9b_add_model_registry_tables_to_db_py] Adding registered_models and model_versions tables to database.
+INFO  [2b4d017a5e9b_add_model_registry_tables_to_db_py] Migration complete!
+INFO  [alembic.runtime.migration] Running upgrade 2b4d017a5e9b -> cfd24bdc0731, Update run status constraint with killed
+INFO  [alembic.runtime.migration] Running upgrade cfd24bdc0731 -> 0a8213491aaa, drop_duplicate_killed_constraint
+INFO  [alembic.runtime.migration] Running upgrade 0a8213491aaa -> 728d730b5ebd, add registered model tags table
+INFO  [alembic.runtime.migration] Running upgrade 728d730b5ebd -> 27a6a02d2cf1, add model version tags table
+INFO  [alembic.runtime.migration] Running upgrade 27a6a02d2cf1 -> 84291f40a231, add run_link to model_version
+INFO  [alembic.runtime.migration] Running upgrade 84291f40a231 -> a8c4a736bde6, allow nulls for run_id
+INFO  [alembic.runtime.migration] Running upgrade a8c4a736bde6 -> 39d1c3be5f05, add_is_nan_constraint_for_metrics_tables_if_necessary
+INFO  [alembic.runtime.migration] Running upgrade 39d1c3be5f05 -> c48cb773bb87, reset_default_value_for_is_nan_in_metrics_table_for_mysql
+INFO  [alembic.runtime.migration] Running upgrade c48cb773bb87 -> bd07f7e963c5, create index on run_uuid
+INFO  [alembic.runtime.migration] Running upgrade bd07f7e963c5 -> 0c779009ac13, add deleted_time field to runs table
+INFO  [alembic.runtime.migration] Running upgrade 0c779009ac13 -> cc1f77228345, change param value length to 500
+INFO  [alembic.runtime.migration] Running upgrade cc1f77228345 -> 97727af70f4d, Add creation_time and last_update_time to experiments table
+INFO  [alembic.runtime.migration] Running upgrade 97727af70f4d -> 3500859a5d39, Add Model Aliases table
+INFO  [alembic.runtime.migration] Running upgrade 3500859a5d39 -> 7f2a7d5fae7d, add datasets inputs input_tags tables
+INFO  [alembic.runtime.migration] Running upgrade 7f2a7d5fae7d -> 2d6e25af4d3e, increase max param val length from 500 to 8000
+INFO  [alembic.runtime.migration] Running upgrade 2d6e25af4d3e -> acf3f17fdcc7, add storage location field to model versions
+INFO  [alembic.runtime.migration] Running upgrade acf3f17fdcc7 -> 867495a8f9d4, add trace tables
+INFO  [alembic.runtime.migration] Running upgrade 867495a8f9d4 -> 5b0e9adcef9c, add cascade deletion to trace tables foreign keys
+INFO  [alembic.runtime.migration] Running upgrade 5b0e9adcef9c -> 4465047574b1, increase max dataset schema size
+INFO  [alembic.runtime.migration] Running upgrade 4465047574b1 -> f5a4f2784254, increase run tag value limit to 8000
+INFO  [alembic.runtime.migration] Running upgrade f5a4f2784254 -> 0584bdc529eb, add cascading deletion to datasets from experiments
+INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+2026/09/30 18:10:02 INFO mlflow.tracking.fluent: Experiment with name 'boreal-marche-temporal' does not exist. Creating a new experiment.
+[train] validation DummyClassifier_stratified: AP=0.3345
+[train] validation business_heuristic_recency: AP=0.5116
+[train] validation LogisticRegression: AP=0.6695
+[train] validation RidgeClassifier: AP=0.6561
+[train] validation DecisionTreeClassifier: AP=0.6003
+[train] validation RandomForestClassifier: AP=0.6724
+[train] validation GradientBoostingClassifier: AP=0.6673
+[train] validation HistGradientBoostingClassifier: AP=0.6526
+[train] validation KNeighborsClassifier: AP=0.6006
+[train] validation LinearSVC: AP=0.6648
+[I 2026-09-30 18:10:05,599] A new study created in memory with name: no-name-246ebb4f-4335-41cd-865a-a5d8900ab526
+[I 2026-09-30 18:10:06,157] Trial 0 finished with value: 0.6698611207451941 and parameters: {'n_estimators': 156, 'max_depth': 12, 'min_samples_leaf': 19}. Best is trial 0 with value: 0.6698611207451941.
+[I 2026-09-30 18:10:06,588] Trial 1 finished with value: 0.6705679813704918 and parameters: {'n_estimators': 190, 'max_depth': 5, 'min_samples_leaf': 5}. Best is trial 1 with value: 0.6705679813704918.
+[I 2026-09-30 18:10:07,034] Trial 2 finished with value: 0.6705068835053926 and parameters: {'n_estimators': 108, 'max_depth': 11, 'min_samples_leaf': 16}. Best is trial 1 with value: 0.6705679813704918.
+[I 2026-09-30 18:10:07,416] Trial 3 finished with value: 0.6681292340579829 and parameters: {'n_estimators': 206, 'max_depth': 4, 'min_samples_leaf': 25}. Best is trial 1 with value: 0.6705679813704918.
+[I 2026-09-30 18:10:07,878] Trial 4 finished with value: 0.6708394851240936 and parameters: {'n_estimators': 225, 'max_depth': 5, 'min_samples_leaf': 6}. Best is trial 4 with value: 0.6708394851240936.
+[I 2026-09-30 18:10:08,184] Trial 5 finished with value: 0.6739172464675545 and parameters: {'n_estimators': 127, 'max_depth': 6, 'min_samples_leaf': 14}. Best is trial 5 with value: 0.6739172464675545.
+[I 2026-09-30 18:10:08,575] Trial 6 finished with value: 0.6743437724534069 and parameters: {'n_estimators': 165, 'max_depth': 6, 'min_samples_leaf': 16}. Best is trial 6 with value: 0.6743437724534069.
+[I 2026-09-30 18:10:08,867] Trial 7 finished with value: 0.6745426977202474 and parameters: {'n_estimators': 121, 'max_depth': 6, 'min_samples_leaf': 10}. Best is trial 7 with value: 0.6745426977202474.
+[I 2026-09-30 18:10:09,444] Trial 8 finished with value: 0.6641267563146989 and parameters: {'n_estimators': 168, 'max_depth': 11, 'min_samples_leaf': 6}. Best is trial 7 with value: 0.6745426977202474.
+[I 2026-09-30 18:10:09,994] Trial 9 finished with value: 0.6679134901837942 and parameters: {'n_estimators': 177, 'max_depth': 9, 'min_samples_leaf': 3}. Best is trial 7 with value: 0.6745426977202474.
+[I 2026-09-30 18:10:10,661] Trial 10 finished with value: 0.6718526280189645 and parameters: {'n_estimators': 243, 'max_depth': 8, 'min_samples_leaf': 11}. Best is trial 7 with value: 0.6745426977202474.
+[I 2026-09-30 18:10:11,017] Trial 11 finished with value: 0.6727889557413228 and parameters: {'n_estimators': 138, 'max_depth': 7, 'min_samples_leaf': 11}. Best is trial 7 with value: 0.6745426977202474.
+[I 2026-09-30 18:10:11,017] A new study created in memory with name: no-name-11028077-04ab-4db1-b452-79b608733084
+[I 2026-09-30 18:10:11,036] Trial 0 finished with value: 0.6667356370619814 and parameters: {'C': 0.04082331665966554}. Best is trial 0 with value: 0.6667356370619814.
+[I 2026-09-30 18:10:11,057] Trial 1 finished with value: 0.6696302533134575 and parameters: {'C': 12.275826710862326}. Best is trial 1 with value: 0.6696302533134575.
+[I 2026-09-30 18:10:11,076] Trial 2 finished with value: 0.6695415964522096 and parameters: {'C': 1.4071095169064511}. Best is trial 1 with value: 0.6696302533134575.
+[I 2026-09-30 18:10:11,096] Trial 3 finished with value: 0.6691196709056051 and parameters: {'C': 0.37570597138026457}. Best is trial 1 with value: 0.6696302533134575.
+[I 2026-09-30 18:10:11,112] Trial 4 finished with value: 0.6578702228081057 and parameters: {'C': 0.004688574837063985}. Best is trial 1 with value: 0.6696302533134575.
+[I 2026-09-30 18:10:11,128] Trial 5 finished with value: 0.6578688368868268 and parameters: {'C': 0.004687454996076497}. Best is trial 1 with value: 0.6696302533134575.
+[I 2026-09-30 18:10:11,144] Trial 6 finished with value: 0.6483978632470284 and parameters: {'C': 0.0017775399007348214}. Best is trial 1 with value: 0.6696302533134575.
+[I 2026-09-30 18:10:11,166] Trial 7 finished with value: 0.6695586046129745 and parameters: {'C': 5.314343038625021}. Best is trial 1 with value: 0.6696302533134575.
+[I 2026-09-30 18:10:11,185] Trial 8 finished with value: 0.669122531164793 and parameters: {'C': 0.3849583075868116}. Best is trial 1 with value: 0.6696302533134575.
+[I 2026-09-30 18:10:11,205] Trial 9 finished with value: 0.669462214636049 and parameters: {'C': 1.1103027007359598}. Best is trial 1 with value: 0.6696302533134575.
+[I 2026-09-30 18:10:11,226] Trial 10 finished with value: 0.6696058298846587 and parameters: {'C': 14.907888012947872}. Best is trial 1 with value: 0.6696302533134575.
+[I 2026-09-30 18:10:11,247] Trial 11 finished with value: 0.6696353343796676 and parameters: {'C': 13.302768407132174}. Best is trial 11 with value: 0.6696353343796676.
+{
+  "selected_model": "RandomForestClassifier",
+  "calibration": "isotonic",
+  "test": {
+    "pr_auc": 0.7430379084309567,
+    "roc_auc": 0.7809627606139234,
+    "brier_score": 0.19539851063119004,
+    "recall_top_decile": 0.21556350626118068,
+    "fit_time_s": 0,
+    "assumed_test_utility": 29605.0
+  }
+}

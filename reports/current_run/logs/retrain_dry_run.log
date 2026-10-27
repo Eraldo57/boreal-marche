@@ -1,0 +1,2 @@
+['/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/bin/python', '-m', 'src.train', '--output-dir', '/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/artifacts/candidates/20260930T221834Z']
+Candidate only. Reusing the same historical holdout is not independent promotion evidence.

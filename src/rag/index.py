@@ -14,14 +14,14 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import json
 import logging
 import re
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-import chromadb
 import yaml
-from sentence_transformers import SentenceTransformer
 
 logger = logging.getLogger(__name__)
 
@@ -30,11 +30,75 @@ DEFAULT_CORPUS = ROOT / "docs" / "corpus"
 DEFAULT_DB = ROOT / "data" / "chromadb"
 CONFIG_PATH = ROOT / "configs" / "pipeline.yaml"
 COLLECTION_NAME = "boreal_policy"
+DEFAULT_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+
+
+def corpus_hash(corpus_dir: Path) -> str:
+    h = hashlib.sha256()
+    for path in sorted(Path(corpus_dir).glob("*.md")):
+        h.update(path.name.encode())
+        h.update(path.read_bytes())
+    return h.hexdigest()
+
+
+@lru_cache(maxsize=2)
+def embedding_model(name: str):
+    """Load once per process. Explicit repo cache works in local/Docker runs."""
+    from sentence_transformers import SentenceTransformer
+
+    return SentenceTransformer(name, cache_folder=str(ROOT / "data/model_cache"), device="cpu")
+
+
+class RagIndex:
+    """Long-lived query object, shared by API requests."""
+
+    def __init__(self, db_dir=DEFAULT_DB, corpus_dir=DEFAULT_CORPUS):
+        import chromadb
+
+        self.db_dir = Path(db_dir)
+        metadata = json.loads((self.db_dir / "manifest.json").read_text())
+        cfg = _load_assistant_config()
+        if metadata["embedding_model"] != cfg["embedding_model"] or metadata[
+            "corpus_sha256"
+        ] != corpus_hash(Path(corpus_dir)):
+            raise ValueError("Stale RAG index; run python -m src.rag.index --force")
+        if (
+            metadata["chunk_size"] != cfg["chunk_size"]
+            or metadata["chunk_overlap"] != cfg["chunk_overlap"]
+        ):
+            raise ValueError("Chunk configuration changed; rebuild RAG index")
+        self.client = chromadb.PersistentClient(path=str(self.db_dir))
+        self.collection = self.client.get_collection(COLLECTION_NAME)
+        if self.collection.count() != metadata["chunk_count"] or not self.collection.count():
+            raise ValueError("RAG collection/manifest count mismatch")
+        self.model = embedding_model(metadata["embedding_model"])
+        self.metadata = metadata
+
+    def query(self, question: str, top_k: int = 5) -> list[dict[str, Any]]:
+        vectors = self.model.encode([question], normalize_embeddings=True).tolist()
+        result = self.collection.query(
+            query_embeddings=vectors,
+            n_results=min(top_k, self.collection.count()),
+            include=["documents", "metadatas", "distances"],
+        )
+        return [
+            {
+                "text": text,
+                "source": meta["source"],
+                "score": float(1 - distance),
+                "language": meta["language"],
+                "chunk_index": meta["chunk_index"],
+            }
+            for text, meta, distance in zip(
+                result["documents"][0], result["metadatas"][0], result["distances"][0]
+            )
+        ]
 
 
 # ---------------------------------------------------------------------------
 # Configuration helpers
 # ---------------------------------------------------------------------------
+
 
 def _load_assistant_config() -> dict[str, Any]:
     """Read the ``assistant`` section from pipeline.yaml."""
@@ -50,11 +114,47 @@ def _detect_language(text: str) -> str:
     where we know only two languages are present.
     """
     french_markers = {
-        "le", "la", "les", "de", "du", "des", "un", "une", "et", "est",
-        "en", "dans", "pour", "sur", "avec", "par", "au", "aux", "ce",
-        "cette", "ces", "nous", "vous", "sont", "qui", "que", "ne", "pas",
-        "ou", "ses", "sa", "son", "leur", "leurs", "ont", "peut", "être",
-        "votre", "vos", "notre", "nos",
+        "le",
+        "la",
+        "les",
+        "de",
+        "du",
+        "des",
+        "un",
+        "une",
+        "et",
+        "est",
+        "en",
+        "dans",
+        "pour",
+        "sur",
+        "avec",
+        "par",
+        "au",
+        "aux",
+        "ce",
+        "cette",
+        "ces",
+        "nous",
+        "vous",
+        "sont",
+        "qui",
+        "que",
+        "ne",
+        "pas",
+        "ou",
+        "ses",
+        "sa",
+        "son",
+        "leur",
+        "leurs",
+        "ont",
+        "peut",
+        "être",
+        "votre",
+        "vos",
+        "notre",
+        "nos",
     }
     words = set(re.findall(r"\b[a-zàâéèêëïîôùûüç]+\b", text.lower()))
     score = len(words & french_markers)
@@ -64,6 +164,7 @@ def _detect_language(text: str) -> str:
 # ---------------------------------------------------------------------------
 # Chunking
 # ---------------------------------------------------------------------------
+
 
 def chunk_text(
     text: str,
@@ -76,6 +177,8 @@ def chunk_text(
     sentence boundaries (``. ``), and finally at word boundaries.  This keeps
     tables and headings intact when possible.
     """
+    if chunk_size <= 0 or chunk_overlap < 0 or chunk_overlap >= chunk_size:
+        raise ValueError("Require 0 <= overlap < chunk_size")
     # Split on double-newlines first (paragraphs / table rows).
     paragraphs = re.split(r"\n{2,}", text)
 
@@ -129,20 +232,24 @@ def chunk_text(
 # Indexing
 # ---------------------------------------------------------------------------
 
+
 def build_index(
     corpus_dir: Path = DEFAULT_CORPUS,
     db_dir: Path = DEFAULT_DB,
     *,
     force: bool = False,
-) -> int:
+) -> RagIndex:
     """Index every ``.md`` file in *corpus_dir* into ChromaDB.
 
-    Returns the total number of chunks indexed.
+    Returns the same query object used by the API lifespan.
     """
+    import chromadb
+
+    corpus_dir, db_dir = Path(corpus_dir), Path(db_dir)
     cfg = _load_assistant_config()
     chunk_size: int = cfg.get("chunk_size", 512)
     chunk_overlap: int = cfg.get("chunk_overlap", 64)
-    model_name: str = cfg.get("embedding_model", "all-MiniLM-L6-v2")
+    model_name: str = cfg.get("embedding_model", DEFAULT_MODEL)
 
     md_files = sorted(corpus_dir.glob("*.md"))
     if not md_files:
@@ -172,11 +279,11 @@ def build_index(
             COLLECTION_NAME,
             collection.count(),
         )
-        return collection.count()
+        return RagIndex(db_dir, corpus_dir)
 
     # Load the embedding model.
     logger.info("Loading embedding model '%s'…", model_name)
-    model = SentenceTransformer(model_name)
+    model = embedding_model(model_name)
 
     all_ids: list[str] = []
     all_texts: list[str] = []
@@ -193,20 +300,22 @@ def build_index(
             doc_id = hashlib.sha256(f"{source}:{idx}".encode()).hexdigest()[:16]
             all_ids.append(doc_id)
             all_texts.append(chunk)
-            all_metas.append({
-                "source": source,
-                "chunk_index": idx,
-                "language": language,
-            })
+            all_metas.append(
+                {
+                    "source": source,
+                    "chunk_index": idx,
+                    "language": language,
+                }
+            )
 
     # Embed all chunks in one batch.
     logger.info("Embedding %d chunks…", len(all_texts))
     embeddings = model.encode(all_texts, show_progress_bar=True, normalize_embeddings=True)
 
     # Upsert into ChromaDB (handles both insert and update).
-    BATCH = 500
-    for start in range(0, len(all_ids), BATCH):
-        end = start + BATCH
+    batch_size = 500
+    for start in range(0, len(all_ids), batch_size):
+        end = start + batch_size
         collection.upsert(
             ids=all_ids[start:end],
             documents=all_texts[start:end],
@@ -215,8 +324,21 @@ def build_index(
         )
 
     total = collection.count()
+    (db_dir / "manifest.json").write_text(
+        json.dumps(
+            {
+                "embedding_model": model_name,
+                "corpus_sha256": corpus_hash(corpus_dir),
+                "chunk_count": total,
+                "document_count": len(md_files),
+                "chunk_size": chunk_size,
+                "chunk_overlap": chunk_overlap,
+            },
+            indent=2,
+        )
+    )
     logger.info("Index complete — %d chunks in collection '%s'.", total, COLLECTION_NAME)
-    return total
+    return RagIndex(db_dir, corpus_dir)
 
 
 def query_index(
@@ -233,12 +355,14 @@ def query_index(
     """
     cfg = _load_assistant_config()
     n_results = n_results or cfg.get("max_chunks_per_query", 5)
-    model_name = model_name or cfg.get("embedding_model", "all-MiniLM-L6-v2")
+    model_name = model_name or cfg.get("embedding_model", DEFAULT_MODEL)
+
+    import chromadb
 
     client = chromadb.PersistentClient(path=str(db_dir))
     collection = client.get_collection(COLLECTION_NAME)
 
-    model = SentenceTransformer(model_name)
+    model = embedding_model(model_name)
     q_emb = model.encode([question], normalize_embeddings=True).tolist()
 
     results = collection.query(
@@ -256,13 +380,15 @@ def query_index(
         # ChromaDB returns cosine *distance* (0 = identical); convert to
         # similarity for the rest of the pipeline.
         score = 1.0 - dist
-        hits.append({
-            "text": doc,
-            "source": meta["source"],
-            "chunk_index": meta["chunk_index"],
-            "language": meta["language"],
-            "score": round(score, 4),
-        })
+        hits.append(
+            {
+                "text": doc,
+                "source": meta["source"],
+                "chunk_index": meta["chunk_index"],
+                "language": meta["language"],
+                "score": round(score, 4),
+            }
+        )
 
     return hits
 
@@ -270,6 +396,7 @@ def query_index(
 # ---------------------------------------------------------------------------
 # CLI entry-point
 # ---------------------------------------------------------------------------
+
 
 def main() -> None:
     """CLI wrapper for ``python -m src.rag.index``."""

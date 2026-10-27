@@ -1,0 +1,20 @@
+======================================================================
+Boréal Marché — Data Ingestion
+======================================================================
+[ingest] Found existing file: /Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/data/raw/online_retail_II.xlsx
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/src/ingest.py", line 406, in <module>
+    main()
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/src/ingest.py", line 402, in main
+    run(force=args.force)
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/src/ingest.py", line 371, in run
+    actual_sha = verify_checksum(xlsx_path, data_cfg.get("source_sha256"))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/src/ingest.py", line 134, in verify_checksum
+    raise ValueError(
+ValueError: [ingest] SHA-256 mismatch; refusing to process input.
+  expected: 62ca00ab6e20bead1e2e7a39ef8a9e59a719dfa1e9acc71093de1c3e6a234e45
+  actual:   bcbe73b35f5b7babf197fb0cb983a11f5d9ff929078d4aa53d171b1f2df2e980
+  Verify the official source before updating the pinned checksum.

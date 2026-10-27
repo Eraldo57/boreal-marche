@@ -2,25 +2,29 @@
 name = "boreal-marche"
 version = "0.1.0"
 description = "Boréal Marché — Customer Intelligence Platform"
-requires-python = ">=3.11"
+requires-python = ">=3.12,<3.14"
 dependencies = [
     "fastapi>=0.115",
     "uvicorn[standard]>=0.30",
     "pydantic>=2.0",
-    "scikit-learn>=1.5",
-    "pandas>=2.2",
-    "numpy>=1.26",
-    "mlflow>=2.15",
-    "optuna>=3.6",
-    "mlxtend>=0.23",
+    "scikit-learn>=1.6,<1.8",
+    "pandas>=2.2,<3",
+    "numpy>=1.26,<3",
+    "pyarrow>=17",
+    "scipy>=1.13",
+    "mlflow>=2.20,<3",
+    "sqlalchemy>=2,<2.1",  # MLflow 2.x imports pool APIs removed in SQLAlchemy 2.1
+    "optuna>=4,<5",
+    "mlxtend>=0.23.4,<0.24",
     "joblib>=1.4",
     "streamlit>=1.37",
     "httpx>=0.27",
     "openpyxl>=3.1",
     "python-dotenv>=1.0",
     "openai>=1.35",
-    "sentence-transformers>=3.0",
-    "chromadb>=0.5",
+    "sentence-transformers>=3.4,<6",
+    "transformers>=4.45,<5",
+    "chromadb>=1.0,<2",
     "pyyaml>=6.0",
     "structlog>=24.1",
 ]
@@ -32,6 +36,7 @@ dev = [
     "ruff>=0.5",
     "mypy>=1.10",
     "coverage>=7.5",
+    "dvc>=3,<4",
 ]
 sagemaker = [
     "sagemaker>=2.220",
@@ -40,13 +45,18 @@ sagemaker = [
 
 [tool.ruff]
 line-length = 100
-target-version = "py311"
+target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP"]
 
+[tool.ruff.lint.per-file-ignores]
+# Conventional sklearn design-matrix notation, not a correctness exemption.
+"src/features.py" = ["N803", "N806"]
+"src/train.py" = ["N803", "N806"]
+
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.12"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
@@ -54,3 +64,11 @@ disallow_untyped_defs = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+markers = ["integration: requires generated local artifacts"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["src*", "api*", "app*", "scripts*"]

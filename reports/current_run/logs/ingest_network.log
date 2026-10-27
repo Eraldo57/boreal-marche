@@ -1,0 +1,39 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/src/ingest.py", line 406, in <module>
+    main()
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/src/ingest.py", line 402, in main
+    run(force=args.force)
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/src/ingest.py", line 368, in run
+    xlsx_path = download_dataset(data_cfg, force=force)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/src/ingest.py", line 93, in download_dataset
+    zip_bytes = resp.read()
+                ^^^^^^^^^^^
+  File "/Users/eraldoibrushi/.cache/tool-runtimes/primary-runtime/dependencies/python/lib/python3.12/http/client.py", line 478, in read
+    return self._read_chunked(amt)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eraldoibrushi/.cache/tool-runtimes/primary-runtime/dependencies/python/lib/python3.12/http/client.py", line 602, in _read_chunked
+    while (chunk_left := self._get_chunk_left()) is not None:
+                         ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eraldoibrushi/.cache/tool-runtimes/primary-runtime/dependencies/python/lib/python3.12/http/client.py", line 584, in _get_chunk_left
+    chunk_left = self._read_next_chunk_size()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eraldoibrushi/.cache/tool-runtimes/primary-runtime/dependencies/python/lib/python3.12/http/client.py", line 544, in _read_next_chunk_size
+    line = self.fp.readline(_MAXLINE + 1)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eraldoibrushi/.cache/tool-runtimes/primary-runtime/dependencies/python/lib/python3.12/socket.py", line 720, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eraldoibrushi/.cache/tool-runtimes/primary-runtime/dependencies/python/lib/python3.12/ssl.py", line 1251, in recv_into
+    return self.read(nbytes, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eraldoibrushi/.cache/tool-runtimes/primary-runtime/dependencies/python/lib/python3.12/ssl.py", line 1103, in read
+    return self._sslobj.read(len, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: The read operation timed out
+======================================================================
+Boréal Marché — Data Ingestion
+======================================================================
+[ingest] Downloading https://archive.ics.uci.edu/static/public/502/online+retail+ii.zip …

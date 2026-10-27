@@ -36,18 +36,22 @@ logger = logging.getLogger(__name__)
 # Shared result type
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class AssistantResult:
     """Intermediate result from a provider before the orchestrator formats it."""
+
     tool_name: str | None = None
     tool_args: dict[str, Any] = field(default_factory=dict)
     raw_text: str = ""  # free-form text the provider wants shown if no tool fires
     language: str = "en"
+    token_usage: dict[str, int] | None = None
 
 
 # ---------------------------------------------------------------------------
 # Abstract base
 # ---------------------------------------------------------------------------
+
 
 class AssistantProvider(ABC):
     """Interface every provider must implement."""
@@ -85,6 +89,7 @@ class AssistantProvider(ABC):
 # 1. RegexProvider — no LLM, pure pattern matching
 # ============================================================================
 
+
 class RegexProvider(AssistantProvider):
     """Rule-based baseline that pattern-matches the user's question.
 
@@ -95,9 +100,9 @@ class RegexProvider(AssistantProvider):
     # --- Patterns that route to a tool ---------------------------------- #
 
     _RETENTION_PAT = re.compile(
-        r"(?:retention|churn|return|rétention|fidél|risk|risque|score|probability|"
+        r"(?:retention|churn|rétention|risk|risque|score|probability|"
         r"probabilit|will\s+(?:they|this customer)\s+(?:come back|return|buy)|"
-        r"va-t-il\s+revenir|chance|likelihood)",
+        r"va-t-il\s+revenir|chance|likelihood|will\s+customer|will\s+return)",
         re.IGNORECASE,
     )
     _CUSTOMER_ID_PAT = re.compile(
@@ -107,7 +112,7 @@ class RegexProvider(AssistantProvider):
     )
 
     _RECOMMEND_PAT = re.compile(
-        r"(?:recommend|suggest|pair|goes?\s+with|complément|proposer|sugg[ée]rer|"
+        r"(?:recommend|suggest|pair|goes?\s+with|complément|proposer|sugg[ée]r|"
         r"what\s+(?:else|should|could)|que\s+(?:suggér|propos|ajouter)|"
         r"aussi\s+aimer|you\s+might\s+(?:also\s+)?like|"
         r"based\s+on\s+(?:my\s+)?(?:basket|cart|panier))",
@@ -140,21 +145,26 @@ class RegexProvider(AssistantProvider):
         # --- 1. Retention score ----------------------------------------- #
         if self._RETENTION_PAT.search(message):
             cid_match = self._CUSTOMER_ID_PAT.search(message)
-            if cid_match:
-                result.tool_name = "retention_score"
-                result.tool_args = {"customer_id": cid_match.group(1)}
-                return result
+            result.tool_name = "retention_score"
+            result.tool_args = {"customer_id": cid_match.group(1)} if cid_match else {}
+            return result
 
         # --- 2. Recommendations ----------------------------------------- #
         if self._RECOMMEND_PAT.search(message):
             basket_items: list[str] = []
-            bm = self._BASKET_ITEM_PAT.search(message)
+            bm = re.search(r"(?:have|got)\s+(.+?)\s+in\s+my\s+(?:basket|cart)", message, re.I)
+            if bm is None:
+                bm = re.search(
+                    r"(?:basket|cart|panier)\s*(?:contains|has|with|avec|contient)\s+([^.!?,]+)",
+                    message,
+                    re.I,
+                )
+            if bm is None:
+                bm = re.search(r"(?:go\s+with|avec)\s+(?:a\s+)?([^.!?]+)", message, re.I)
             if bm:
                 raw = bm.group(1)
                 basket_items = [
-                    item.strip()
-                    for item in re.split(r"[,;]|\band\b|\bet\b", raw)
-                    if item.strip()
+                    item.strip() for item in re.split(r"[,;]|\band\b|\bet\b", raw) if item.strip()
                 ]
             if not basket_items:
                 # Try to extract quoted items.
@@ -169,6 +179,18 @@ class RegexProvider(AssistantProvider):
             result.tool_name = "recommendations"
             result.tool_args = {"basket": basket_items}
             return result
+
+        # Policy terms take precedence over generic words such as products/items.
+        if re.search(
+            r"polic|politiq|deliver|livraison|ship|return|retour|refund|rembours|loyalty|"
+            r"fidélité|point|allergen|allergène|privacy|personal data|"
+            r"delete.*(?:account|data)|supprimer|cancel|cold.chain",
+            message,
+            re.I,
+        ):
+            return AssistantResult(
+                tool_name="policy_search", tool_args={"question": message}, language=language
+            )
 
         # --- 3. Product lookup ------------------------------------------ #
         if self._PRODUCT_PAT.search(message):
@@ -253,10 +275,7 @@ class OpenAIProvider(AssistantProvider):
         )
 
         context_text = "\n---\n".join(context_chunks) if context_chunks else "(no context)"
-        user_content = (
-            f"Customer message: {message}\n\n"
-            f"Retrieved policy context:\n{context_text}"
-        )
+        user_content = f"Customer message: {message}\n\nRetrieved policy context:\n{context_text}"
 
         resp = await client.chat.completions.create(
             model=self.model,
@@ -280,6 +299,12 @@ class OpenAIProvider(AssistantProvider):
             tool_args=parsed.get("args", {}),
             raw_text=parsed.get("direct_answer", ""),
             language=language,
+            token_usage={
+                "prompt_tokens": resp.usage.prompt_tokens,
+                "completion_tokens": resp.usage.completion_tokens,
+            }
+            if resp.usage
+            else None,
         )
         # Normalise null/"null"/None.
         if result.tool_name in (None, "null", ""):
@@ -290,6 +315,7 @@ class OpenAIProvider(AssistantProvider):
 # ============================================================================
 # 3. OllamaProvider — same approach, local model
 # ============================================================================
+
 
 class OllamaProvider(AssistantProvider):
     """Uses a local Ollama instance for tool dispatch."""
@@ -316,10 +342,7 @@ class OllamaProvider(AssistantProvider):
             language="French" if language == "fr" else "English",
         )
         context_text = "\n---\n".join(context_chunks) if context_chunks else "(no context)"
-        user_content = (
-            f"Customer message: {message}\n\n"
-            f"Retrieved policy context:\n{context_text}"
-        )
+        user_content = f"Customer message: {message}\n\nRetrieved policy context:\n{context_text}"
 
         async with httpx.AsyncClient(timeout=90.0) as client:
             resp = await client.post(
@@ -358,6 +381,7 @@ class OllamaProvider(AssistantProvider):
 # ---------------------------------------------------------------------------
 # Factory
 # ---------------------------------------------------------------------------
+
 
 def get_provider(
     name: str,

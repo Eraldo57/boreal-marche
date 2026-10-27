@@ -2,7 +2,7 @@
 Boréal Marché — Feature Engineering
 =====================================
 
-Builds **25+ documented features** from the cleaned transaction data and
+Builds **25 documented features** from the cleaned transaction data and
 creates the binary retention label (``will_return``).
 
 Feature groups
@@ -18,10 +18,10 @@ Total: **25 features** (all documented below).
 
 Missingness policy
 ------------------
-**Explicit**.  Features that cannot be computed for a customer (e.g.,
-``std_days_between_orders`` for a one-time buyer) are set to a
-documented sentinel (``-1`` for undefined ratios, ``0`` for std of a
-single observation) and the policy is stated in the feature docstring.
+Structural defaults are explicit: single-order standard deviations are zero,
+single-order mean gap is tenure, and unseen countries use -1. Other missing
+numeric values remain NaN for the training-only median imputer; feature
+construction never estimates medians from all snapshots.
 
 Usage::
 
@@ -30,9 +30,7 @@ Usage::
 
 from __future__ import annotations
 
-import argparse
 import json
-import sys
 from datetime import timedelta
 from pathlib import Path
 
@@ -40,6 +38,8 @@ import numpy as np
 import pandas as pd
 import yaml
 
+from src.contracts import CONTRACT_VERSION, FEATURE_NAMES
+from src.ingest import _sha256
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 CONFIG_PATH = PROJECT_ROOT / "configs" / "pipeline.yaml"
@@ -55,9 +55,7 @@ def load_transactions(cfg: dict) -> pd.DataFrame:
     """Load the cleaned Parquet file produced by ``src.ingest``."""
     path = PROJECT_ROOT / cfg["data"]["parquet_path"]
     if not path.exists():
-        raise FileNotFoundError(
-            f"{path} not found. Run `python -m src.ingest` first."
-        )
+        raise FileNotFoundError(f"{path} not found. Run `python -m src.ingest` first.")
     df = pd.read_parquet(path)
     df["InvoiceDate"] = pd.to_datetime(df["InvoiceDate"])
     return df
@@ -96,9 +94,10 @@ def create_labels(
     label_end = cutoff_dt + timedelta(days=window_days)
 
     obs_df = df[df["InvoiceDate"] < cutoff_dt].copy()
-    label_df = df[
-        (df["InvoiceDate"] >= cutoff_dt) & (df["InvoiceDate"] < label_end)
-    ].copy()
+    label_df = df[(df["InvoiceDate"] >= cutoff_dt) & (df["InvoiceDate"] < label_end)].copy()
+    # Only genuine positive purchases establish eligibility or a return label.
+    obs_df = purchases(obs_df)
+    label_df = purchases(label_df)
 
     # Customers who appear in the observation window
     obs_customers = set(obs_df["Customer ID"].unique())
@@ -107,7 +106,7 @@ def create_labels(
     label_customers = set(label_df["Customer ID"].unique()) & obs_customers
 
     y = pd.Series(
-        {cid: cid in label_customers for cid in obs_customers},
+        {cid: cid in label_customers for cid in sorted(obs_customers)},
         name="will_return",
     )
 
@@ -119,9 +118,20 @@ def create_labels(
     return obs_df, label_df, y
 
 
+def purchases(df: pd.DataFrame) -> pd.DataFrame:
+    """Purchase view of the event ledger; cancellations never count as orders."""
+    mask = (
+        ~df["Invoice"].astype(str).str.upper().str.startswith("C")
+        & (df["Quantity"] > 0)
+        & (df["Price"] > 0)
+    )
+    return df.loc[mask].copy()
+
+
 # ---------------------------------------------------------------------------
 # Feature builders — each returns a DataFrame indexed by Customer ID
 # ---------------------------------------------------------------------------
+
 
 def _rfm_features(df: pd.DataFrame, cutoff: pd.Timestamp) -> pd.DataFrame:
     """Recency / Frequency / Monetary features (5 features).
@@ -149,8 +159,7 @@ def _rfm_features(df: pd.DataFrame, cutoff: pd.Timestamp) -> pd.DataFrame:
     )
     agg["recency_days"] = (cutoff - agg["last_date"]).dt.days
     agg["monetary_std"] = agg["monetary_std"].fillna(0.0)  # single-order → 0
-    return agg[["recency_days", "frequency", "monetary_total",
-                "monetary_mean", "monetary_std"]]
+    return agg[["recency_days", "frequency", "monetary_total", "monetary_mean", "monetary_std"]]
 
 
 def _cadence_features(df: pd.DataFrame, cutoff: pd.Timestamp) -> pd.DataFrame:
@@ -174,19 +183,23 @@ def _cadence_features(df: pd.DataFrame, cutoff: pd.Timestamp) -> pd.DataFrame:
         first = pd.Timestamp(dates[0])
         tenure = (cutoff - first).days
         if len(dates) < 2:
-            return pd.Series({
-                "days_since_first_purchase": tenure,
-                "avg_days_between_orders": float(tenure),
-                "std_days_between_orders": 0.0,
-                "is_one_time_buyer": 1,
-            })
+            return pd.Series(
+                {
+                    "days_since_first_purchase": tenure,
+                    "avg_days_between_orders": float(tenure),
+                    "std_days_between_orders": 0.0,
+                    "is_one_time_buyer": 1,
+                }
+            )
         gaps = np.diff(dates).astype("timedelta64[D]").astype(float)
-        return pd.Series({
-            "days_since_first_purchase": tenure,
-            "avg_days_between_orders": float(np.mean(gaps)),
-            "std_days_between_orders": float(np.std(gaps, ddof=1)) if len(gaps) > 1 else 0.0,
-            "is_one_time_buyer": 0,
-        })
+        return pd.Series(
+            {
+                "days_since_first_purchase": tenure,
+                "avg_days_between_orders": float(np.mean(gaps)),
+                "std_days_between_orders": float(np.std(gaps, ddof=1)) if len(gaps) > 1 else 0.0,
+                "is_one_time_buyer": 0,
+            }
+        )
 
     return inv_dates.groupby("Customer ID").apply(_gap_stats, include_groups=False)
 
@@ -200,11 +213,15 @@ def _basket_shape_features(df: pd.DataFrame) -> pd.DataFrame:
     - ``avg_unique_items_per_basket``: average distinct SKUs per invoice.
     - ``single_item_basket_ratio``: fraction of invoices with exactly 1 line item.
     """
-    inv = df.groupby(["Customer ID", "Invoice"]).agg(
-        n_lines=("Quantity", "size"),
-        total=("LineTotal", "sum"),
-        n_unique=("StockCode", "nunique"),
-    ).reset_index()
+    inv = (
+        df.groupby(["Customer ID", "Invoice"])
+        .agg(
+            n_lines=("Quantity", "size"),
+            total=("LineTotal", "sum"),
+            n_unique=("StockCode", "nunique"),
+        )
+        .reset_index()
+    )
 
     agg = inv.groupby("Customer ID").agg(
         avg_basket_size=("n_lines", "mean"),
@@ -212,9 +229,11 @@ def _basket_shape_features(df: pd.DataFrame) -> pd.DataFrame:
         max_basket_value=("total", "max"),
         avg_unique_items_per_basket=("n_unique", "mean"),
     )
-    singles = inv.groupby("Customer ID")["n_lines"].apply(
-        lambda s: (s == 1).mean()
-    ).rename("single_item_basket_ratio")
+    singles = (
+        inv.groupby("Customer ID")["n_lines"]
+        .apply(lambda s: (s == 1).mean())
+        .rename("single_item_basket_ratio")
+    )
     return agg.join(singles)
 
 
@@ -232,11 +251,7 @@ def _category_mix_features(df: pd.DataFrame) -> pd.DataFrame:
     tmp = df.copy()
     tmp["category"] = tmp["Description"].str.split().str[0].fillna("unknown")
 
-    cat_spend = (
-        tmp.groupby(["Customer ID", "category"])["LineTotal"]
-        .sum()
-        .reset_index()
-    )
+    cat_spend = tmp.groupby(["Customer ID", "category"])["LineTotal"].sum().reset_index()
 
     def _cat_stats(g: pd.DataFrame) -> pd.Series:
         total = g["LineTotal"].sum()
@@ -247,45 +262,46 @@ def _category_mix_features(df: pd.DataFrame) -> pd.DataFrame:
         probs = share.values
         probs = probs[probs > 0]
         entropy = float(-np.sum(probs * np.log2(probs))) if len(probs) > 1 else 0.0
-        return pd.Series({
-            "top_category_share": top_share,
-            "n_unique_categories": n_cats,
-            "category_entropy": entropy,
-        })
+        return pd.Series(
+            {
+                "top_category_share": top_share,
+                "n_unique_categories": n_cats,
+                "category_entropy": entropy,
+            }
+        )
 
     return cat_spend.groupby("Customer ID").apply(_cat_stats, include_groups=False)
 
 
-def _behavioural_features(
-    obs_df: pd.DataFrame, full_df: pd.DataFrame
-) -> pd.DataFrame:
+def _behavioural_features(obs_df: pd.DataFrame, event_history: pd.DataFrame) -> pd.DataFrame:
     """Behavioural features (5 features).
 
-    Uses the *full* (pre-cleaning) cancellation signal where available.
+    Both inputs must be strictly before the snapshot cutoff.
 
     - ``has_ever_cancelled``: 1 if the customer has any cancelled invoice.
     - ``cancellation_rate``: fraction of invoices that are cancellations.
-    - ``return_rate``: fraction of units returned (Quantity < 0 rows).
-      *Missingness:* 0 if no negative-quantity rows survive.
+    - ``return_rate``: returned units / all absolute event units (bounded 0–1).
     - ``weekend_purchase_ratio``: fraction of orders placed on Sat/Sun.
     - ``morning_purchase_ratio``: fraction of orders placed before noon.
     """
     # Cancellations — detect from the original Invoice column before cleaning
-    inv = obs_df.groupby("Customer ID")["Invoice"].apply(
-        lambda s: s.unique()
+    inv = event_history.groupby("Customer ID")["Invoice"].apply(lambda s: s.unique())
+    has_cancel = inv.apply(lambda arr: int(any(str(x).startswith("C") for x in arr))).rename(
+        "has_ever_cancelled"
     )
-    has_cancel = inv.apply(
-        lambda arr: int(any(str(x).startswith("C") for x in arr))
-    ).rename("has_ever_cancelled")
     cancel_rate = inv.apply(
-        lambda arr: sum(1 for x in arr if str(x).startswith("C")) / len(arr)
-        if len(arr) > 0 else 0.0
+        lambda arr: (
+            sum(1 for x in arr if str(x).startswith("C")) / len(arr) if len(arr) > 0 else 0.0
+        )
     ).rename("cancellation_rate")
 
-    # Return rate from negative-quantity rows in the FULL dataset
-    cust_qty = full_df.groupby("Customer ID")["Quantity"].agg(["sum", "count"])
-    neg_qty = full_df[full_df["Quantity"] < 0].groupby("Customer ID")["Quantity"].count()
-    return_rate = (neg_qty / cust_qty["count"]).fillna(0.0).rename("return_rate")
+    cust_qty = (
+        event_history.assign(units=event_history["Quantity"].abs())
+        .groupby("Customer ID")["units"]
+        .sum()
+    )
+    neg_qty = -event_history[event_history["Quantity"] < 0].groupby("Customer ID")["Quantity"].sum()
+    return_rate = (neg_qty / cust_qty).fillna(0.0).rename("return_rate")
 
     # Weekend / morning
     obs_inv = obs_df.drop_duplicates(subset=["Customer ID", "Invoice"])
@@ -306,7 +322,7 @@ def _behavioural_features(
     return result
 
 
-def _geography_features(df: pd.DataFrame) -> pd.DataFrame:
+def _geography_features(df: pd.DataFrame, country_map: dict[str, int]) -> pd.DataFrame:
     """Geography features (3 features).
 
     - ``country_code``: label-encoded country (integer).
@@ -319,48 +335,24 @@ def _geography_features(df: pd.DataFrame) -> pd.DataFrame:
         .agg(lambda s: s.mode().iloc[0])
         .rename("primary_country")
     )
-    n_countries = (
-        df.groupby("Customer ID")["Country"]
-        .nunique()
-        .rename("n_countries")
-    )
+    n_countries = df.groupby("Customer ID")["Country"].nunique().rename("n_countries")
 
     result = pd.DataFrame({"primary_country": country_mode, "n_countries": n_countries})
     result["is_domestic"] = (result["primary_country"] == "United Kingdom").astype(int)
 
     # Label-encode country
-    all_countries = sorted(result["primary_country"].unique())
-    country_map = {c: i for i, c in enumerate(all_countries)}
-    result["country_code"] = result["primary_country"].map(country_map)
+    result["country_code"] = result["primary_country"].map(country_map).fillna(-1)
     return result[["country_code", "is_domestic", "n_countries"]]
 
 
 # ---------------------------------------------------------------------------
 # Main feature builder
 # ---------------------------------------------------------------------------
-FEATURE_NAMES: list[str] = [
-    # RFM
-    "recency_days", "frequency", "monetary_total", "monetary_mean", "monetary_std",
-    # Cadence
-    "days_since_first_purchase", "avg_days_between_orders",
-    "std_days_between_orders", "is_one_time_buyer",
-    # Basket shape
-    "avg_basket_size", "avg_basket_value", "max_basket_value",
-    "avg_unique_items_per_basket", "single_item_basket_ratio",
-    # Category mix
-    "top_category_share", "n_unique_categories", "category_entropy",
-    # Behavioural
-    "has_ever_cancelled", "cancellation_rate", "return_rate",
-    "weekend_purchase_ratio", "morning_purchase_ratio",
-    # Geography
-    "country_code", "is_domestic", "n_countries",
-]
-
-
 def build_features(
     obs_df: pd.DataFrame,
     full_df: pd.DataFrame,
     cutoff: str,
+    country_map: dict[str, int] | None = None,
 ) -> pd.DataFrame:
     """Compute all feature groups and concatenate them.
 
@@ -369,7 +361,7 @@ def build_features(
     obs_df : DataFrame
         Transactions in the observation window (already cleaned).
     full_df : DataFrame
-        All transactions (used for return-rate calculation).
+        Event ledger; sliced strictly before cutoff inside this function.
     cutoff : str
         ISO date string for the cutoff boundary.
 
@@ -379,6 +371,10 @@ def build_features(
         One row per customer, columns are ``FEATURE_NAMES``.
     """
     cutoff_ts = pd.Timestamp(cutoff)
+    obs_df = purchases(obs_df[obs_df["InvoiceDate"] < cutoff_ts])
+    event_history = full_df[full_df["InvoiceDate"] < cutoff_ts].copy()
+    if country_map is None:
+        country_map = {c: i for i, c in enumerate(sorted(obs_df["Country"].unique()))}
     print("[features] Building RFM …")
     rfm = _rfm_features(obs_df, cutoff_ts)
     print("[features] Building cadence …")
@@ -388,9 +384,9 @@ def build_features(
     print("[features] Building category mix …")
     cat_mix = _category_mix_features(obs_df)
     print("[features] Building behavioural …")
-    behav = _behavioural_features(obs_df, full_df)
+    behav = _behavioural_features(obs_df, event_history)
     print("[features] Building geography …")
-    geo = _geography_features(obs_df)
+    geo = _geography_features(obs_df, country_map)
 
     X = rfm.join(cadence).join(basket).join(cat_mix).join(behav).join(geo)
 
@@ -401,18 +397,8 @@ def build_features(
 
     X = X[FEATURE_NAMES]
 
-    # Final missingness audit
-    null_counts = X.isnull().sum()
-    if null_counts.any():
-        print("[features] WARNING — remaining nulls (will be filled per policy):")
-        for col, cnt in null_counts[null_counts > 0].items():
-            print(f"  {col}: {cnt} nulls")
-        # Explicit fill: numeric features get the column median, with a log
-        for col in X.columns:
-            if X[col].isnull().any():
-                median_val = X[col].median()
-                print(f"  → filling '{col}' nulls with median = {median_val:.4f}")
-                X[col] = X[col].fillna(median_val)
+    # No learned imputation here. The training Pipeline owns medians/scaling.
+    X = X.replace([np.inf, -np.inf], np.nan).astype(float)
 
     print(f"[features] Built {len(X.columns)} features for {len(X):,} customers")
     return X
@@ -421,7 +407,9 @@ def build_features(
 # ---------------------------------------------------------------------------
 # Save
 # ---------------------------------------------------------------------------
-def save_features(X: pd.DataFrame, y: pd.Series, cfg: dict) -> Path:
+def save_features(
+    X: pd.DataFrame, y: pd.Series, cfg: dict, snapshots: pd.DataFrame, country_map: dict[str, int]
+) -> Path:
     """Save feature matrix and labels to Parquet.
 
     Returns
@@ -434,15 +422,28 @@ def save_features(X: pd.DataFrame, y: pd.Series, cfg: dict) -> Path:
 
     X.to_parquet(out_dir / "X.parquet")
     y.to_frame().to_parquet(out_dir / "y.parquet")
+    snapshots.to_parquet(out_dir / "snapshots.parquet")
+    # Latest historical snapshot is a demo feature store, not live customer data.
+    latest = snapshots["cutoff"].max()
+    latest_x = X.loc[snapshots["cutoff"].eq(latest)].copy()
+    latest_x.index = snapshots.loc[latest_x.index, "customer_id"].astype(str)
+    latest_x.to_parquet(out_dir / "customer_features.parquet")
 
     # Also save feature metadata
     meta = {
         "feature_names": FEATURE_NAMES,
+        "contract_version": CONTRACT_VERSION,
+        "country_map": country_map,
+        "unknown_country_code": -1,
         "n_features": len(FEATURE_NAMES),
         "n_customers": len(X),
         "positive_rate": float(y.mean()),
         "cutoff_date": cfg["labelling"]["cutoff_date"],
         "label_window_days": cfg["labelling"]["label_window_days"],
+        "snapshots": cfg["labelling"]["snapshots"],
+        "source_data_sha256": _sha256(PROJECT_ROOT / cfg["data"]["parquet_path"]),
+        "snapshot_rows": snapshots.groupby("split").size().to_dict(),
+        "missing_counts": X.isna().sum().to_dict(),
     }
     with open(out_dir / "feature_metadata.json", "w") as f:
         json.dump(meta, f, indent=2)
@@ -464,20 +465,44 @@ def run() -> tuple[pd.DataFrame, pd.Series]:
 
     full_df = load_transactions(cfg)
 
-    obs_df, _, y = create_labels(
-        full_df,
-        cutoff=cfg["labelling"]["cutoff_date"],
-        window_days=cfg["labelling"]["label_window_days"],
-    )
-
-    X = build_features(obs_df, full_df, cutoff=cfg["labelling"]["cutoff_date"])
-
-    # Align X and y (intersection of customer IDs)
-    common = X.index.intersection(y.index)
-    X = X.loc[common]
-    y = y.loc[common]
-
-    save_features(X, y, cfg)
+    configured_features = [f for group in cfg["features"]["groups"].values() for f in group]
+    if configured_features != FEATURE_NAMES:
+        raise ValueError("pipeline.yaml feature groups differ from canonical contract")
+    cutoffs = cfg["labelling"]["snapshots"]
+    first = min(cutoffs["train"])
+    country_map = {
+        c: i
+        for i, c in enumerate(
+            sorted(full_df.loc[full_df["InvoiceDate"] < first, "Country"].unique())
+        )
+    }
+    frames, targets, rows = [], [], []
+    window = cfg["labelling"]["label_window_days"]
+    for split, dates in cutoffs.items():
+        for cutoff in dates:
+            end = pd.Timestamp(cutoff) + pd.Timedelta(days=window)
+            if end > full_df["InvoiceDate"].max():
+                raise ValueError(
+                    f"Incomplete label window for {cutoff}: requires data through {end}"
+                )
+            obs_df, _, y = create_labels(full_df, cutoff, window)
+            X = build_features(obs_df, full_df, cutoff, country_map)
+            y = y.reindex(X.index)
+            snapshot = pd.DataFrame(
+                {
+                    "customer_id": X.index,
+                    "cutoff": cutoff,
+                    "label_end": str(end.date()),
+                    "split": split,
+                }
+            )
+            frames.append(X.reset_index(drop=True))
+            targets.append(y.reset_index(drop=True))
+            rows.append(snapshot)
+    X = pd.concat(frames, ignore_index=True)
+    y = pd.concat(targets, ignore_index=True)
+    snapshots = pd.concat(rows, ignore_index=True)
+    save_features(X, y, cfg, snapshots, country_map)
 
     print("=" * 70)
     print("[features] Done.")

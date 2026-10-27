@@ -1,397 +1,277 @@
-"""
-Boréal Marché — Association Rule Mining (Head B)
-=================================================
-
-Builds a sparse transaction matrix from clean invoices, mines association
-rules with Apriori (demonstration) and FP-Growth (production), sweeps
-support thresholds, filters by lift, and exports a static rule artifact.
-
-Key design decisions
---------------------
-* **Mining is offline; serving is online.** This module runs once (or on a
-  schedule).  The API loads the exported JSON — it never re-runs the
-  mining algorithm on every request.
-* The exported ``artifacts/rules.json`` contains a header with the mining
-  date, parameters, source-data hash, and rule count so the serving layer
-  can detect staleness.
-
-Usage::
-
-    python -m src.rules
-"""
+"""Offline sparse association mining, chronological evaluation, JSON serving artifacts."""
 
 from __future__ import annotations
 
-import argparse
-import hashlib
 import json
-import sys
 import time
-from datetime import datetime, timezone
-from pathlib import Path
+from datetime import UTC, datetime
 
 import numpy as np
 import pandas as pd
-import yaml
-from mlxtend.frequent_patterns import apriori, fpgrowth, association_rules
-from scipy import sparse
+from mlxtend.frequent_patterns import apriori, association_rules, fpgrowth
+from mlxtend.preprocessing import TransactionEncoder
+
+from src.contracts import ARTIFACTS, PROJECT_ROOT
+from src.features import purchases
+from src.ingest import _sha256, load_config
+from src.recommend import RecommendationEngine, _Rule
 
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-CONFIG_PATH = PROJECT_ROOT / "configs" / "pipeline.yaml"
+def baskets(df: pd.DataFrame) -> list[list[str]]:
+    """Use canonical descriptions, explicitly accepting description/SKU ambiguity."""
+    return df.groupby("Invoice", sort=True)["Description"].agg(lambda s: sorted(set(s))).tolist()
 
 
-def load_config() -> dict:
-    with open(CONFIG_PATH) as f:
-        return yaml.safe_load(f)
+def build_transaction_matrix(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
+    """Encode directly to CSR; never allocate the full dense invoice/item matrix."""
+    rows = baskets(df)
+    if not rows:
+        raise ValueError("No purchase baskets to mine")
+    encoder = TransactionEncoder()
+    matrix = encoder.fit(rows).transform(rows, sparse=True).tocsr()
+    dense_bytes = matrix.shape[0] * matrix.shape[1] * np.dtype(bool).itemsize
+    sparse_bytes = matrix.data.nbytes + matrix.indices.nbytes + matrix.indptr.nbytes
+    report = {
+        "n_invoices": matrix.shape[0],
+        "n_items": matrix.shape[1],
+        "dense_equivalent_bytes": dense_bytes,
+        "csr_bytes": sparse_bytes,
+        "sparsity_pct": 100 * (1 - matrix.nnz / max(1, dense_bytes)),
+        "dense_mb": dense_bytes / 1e6,
+        "sparse_mb": sparse_bytes / 1e6,
+    }
+    return pd.DataFrame.sparse.from_spmatrix(matrix, columns=encoder.columns_), report
 
 
-# ---------------------------------------------------------------------------
-# Transaction matrix
-# ---------------------------------------------------------------------------
-def build_transaction_matrix(
-    df: pd.DataFrame,
-) -> tuple[pd.DataFrame, dict[str, int | float]]:
-    """Build a one-hot transaction matrix (invoices × items).
+def mine(basket_df, support, confidence, lift, algorithm="fpgrowth", max_len=3):
+    start = time.perf_counter()
+    miner = apriori if algorithm == "apriori" else fpgrowth
+    kwargs = {"low_memory": True} if algorithm == "apriori" else {}
+    frequent = miner(basket_df, min_support=support, use_colnames=True, max_len=max_len, **kwargs)
+    columns = ["antecedents", "consequents", "confidence", "lift", "support"]
+    if frequent.empty or not frequent["itemsets"].map(len).gt(1).any():
+        rules = pd.DataFrame(columns=columns)
+    else:
+        rules = association_rules(
+            frequent, metric="confidence", min_threshold=confidence, num_itemsets=len(basket_df)
+        )
+        rules = rules[rules["lift"] >= lift]
+    return rules, time.perf_counter() - start, len(frequent)
 
-    Parameters
-    ----------
-    df : DataFrame
-        Cleaned transactions with at least ``Invoice`` and ``Description``.
 
-    Returns
-    -------
-    basket_df : DataFrame
-        Boolean DataFrame, one row per invoice, one column per item.
-    memory_report : dict
-        Dense vs. sparse memory footprint in MB.
-    """
-    # One-hot encode: each invoice is a row, each Description is a column
-    basket = (
-        df.groupby(["Invoice", "Description"])["Quantity"]
-        .sum()
-        .unstack()
-        .fillna(0)
+def mine_rules_apriori(basket_df, min_support, min_confidence, min_lift):
+    rules, seconds, _ = mine(basket_df, min_support, min_confidence, min_lift, "apriori")
+    return rules, seconds
+
+
+def mine_rules_fpgrowth(basket_df, min_support, min_confidence, min_lift):
+    rules, seconds, _ = mine(basket_df, min_support, min_confidence, min_lift)
+    return rules, seconds
+
+
+def rule_records(rules: pd.DataFrame, max_rules: int) -> list[dict]:
+    records = [
+        {
+            "antecedent": sorted(r.antecedents),
+            "consequent": sorted(r.consequents),
+            "confidence": float(r.confidence),
+            "lift": float(r.lift),
+            "support": float(r.support),
+        }
+        for r in rules.itertuples()
+    ]
+    return sorted(
+        records, key=lambda r: (-r["lift"], -r["confidence"], r["antecedent"], r["consequent"])
+    )[:max_rules]
+
+
+def compute_popularity(df: pd.DataFrame, top_n: int | None = None) -> list[str]:
+    counts = (
+        df.groupby("Description")["Invoice"].nunique().sort_values(ascending=False, kind="stable")
     )
-    # Convert to boolean (purchased or not)
-    basket_bool = (basket > 0)
-
-    # Memory report
-    dense_bytes = basket_bool.values.nbytes
-    sp = sparse.csr_matrix(basket_bool.values)
-    sparse_bytes = sp.data.nbytes + sp.indices.nbytes + sp.indptr.nbytes
-
-    memory_report = {
-        "n_invoices": len(basket_bool),
-        "n_items": basket_bool.shape[1],
-        "sparsity_pct": round(float(1 - sp.nnz / (sp.shape[0] * sp.shape[1])) * 100, 2),
-        "dense_mb": round(dense_bytes / 1e6, 2),
-        "sparse_mb": round(sparse_bytes / 1e6, 2),
-        "compression_ratio": round(dense_bytes / sparse_bytes, 1) if sparse_bytes > 0 else 0,
-    }
-    print(f"[rules] Transaction matrix: {memory_report['n_invoices']:,} invoices × "
-          f"{memory_report['n_items']:,} items")
-    print(f"[rules] Sparsity: {memory_report['sparsity_pct']:.1f}%")
-    print(f"[rules] Dense: {memory_report['dense_mb']:.1f} MB  "
-          f"Sparse: {memory_report['sparse_mb']:.1f} MB  "
-          f"(compression {memory_report['compression_ratio']:.0f}×)")
-
-    return basket_bool, memory_report
+    return counts.head(top_n).index.tolist() if top_n else counts.index.tolist()
 
 
-# ---------------------------------------------------------------------------
-# Mining
-# ---------------------------------------------------------------------------
-def mine_rules_apriori(
-    basket_df: pd.DataFrame,
-    min_support: float,
-    min_confidence: float,
-    min_lift: float,
-) -> tuple[pd.DataFrame, float]:
-    """Mine with Apriori (demonstration / timing comparison).
+def engine_from_records(records, popularity):
+    return RecommendationEngine(
+        [
+            _Rule(
+                frozenset(r["antecedent"]),
+                frozenset(r["consequent"]),
+                r["confidence"],
+                r["lift"],
+                r["support"],
+            )
+            for r in records
+        ],
+        popularity,
+    )
 
-    Returns (rules_df, elapsed_seconds).
+
+def temporal_baskets(df: pd.DataFrame, train_end: str, validation_end: str, test_end: str):
+    """Assign entire invoices by date; reject invoices spanning a split boundary."""
+    history = purchases(df)
+    dates = history.groupby("Invoice")["InvoiceDate"].agg(["min", "max"])
+    for boundary in [train_end, validation_end, test_end]:
+        if ((dates["min"] < boundary) & (dates["max"] >= boundary)).any():
+            raise ValueError("Invoice straddles a temporal boundary")
+    return (
+        history[history["InvoiceDate"] < train_end],
+        history[(history["InvoiceDate"] >= train_end) & (history["InvoiceDate"] < validation_end)],
+        history[(history["InvoiceDate"] >= validation_end) & (history["InvoiceDate"] < test_end)],
+    )
+
+
+def evaluate_baskets(engine, heldout, popularity, seed=42, k=5) -> dict:
+    """Mask half each later basket; compare rule/fallback hybrid to popularity.
+
+    This is basket completion, not next-order prediction. Single-item baskets
+    cannot supply both context and hidden targets and are counted but excluded.
     """
-    t0 = time.time()
-    freq = apriori(basket_df, min_support=min_support, use_colnames=True)
-    if len(freq) == 0:
-        return pd.DataFrame(), time.time() - t0
-    rules = association_rules(freq, metric="confidence", min_threshold=min_confidence)
-    rules = rules[rules["lift"] >= min_lift]
-    elapsed = time.time() - t0
-    return rules, elapsed
-
-
-def mine_rules_fpgrowth(
-    basket_df: pd.DataFrame,
-    min_support: float,
-    min_confidence: float,
-    min_lift: float,
-) -> tuple[pd.DataFrame, float]:
-    """Mine with FP-Growth (production).
-
-    Returns (rules_df, elapsed_seconds).
-    """
-    t0 = time.time()
-    freq = fpgrowth(basket_df, min_support=min_support, use_colnames=True)
-    if len(freq) == 0:
-        return pd.DataFrame(), time.time() - t0
-    rules = association_rules(freq, metric="confidence", min_threshold=min_confidence)
-    rules = rules[rules["lift"] >= min_lift]
-    elapsed = time.time() - t0
-    return rules, elapsed
-
-
-def sweep_support(
-    basket_df: pd.DataFrame,
-    support_values: list[float],
-    min_confidence: float,
-    min_lift: float,
-) -> pd.DataFrame:
-    """Sweep min_support and report rule counts and timings.
-
-    Runs FP-Growth at each threshold and Apriori at the chosen production
-    threshold for timing comparison.
-    """
-    rows = []
-    for sup in support_values:
-        rules, elapsed = mine_rules_fpgrowth(basket_df, sup, min_confidence, min_lift)
-        rows.append({
-            "min_support": sup,
-            "n_frequent_itemsets": "-",
-            "n_rules": len(rules),
-            "fpgrowth_time_s": round(elapsed, 2),
-        })
-        print(f"[rules] support={sup:.3f}  → {len(rules):,} rules  ({elapsed:.1f}s)")
-    return pd.DataFrame(rows)
-
-
-# ---------------------------------------------------------------------------
-# Lift filtering & concrete example
-# ---------------------------------------------------------------------------
-def filter_and_document_lift(
-    rules: pd.DataFrame,
-    min_lift: float,
-) -> tuple[pd.DataFrame, list[dict]]:
-    """Apply lift filter and find a concrete example of a discarded rule.
-
-    Returns
-    -------
-    filtered : DataFrame
-        Rules that survive the lift filter.
-    discarded_examples : list[dict]
-        At least one example of a high-confidence, low-lift rule that was
-        rightfully removed — with an explanation of why.
-    """
-    # Find high-confidence rules that would be BELOW the lift threshold
-    # (for documentation purposes, temporarily include them)
-    low_lift = rules[rules["lift"] < min_lift].copy()
-    high_conf_low_lift = low_lift.sort_values("confidence", ascending=False)
-
-    discarded_examples: list[dict] = []
-    if len(high_conf_low_lift) > 0:
-        example = high_conf_low_lift.iloc[0]
-        discarded_examples.append({
-            "antecedent": sorted(example["antecedents"]),
-            "consequent": sorted(example["consequents"]),
-            "confidence": round(float(example["confidence"]), 4),
-            "lift": round(float(example["lift"]), 4),
-            "support": round(float(example["support"]), 6),
-            "reason_discarded": (
-                f"Lift = {float(example['lift']):.4f} (< {min_lift}).  "
-                f"Despite {float(example['confidence']):.1%} confidence, the consequent "
-                f"'{sorted(example['consequents'])}' is so popular on its own that "
-                f"co-occurrence with '{sorted(example['antecedents'])}' adds no "
-                f"predictive value — the customer would likely buy it anyway."
-            ),
-        })
-
-    filtered = rules[rules["lift"] >= min_lift].copy()
-    return filtered, discarded_examples
-
-
-# ---------------------------------------------------------------------------
-# Export
-# ---------------------------------------------------------------------------
-def _data_hash(df: pd.DataFrame) -> str:
-    """Quick content hash for provenance tracking."""
-    h = hashlib.sha256()
-    for col in sorted(df.columns):
-        h.update(df[col].astype(str).str.cat().encode())
-    return h.hexdigest()[:16]
-
-
-def export_rules(
-    rules: pd.DataFrame,
-    cfg: dict,
-    memory_report: dict,
-    sweep_df: pd.DataFrame,
-    discarded_examples: list[dict],
-    apriori_time: float,
-    fpgrowth_time: float,
-    data_hash: str,
-) -> Path:
-    """Export rules to ``artifacts/rules.json``.
-
-    The file contains a header and the rule list, each rule being a dict
-    with antecedent (list of item descriptions), consequent, confidence,
-    lift, and support.
-    """
-    out_path = PROJECT_ROOT / "artifacts" / "rules.json"
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-
-    rule_list = []
-    for _, row in rules.iterrows():
-        rule_list.append({
-            "antecedent": sorted(row["antecedents"]),
-            "consequent": sorted(row["consequents"]),
-            "confidence": round(float(row["confidence"]), 6),
-            "lift": round(float(row["lift"]), 4),
-            "support": round(float(row["support"]), 6),
-        })
-
-    # Sort by lift descending for serving efficiency
-    rule_list.sort(key=lambda r: -r["lift"])
-
-    # Cap at max_rules
-    max_rules = cfg["rules"]["max_rules"]
-    if len(rule_list) > max_rules:
-        print(f"[rules] Capping from {len(rule_list)} to {max_rules} rules")
-        rule_list = rule_list[:max_rules]
-
-    artifact = {
-        "header": {
-            "mining_date": datetime.now(timezone.utc).isoformat(),
-            "algorithm_demo": cfg["rules"]["algorithm_demo"],
-            "algorithm_prod": cfg["rules"]["algorithm_prod"],
-            "min_support": cfg["rules"]["min_support_sweep"],
-            "min_confidence": cfg["rules"]["min_confidence"],
-            "min_lift": cfg["rules"]["min_lift"],
-            "source_data_hash": data_hash,
-            "rule_count": len(rule_list),
-            "memory_report": memory_report,
-            "timing": {
-                "apriori_seconds": round(apriori_time, 2),
-                "fpgrowth_seconds": round(fpgrowth_time, 2),
-            },
-            "discarded_rule_examples": discarded_examples,
-        },
-        "rules": rule_list,
+    rng = np.random.default_rng(seed)
+    hits, baseline_hits, evaluated, rule_served = 0, 0, 0, 0
+    recommended, baseline_recommended = set(), set()
+    all_baskets = baskets(heldout)
+    for basket in all_baskets:
+        if len(basket) < 2:
+            continue
+        shuffled = rng.permutation(basket).tolist()
+        observed = shuffled[: max(1, len(basket) // 2)]
+        hidden = set(shuffled[len(observed) :])
+        result = engine.recommend(observed, k)
+        recs = result["recommendations"]
+        baseline = [item for item in popularity if item not in observed][:k]
+        hits += bool(set(recs) & hidden)
+        baseline_hits += bool(set(baseline) & hidden)
+        recommended.update(recs)
+        baseline_recommended.update(baseline)
+        rule_served += result["strategy"] == "rule_based"
+        evaluated += 1
+    return {
+        "baskets_total": len(all_baskets),
+        "baskets_evaluated": evaluated,
+        "single_item_excluded": len(all_baskets) - evaluated,
+        "hit_rate_at_5": hits / evaluated if evaluated else None,
+        "popularity_hit_rate_at_5": baseline_hits / evaluated if evaluated else None,
+        "catalogue_coverage": len(recommended) / len(popularity) if popularity else None,
+        "popularity_catalogue_coverage": len(baseline_recommended) / len(popularity)
+        if popularity
+        else None,
+        "rule_firing_coverage": rule_served / evaluated if evaluated else None,
+        "coverage_denominator": "distinct training descriptions",
+        "k": k,
+        "mask_seed": seed,
     }
 
-    with open(out_path, "w") as f:
-        json.dump(artifact, f, indent=2, ensure_ascii=False)
 
-    print(f"[rules] Exported {len(rule_list)} rules to {out_path}")
-    return out_path
-
-
-# ---------------------------------------------------------------------------
-# Popularity fallback
-# ---------------------------------------------------------------------------
-def compute_popularity(df: pd.DataFrame, top_n: int = 20) -> list[str]:
-    """Return the top-N most frequently purchased items for fallback."""
-    counts = df.groupby("Description")["Invoice"].nunique().sort_values(ascending=False)
-    return counts.head(top_n).index.tolist()
-
-
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
-def run() -> Path:
-    """Execute the full rule-mining pipeline."""
+def run():
     cfg = load_config()
-
-    print("=" * 70)
-    print("Boréal Marché — Association Rule Mining (Head B)")
-    print("=" * 70)
-
-    # Load clean transactions
-    parquet_path = PROJECT_ROOT / cfg["data"]["parquet_path"]
-    if not parquet_path.exists():
-        raise FileNotFoundError(f"{parquet_path} not found. Run `python -m src.ingest` first.")
-
-    df = pd.read_parquet(parquet_path)
-    data_hash = _data_hash(df[["Invoice", "Description"]])
-
-    # Build transaction matrix
-    print("\n[rules] === Transaction Matrix ===")
-    basket_df, mem_report = build_transaction_matrix(df)
-
-    # Support sweep
-    print("\n[rules] === Support Sweep (FP-Growth) ===")
-    rules_cfg = cfg["rules"]
-    sweep_df = sweep_support(
-        basket_df,
-        rules_cfg["min_support_sweep"],
-        rules_cfg["min_confidence"],
-        rules_cfg["min_lift"],
+    rcfg = cfg["rules"]
+    path = PROJECT_ROOT / cfg["data"]["parquet_path"]
+    df = pd.read_parquet(path)
+    train, validation, test = temporal_baskets(
+        df, rcfg["train_end"], rcfg["validation_end"], rcfg["test_end"]
     )
-    print(sweep_df.to_string(index=False))
-
-    # Pick the production support level (first one that yields ≤ max_rules)
-    chosen_support = rules_cfg["min_support_sweep"][1]  # default to second value
-    for sup in rules_cfg["min_support_sweep"]:
-        test_rules, _ = mine_rules_fpgrowth(basket_df, sup, rules_cfg["min_confidence"], rules_cfg["min_lift"])
-        if len(test_rules) <= rules_cfg["max_rules"]:
-            chosen_support = sup
-            break
-
-    print(f"\n[rules] Production support level: {chosen_support}")
-
-    # Apriori timing comparison
-    print("\n[rules] === Apriori (demonstration) ===")
-    apriori_rules, apriori_time = mine_rules_apriori(
-        basket_df, chosen_support, rules_cfg["min_confidence"], rules_cfg["min_lift"],
+    matrix, memory = build_transaction_matrix(train)
+    popularity = compute_popularity(train)
+    sweep, candidates = [], {}
+    for support in rcfg["min_support_sweep"]:
+        all_rules, seconds, n_itemsets = mine(
+            matrix,
+            support,
+            min(rcfg["min_confidence_sweep"]),
+            rcfg["min_lift"],
+            max_len=rcfg["max_itemset_length"],
+        )
+        for confidence in rcfg["min_confidence_sweep"]:
+            filtered = all_rules[all_rules["confidence"] >= confidence]
+            records = rule_records(filtered, rcfg["max_rules"])
+            metrics = evaluate_baskets(
+                engine_from_records(records, popularity), validation, popularity
+            )
+            sweep.append(
+                {
+                    "support": support,
+                    "confidence": confidence,
+                    "eligible_rules": len(filtered),
+                    "exported_rules": len(records),
+                    "frequent_itemsets": n_itemsets,
+                    "shared_mining_seconds": seconds,
+                    **metrics,
+                }
+            )
+            candidates[(support, confidence)] = records
+        print(
+            f"[rules] support={support} itemsets={n_itemsets} eligible_rules={len(all_rules)}",
+            flush=True,
+        )
+    # Select on validation only; never mine validation or final-test baskets.
+    selected = max(
+        sweep, key=lambda r: (r["hit_rate_at_5"], r["catalogue_coverage"], -r["exported_rules"])
     )
-    print(f"[rules] Apriori: {len(apriori_rules)} rules in {apriori_time:.2f}s")
-
-    # FP-Growth production run
-    print("\n[rules] === FP-Growth (production) ===")
-    prod_rules, fpgrowth_time = mine_rules_fpgrowth(
-        basket_df, chosen_support, rules_cfg["min_confidence"], rules_cfg["min_lift"],
+    support, confidence = selected["support"], selected["confidence"]
+    records = candidates[(support, confidence)]
+    ap, ap_time, _ = mine(
+        matrix, support, confidence, rcfg["min_lift"], "apriori", rcfg["max_itemset_length"]
     )
-    print(f"[rules] FP-Growth: {len(prod_rules)} rules in {fpgrowth_time:.2f}s")
-
-    # Lift filtering
-    print("\n[rules] === Lift Filtering ===")
-    # For the discarded-rule example, temporarily mine with lift >= 0
-    all_rules, _ = mine_rules_fpgrowth(basket_df, chosen_support, rules_cfg["min_confidence"], 0.0)
-    filtered, discarded = filter_and_document_lift(all_rules, rules_cfg["min_lift"])
-    print(f"[rules] After lift filter (≥ {rules_cfg['min_lift']}): {len(filtered)} rules")
-    if discarded:
-        ex = discarded[0]
-        print(f"[rules] Example discarded rule:")
-        print(f"        {ex['antecedent']} → {ex['consequent']}")
-        print(f"        confidence={ex['confidence']:.2%}  lift={ex['lift']:.4f}")
-        print(f"        Reason: {ex['reason_discarded']}")
-
-    # Compute popularity fallback
-    popularity = compute_popularity(df, top_n=20)
-
-    # Export
-    print("\n[rules] === Export ===")
-    out_path = export_rules(
-        prod_rules, cfg, mem_report, sweep_df, discarded,
-        apriori_time, fpgrowth_time, data_hash,
+    fp, fp_time, _ = mine(
+        matrix, support, confidence, rcfg["min_lift"], "fpgrowth", rcfg["max_itemset_length"]
     )
-
-    # Also save popularity for the recommendation engine
-    pop_path = PROJECT_ROOT / "artifacts" / "popularity.json"
-    with open(pop_path, "w") as f:
-        json.dump({"items": popularity}, f, indent=2, ensure_ascii=False)
-    print(f"[rules] Popularity fallback saved to {pop_path}")
-
-    print("=" * 70)
-    print("[rules] Done.")
-    return out_path
-
-
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Boréal Marché rule mining")
-    parser.parse_args()
-    run()
+    ap_keys = {(tuple(r["antecedent"]), tuple(r["consequent"])) for r in rule_records(ap, len(ap))}
+    fp_keys = {(tuple(r["antecedent"]), tuple(r["consequent"])) for r in rule_records(fp, len(fp))}
+    final = evaluate_baskets(engine_from_records(records, popularity), test, popularity)
+    raw, _, _ = mine(matrix, support, confidence, 0, max_len=rcfg["max_itemset_length"])
+    discarded = rule_records(raw[raw["lift"] < rcfg["min_lift"]], 1)
+    header = {
+        "mining_date": datetime.now(UTC).isoformat(),
+        "algorithm_prod": "fpgrowth",
+        "algorithm_demo": "apriori",
+        "min_support": support,
+        "min_confidence": confidence,
+        "min_lift": rcfg["min_lift"],
+        "max_itemset_length": rcfg["max_itemset_length"],
+        "product_identity": "canonical_description",
+        "source_data_hash": _sha256(path),
+        "train_end_exclusive": rcfg["train_end"],
+        "rule_count": len(records),
+        "memory_report": memory,
+        "timing": {"apriori_seconds": ap_time, "fpgrowth_seconds": fp_time},
+        "apriori_fpgrowth_rule_keys_equal": ap_keys == fp_keys,
+        "discarded_rule_examples": discarded,
+        "popularity_path": "artifacts/popularity.json",
+    }
+    ARTIFACTS.mkdir(parents=True, exist_ok=True)
+    (ARTIFACTS / "rules.json").write_text(
+        json.dumps({"header": header, "rules": records}, indent=2)
+    )
+    (ARTIFACTS / "popularity.json").write_text(
+        json.dumps(
+            {
+                "items": popularity,
+                "train_end_exclusive": rcfg["train_end"],
+                "source_data_hash": header["source_data_hash"],
+            },
+            indent=2,
+        )
+    )
+    reports = PROJECT_ROOT / "reports/current_run"
+    reports.mkdir(parents=True, exist_ok=True)
+    (reports / "recommendation_metrics.json").write_text(
+        json.dumps(
+            {
+                "header": header,
+                "sweep_validation": sweep,
+                "selected_validation": selected,
+                "final_test": final,
+                "protocol": "train before June; validation June-August; untouched "
+                "September-November baskets; deterministic half-basket masking",
+            },
+            indent=2,
+        )
+    )
+    print(json.dumps({"rules": len(records), "final_test": final}, indent=2))
+    return ARTIFACTS / "rules.json"
 
 
 if __name__ == "__main__":
-    main()
+    run()

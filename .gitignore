@@ -27,10 +27,23 @@ artifacts/rules.json
 # MLflow
 mlruns/
 mlartifacts/
+mlflow.db*
+data/model_cache/
+data/chromadb/
+data/logs/
+outputs/
+node_modules/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+coverage.json
 
 # Environment
 .env
 .env.*
+!.env.example
 
 # IDE
 .vscode/
@@ -45,5 +58,7 @@ Thumbs.db
 docker-compose.override.yml
 
 # DVC
+.dvc/cache/
+.dvc/tmp/
 /data/raw/*.xlsx
 /data/raw/*.csv

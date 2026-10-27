@@ -1,0 +1,371 @@
+{
+  "description": "Golden set of 40 questions for Head C evaluation (Section 3.4).",
+  "breakdown": {
+    "policy": 15,
+    "tool_call": 10,
+    "out_of_scope": 8,
+    "french": 7
+  },
+  "questions": [
+    {
+      "id": 1,
+      "text": "What is your return policy for perishable items?",
+      "category": "policy",
+      "language": "en",
+      "expected_tool": "policy_search",
+      "expected_source": "return_policy.md",
+      "notes": "Should retrieve return policy chunk about perishables"
+    },
+    {
+      "id": 2,
+      "text": "How long does delivery take for orders within Montreal?",
+      "category": "policy",
+      "language": "en",
+      "expected_tool": "policy_search",
+      "expected_source": "delivery_policy.md",
+      "notes": "Should retrieve delivery windows for local orders"
+    },
+    {
+      "id": 3,
+      "text": "Do you ship frozen products? How is the cold chain maintained?",
+      "category": "policy",
+      "language": "en",
+      "expected_tool": "policy_search",
+      "expected_source": "delivery_policy.md",
+      "notes": "Cold chain question — should retrieve delivery policy"
+    },
+    {
+      "id": 4,
+      "text": "What allergens are present in your bakery products?",
+      "category": "policy",
+      "language": "en",
+      "expected_tool": "policy_search",
+      "expected_source": "allergen_policy.md",
+      "notes": "Should retrieve allergen policy"
+    },
+    {
+      "id": 5,
+      "text": "How do I earn loyalty points with Boréal Marché?",
+      "category": "policy",
+      "language": "en",
+      "expected_tool": "policy_search",
+      "expected_source": "loyalty_terms.md",
+      "notes": "Should retrieve loyalty program terms"
+    },
+    {
+      "id": 6,
+      "text": "Can I get a refund if my order arrives damaged?",
+      "category": "policy",
+      "language": "en",
+      "expected_tool": "policy_search",
+      "expected_source": "return_policy.md",
+      "notes": "Damaged order refund — return policy"
+    },
+    {
+      "id": 7,
+      "text": "What personal data does Boréal Marché collect about me?",
+      "category": "policy",
+      "language": "en",
+      "expected_tool": "policy_search",
+      "expected_source": "privacy_notice_en.md",
+      "notes": "Privacy question — should retrieve privacy notice"
+    },
+    {
+      "id": 8,
+      "text": "How do I cancel an existing order?",
+      "category": "policy",
+      "language": "en",
+      "expected_tool": "policy_search",
+      "expected_source": "return_policy.md",
+      "notes": "Cancellation question — return/order policy"
+    },
+    {
+      "id": 9,
+      "text": "What are the tiers in the loyalty program?",
+      "category": "policy",
+      "language": "en",
+      "expected_tool": "policy_search",
+      "expected_source": "loyalty_terms.md",
+      "notes": "Loyalty tier structure"
+    },
+    {
+      "id": 10,
+      "text": "Do you offer free shipping? What is the minimum order?",
+      "category": "policy",
+      "language": "en",
+      "expected_tool": "policy_search",
+      "expected_source": "delivery_policy.md",
+      "notes": "Free shipping threshold"
+    },
+    {
+      "id": 11,
+      "text": "Is there a gluten-free section in your store?",
+      "category": "policy",
+      "language": "en",
+      "expected_tool": "product_lookup",
+      "expected_source": null,
+      "notes": "Product-related but also potentially allergen policy"
+    },
+    {
+      "id": 12,
+      "text": "How can I delete my account and all my data?",
+      "category": "policy",
+      "language": "en",
+      "expected_tool": "policy_search",
+      "expected_source": "privacy_notice_en.md",
+      "notes": "Data deletion request — privacy notice"
+    },
+    {
+      "id": 13,
+      "text": "What happens to my loyalty points if I return an item?",
+      "category": "policy",
+      "language": "en",
+      "expected_tool": "policy_search",
+      "expected_source": "loyalty_terms.md",
+      "notes": "Cross-topic: loyalty + returns"
+    },
+    {
+      "id": 14,
+      "text": "Are your delivery boxes recyclable?",
+      "category": "policy",
+      "language": "en",
+      "expected_tool": "policy_search",
+      "expected_source": "delivery_policy.md",
+      "notes": "Packaging question — delivery policy"
+    },
+    {
+      "id": 15,
+      "text": "Can I pick up my order in store instead of delivery?",
+      "category": "policy",
+      "language": "en",
+      "expected_tool": "policy_search",
+      "expected_source": "delivery_policy.md",
+      "notes": "Click & collect question"
+    },
+    {
+      "id": 16,
+      "text": "What is the retention risk score for customer 12345?",
+      "category": "tool_call",
+      "language": "en",
+      "expected_tool": "retention_score",
+      "expected_source": null,
+      "notes": "Should extract customer_id=12345 and call retention_score"
+    },
+    {
+      "id": 17,
+      "text": "Will customer #17850 come back?",
+      "category": "tool_call",
+      "language": "en",
+      "expected_tool": "retention_score",
+      "expected_source": null,
+      "notes": "Natural phrasing for retention check"
+    },
+    {
+      "id": 18,
+      "text": "I have bread and butter in my basket. What else should I buy?",
+      "category": "tool_call",
+      "language": "en",
+      "expected_tool": "recommendations",
+      "expected_source": null,
+      "notes": "Should extract basket items and call recommendations"
+    },
+    {
+      "id": 19,
+      "text": "Recommend products to go with a red polkadot mug",
+      "category": "tool_call",
+      "language": "en",
+      "expected_tool": "recommendations",
+      "expected_source": null,
+      "notes": "Single-item basket recommendation"
+    },
+    {
+      "id": 20,
+      "text": "What is the churn probability for account BM-14688?",
+      "category": "tool_call",
+      "language": "en",
+      "expected_tool": "retention_score",
+      "expected_source": null,
+      "notes": "Should parse BM-prefixed customer ID"
+    },
+    {
+      "id": 21,
+      "text": "Do you sell organic maple syrup?",
+      "category": "tool_call",
+      "language": "en",
+      "expected_tool": "product_lookup",
+      "expected_source": null,
+      "notes": "Product availability query"
+    },
+    {
+      "id": 22,
+      "text": "My basket has white hanging heart t-light holder and jumbo bag red retrospot. What goes with them?",
+      "category": "tool_call",
+      "language": "en",
+      "expected_tool": "recommendations",
+      "expected_source": null,
+      "notes": "Multi-item basket with real product names from the dataset"
+    },
+    {
+      "id": 23,
+      "text": "Show me the likelihood that customer 15311 will return",
+      "category": "tool_call",
+      "language": "en",
+      "expected_tool": "retention_score",
+      "expected_source": null,
+      "notes": "Probability phrasing for retention"
+    },
+    {
+      "id": 24,
+      "text": "Do you carry any vegan cheese options?",
+      "category": "tool_call",
+      "language": "en",
+      "expected_tool": "product_lookup",
+      "expected_source": null,
+      "notes": "Dietary-specific product search"
+    },
+    {
+      "id": 25,
+      "text": "Based on my cart with tea and biscuits, suggest something",
+      "category": "tool_call",
+      "language": "en",
+      "expected_tool": "recommendations",
+      "expected_source": null,
+      "notes": "Casual recommendation request"
+    },
+    {
+      "id": 26,
+      "text": "What is the weather in Montreal today?",
+      "category": "out_of_scope",
+      "language": "en",
+      "expected_tool": null,
+      "expected_source": null,
+      "notes": "Must be refused — weather is off-topic"
+    },
+    {
+      "id": 27,
+      "text": "Write me a poem about groceries",
+      "category": "out_of_scope",
+      "language": "en",
+      "expected_tool": null,
+      "expected_source": null,
+      "notes": "Must be refused — creative writing request"
+    },
+    {
+      "id": 28,
+      "text": "What is the capital of France?",
+      "category": "out_of_scope",
+      "language": "en",
+      "expected_tool": null,
+      "expected_source": null,
+      "notes": "Must be refused — general knowledge"
+    },
+    {
+      "id": 29,
+      "text": "Solve this equation: 2x + 3 = 7",
+      "category": "out_of_scope",
+      "language": "en",
+      "expected_tool": null,
+      "expected_source": null,
+      "notes": "Must be refused — math homework"
+    },
+    {
+      "id": 30,
+      "text": "Who is the president of the United States?",
+      "category": "out_of_scope",
+      "language": "en",
+      "expected_tool": null,
+      "expected_source": null,
+      "notes": "Must be refused — politics / general knowledge"
+    },
+    {
+      "id": 31,
+      "text": "Can you help me write a Python script?",
+      "category": "out_of_scope",
+      "language": "en",
+      "expected_tool": null,
+      "expected_source": null,
+      "notes": "Must be refused — coding assistance"
+    },
+    {
+      "id": 32,
+      "text": "What is Bitcoin worth right now?",
+      "category": "out_of_scope",
+      "language": "en",
+      "expected_tool": null,
+      "expected_source": null,
+      "notes": "Must be refused — crypto/stock market"
+    },
+    {
+      "id": 33,
+      "text": "Translate this paragraph to Spanish for me",
+      "category": "out_of_scope",
+      "language": "en",
+      "expected_tool": null,
+      "expected_source": null,
+      "notes": "Must be refused — translation service"
+    },
+    {
+      "id": 34,
+      "text": "Quelle est votre politique de retour pour les produits congelés?",
+      "category": "french",
+      "language": "fr",
+      "expected_tool": "policy_search",
+      "expected_source": "return_policy.md",
+      "notes": "French return policy question — should retrieve relevant chunk"
+    },
+    {
+      "id": 35,
+      "text": "Combien de temps prend la livraison à Montréal?",
+      "category": "french",
+      "language": "fr",
+      "expected_tool": "policy_search",
+      "expected_source": "delivery_policy.md",
+      "notes": "French delivery time question"
+    },
+    {
+      "id": 36,
+      "text": "Quel est le risque de rétention pour le client 17850?",
+      "category": "french",
+      "language": "fr",
+      "expected_tool": "retention_score",
+      "expected_source": null,
+      "notes": "French retention score — should parse customer ID"
+    },
+    {
+      "id": 37,
+      "text": "Quels produits suggérez-vous avec du pain et du beurre?",
+      "category": "french",
+      "language": "fr",
+      "expected_tool": "recommendations",
+      "expected_source": null,
+      "notes": "French recommendation request"
+    },
+    {
+      "id": 38,
+      "text": "Comment puis-je supprimer mon compte et mes données personnelles?",
+      "category": "french",
+      "language": "fr",
+      "expected_tool": "policy_search",
+      "expected_source": "privacy_notice_fr.md",
+      "notes": "French data deletion — should retrieve FR privacy notice"
+    },
+    {
+      "id": 39,
+      "text": "Avez-vous des produits sans gluten?",
+      "category": "french",
+      "language": "fr",
+      "expected_tool": "product_lookup",
+      "expected_source": null,
+      "notes": "French product search for gluten-free"
+    },
+    {
+      "id": 40,
+      "text": "Quels sont les allergènes dans vos produits de boulangerie?",
+      "category": "french",
+      "language": "fr",
+      "expected_tool": "policy_search",
+      "expected_source": "allergen_policy.md",
+      "notes": "French allergen policy question"
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+[2m2026-09-30T22:13:41.069065Z[0m [[32m[1minfo     [0m] [1mstartup_complete              [0m [36merrors[0m=[35m{}[0m
+[2m2026-09-30T22:13:41.536156Z[0m [[32m[1minfo     [0m] [1mrecommendation_served         [0m [36mbasket_size[0m=[35m2[0m [36mcustomer_id[0m=[35mNone[0m [36mn_recommendations[0m=[35m5[0m [36mstrategy[0m=[35mpopularity_fallback[0m
+[2m2026-09-30T22:13:41.548107Z[0m [[32m[1minfo     [0m] [1mrecommendation_served         [0m [36mbasket_size[0m=[35m1[0m [36mcustomer_id[0m=[35mNone[0m [36mn_recommendations[0m=[35m5[0m [36mstrategy[0m=[35mpopularity_fallback[0m
+[2m2026-09-30T22:13:41.595835Z[0m [[32m[1minfo     [0m] [1mrecommendation_served         [0m [36mbasket_size[0m=[35m2[0m [36mcustomer_id[0m=[35mNone[0m [36mn_recommendations[0m=[35m5[0m [36mstrategy[0m=[35mrule_based[0m
+[2m2026-09-30T22:13:41.643865Z[0m [[32m[1minfo     [0m] [1mrecommendation_served         [0m [36mbasket_size[0m=[35m2[0m [36mcustomer_id[0m=[35mNone[0m [36mn_recommendations[0m=[35m5[0m [36mstrategy[0m=[35mpopularity_fallback[0m
+[2m2026-09-30T22:13:41.717607Z[0m [[32m[1minfo     [0m] [1mrecommendation_served         [0m [36mbasket_size[0m=[35m2[0m [36mcustomer_id[0m=[35mNone[0m [36mn_recommendations[0m=[35m5[0m [36mstrategy[0m=[35mpopularity_fallback[0m
+[2m2026-09-30T22:13:41.760588Z[0m [[32m[1minfo     [0m] [1mshutdown                      [0m
+{
+  "executed_at": "2026-09-30T22:13:41.773992+00:00",
+  "provider": "regex",
+  "golden_count": 40,
+  "category_counts": {
+    "policy": 15,
+    "tool_call": 10,
+    "out_of_scope": 8,
+    "french": 7
+  },
+  "tool_choice_accuracy_all": 0.975,
+  "tool_choice_accuracy_in_scope": 0.96875,
+  "out_of_scope_refusal_rate": 1.0,
+  "in_scope_refusal_count": 1,
+  "expected_source_accuracy": 0.8333333333333334,
+  "policy_extract_grounding_proxy": 1.0,
+  "latency_p50_ms": 15.35860399599187,
+  "latency_p95_ms": 25.973475672071796,
+  "limitations": [
+    "Golden set is a development regression set, not an unseen evaluation set",
+    "Extractive grounding proxy does not measure answer relevance or completeness",
+    "French policy answers may quote English source text; fluent translation is not implemented",
+    "OpenAI and Ollama results are absent unless explicitly executed with --provider",
+    "Costs unknown for external providers; no pricing assumptions fabricated"
+  ]
+}
