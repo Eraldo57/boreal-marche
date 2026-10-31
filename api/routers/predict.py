@@ -26,6 +26,7 @@ router = APIRouter(tags=["prediction"])
 
 
 def _risk_label(probability: float) -> str:
+    """Display bands only; 0.65 / 0.35 are judgement cut-offs, not tied to the profit threshold."""
     if probability >= 0.65:
         return "low"
     if probability >= 0.35:

@@ -60,11 +60,13 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: docker/Dockerfile
+          target: api
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           build-args: GIT_SHA=${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,mode=max,scope=api
 
   # -----------------------------------------------------------------------
   # 2. Deploy to App Runner
@@ -153,7 +155,7 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"  # pyproject.toml requires >=3.12
 
       - name: Install dependencies
         run: pip install ".[dev]"

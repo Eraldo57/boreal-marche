@@ -1,0 +1,66 @@
+{
+  "measured_at": "2026-10-31T20:26:21+00:00",
+  "docker_server": "29.4.1",
+  "method": {
+    "uncompressed": "sum of `docker history --human=false` layer sizes",
+    "compressed": "`docker image inspect --format {{.Size}}` (containerd image store)",
+    "packages": "file sizes under the image's site-packages, read inside the image"
+  },
+  "note": "Built on Apple Silicon, so linux/arm64. CI and AWS build linux/amd64; sizes differ.",
+  "images": [
+    {
+      "stage": "before",
+      "description": "single image from the original root Dockerfile",
+      "tag": "boreal-marche:measure",
+      "image_id": "sha256:2ab7e1214b413fa67c60e1f5563bd42526ede1edc073fad0a0929ce5397a1d68",
+      "architecture": "arm64",
+      "uncompressed_bytes": 7375548416,
+      "uncompressed_mb": 7376,
+      "compressed_bytes": 3690659316,
+      "compressed_mb": 3691,
+      "largest_layer_mb": 7201,
+      "python_packages": {
+        "site_packages_dir": "/usr/local/lib/python3.12/site-packages",
+        "site_packages_mb": 7005,
+        "gpu_only_packages_mb": 4394,
+        "torch_mb": 1117
+      }
+    },
+    {
+      "stage": "after",
+      "description": "docker/Dockerfile --target api",
+      "tag": "boreal-marche/api:local",
+      "image_id": "sha256:47daf30a695fc1c6393a477390c16763a76f5d3f6bc82de9828e06dd1ae94436",
+      "architecture": "arm64",
+      "uncompressed_bytes": 1992781824,
+      "uncompressed_mb": 1993,
+      "compressed_bytes": 534007195,
+      "compressed_mb": 534,
+      "largest_layer_mb": 1823,
+      "python_packages": {
+        "site_packages_dir": "/opt/venv/lib/python3.12/site-packages",
+        "site_packages_mb": 1702,
+        "gpu_only_packages_mb": 0,
+        "torch_mb": 517
+      }
+    },
+    {
+      "stage": "after",
+      "description": "docker/Dockerfile --target frontend",
+      "tag": "boreal-marche/frontend:local",
+      "image_id": "sha256:4c45f58fd0be7aa2b8f3bf8464b34450740d16b6195be65532abc53ae5b0599a",
+      "architecture": "arm64",
+      "uncompressed_bytes": 634929152,
+      "uncompressed_mb": 635,
+      "compressed_bytes": 179947426,
+      "compressed_mb": 180,
+      "largest_layer_mb": 469,
+      "python_packages": {
+        "site_packages_dir": "/usr/local/lib/python3.12/site-packages",
+        "site_packages_mb": 425,
+        "gpu_only_packages_mb": 0,
+        "torch_mb": 0
+      }
+    }
+  ]
+}

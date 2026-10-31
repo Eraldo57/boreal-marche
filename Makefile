@@ -82,13 +82,16 @@ typecheck: ## Static type checking
 # ---------------------------------------------------------------------------
 # Run
 # ---------------------------------------------------------------------------
+# Compose reads ${VAR} settings (ports, POSTGRES_PASSWORD, OLLAMA_MODEL) from .env when present.
+COMPOSE := docker compose -f docker/compose.yml $(if $(wildcard .env),--env-file .env,)
+
 .PHONY: up
-up: ## Start full stack (API + Streamlit + MLflow) via Docker Compose
-	docker compose up --build -d
+up: ## Start full stack (API + Streamlit + PostgreSQL + Ollama) via Docker Compose
+	GIT_SHA=$$(git rev-parse HEAD 2>/dev/null || echo unknown) $(COMPOSE) up --build -d
 
 .PHONY: down
-down: ## Stop all containers
-	docker compose down
+down: ## Stop all containers (named volumes, e.g. the database, are kept)
+	$(COMPOSE) down
 
 .PHONY: api
 api: ## Start the API locally (dev mode)

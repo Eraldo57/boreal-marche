@@ -62,7 +62,7 @@ class PredictionRequest(StrictModel):
 
     @field_validator("features", mode="before")
     @classmethod
-    def canonical_features(cls, value):
+    def canonical_features(cls, value: Any) -> Any:
         if not isinstance(value, dict) or set(value) != set(FEATURE_NAMES):
             raise ValueError(
                 "features must contain exactly the canonical 25 names; see /feature-contract"
@@ -214,3 +214,4 @@ class MonitoringResponse(BaseModel):
     status: str  # "green", "yellow", "red"
     drift_status: str = "not_evaluated"
     window_description: str = "bounded local request log"
+    log_write_failures: int = 0  # rows that could not be written to the prediction_log table

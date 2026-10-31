@@ -11,6 +11,7 @@ One public-data pipeline supports retention prediction and basket recommendation
 - [Remaining work](reports/current_run/REMAINING_ISSUES.md): prioritized, including failing quality gates.
 - [Student technical guide](reports/STUDENT_TECHNICAL_GUIDE.md): module-by-module explanation.
 - [Architecture](ARCHITECTURE.md), [canonical feature inventory](governance/FEATURE_INVENTORY.md).
+- [Containers](docs/CONTAINERS.md): Dockerfile choices, measured image sizes, Compose stack.
 
 ## Local quickstart
 
@@ -36,6 +37,16 @@ In another terminal:
 
 Open http://127.0.0.1:8501 and http://127.0.0.1:8000/docs. Use historical customer **12347**, then “Load historical customer features.” These are local demo endpoints with no authentication; do not expose them publicly.
 
+## Docker quickstart
+
+After the pipeline above has produced `artifacts/` and `data/`, one command starts the API, the Streamlit interface, PostgreSQL (prediction log) and Ollama (local LLM):
+
+```bash
+make up      # docker compose -f docker/compose.yml up --build -d; stop with: make down
+```
+
+Same URLs as above. On macOS, Docker Desktop needs permission to read the folder if the repository is under Desktop, Documents or Downloads. Prerequisites, download sizes and measured image sizes: [docs/CONTAINERS.md](docs/CONTAINERS.md).
+
 ## Evidence from the current local run
 
 Measured on the real UCI workbook on 2026-09-30; detailed protocols and JSON sources are in the validation report.
@@ -53,7 +64,7 @@ Average precision here measures **will_return**, not churn. Recommendation evalu
 
 ## Current limitations
 
-Strict mypy and coverage gates still fail. Docker configuration parses, but the Docker daemon was unavailable for building/running containers. OpenAI/Ollama integrations exist but were not executed. Fluent French generation, authenticated customer access, full fairness evaluation, deletion enforcement, human approval, registry promotion and cloud operations remain unfinished.
+Local quality gates pass (strict mypy with 0 errors; coverage 90% locally and 89% on a clean checkout, against the 80% gate), but no CI run has happened because the repository has no remote yet. Both images were built and the Compose stack was run locally on linux/arm64; the linux/amd64 build, a fresh clone on another machine and any cloud deployment have not been done. The OpenAI provider was not executed; the Ollama path ran in Compose with the configured `llama3.2:3b` on three questions only, which is a wiring check, not an evaluation. Fluent French generation, authenticated customer access, full fairness evaluation, deletion enforcement, human approval, registry promotion and cloud operations remain unfinished.
 
 ## Provenance and safe use
 

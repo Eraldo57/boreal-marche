@@ -35,7 +35,7 @@ class ToolModel(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
 
 
-def api_client(app=None):
+def api_client(app: Any = None) -> httpx.AsyncClient:
     """In-process HTTP follows the same strict routes without a loopback deadlock."""
     return httpx.AsyncClient(
         base_url=os.getenv("API_BASE_URL", API_BASE),
@@ -72,7 +72,7 @@ class PolicySearchOutput(BaseModel):
     query: str
 
 
-async def policy_search(inp: PolicySearchInput, *, app=None) -> PolicySearchOutput:
+async def policy_search(inp: PolicySearchInput, *, app: Any = None) -> PolicySearchOutput:
     """Retrieve policy chunks semantically similar to *inp.question*."""
     if app is not None:
         if app.state.rag_index is None:
@@ -114,7 +114,7 @@ class RetentionScoreOutput(BaseModel):
     error: str | None = None
 
 
-async def retention_score(inp: RetentionScoreInput, *, app=None) -> RetentionScoreOutput:
+async def retention_score(inp: RetentionScoreInput, *, app: Any = None) -> RetentionScoreOutput:
     """Call the /predict endpoint and return the retention score.
 
     This function sends a request to the local API.  The features are looked
@@ -179,7 +179,7 @@ class RecommendationsOutput(BaseModel):
     error: str | None = None
 
 
-async def recommendations(inp: RecommendationsInput, *, app=None) -> RecommendationsOutput:
+async def recommendations(inp: RecommendationsInput, *, app: Any = None) -> RecommendationsOutput:
     """Call the /recommend endpoint and return suggestions."""
     try:
         async with api_client(app) as client:
@@ -291,7 +291,7 @@ def _rank(forms: list[str], catalogue: _Catalogue) -> tuple[int, list[dict[str, 
     return best, [row for row, score in zip(catalogue.rows, scores) if score == best]
 
 
-async def product_lookup(inp: ProductLookupInput, *, app=None) -> ProductLookupOutput:
+async def product_lookup(inp: ProductLookupInput, *, app: Any = None) -> ProductLookupOutput:
     """Search the exported catalogue by words in the description or by StockCode."""
     catalogue = _load_catalogue()
     query_lower = inp.query.lower()

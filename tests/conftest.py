@@ -21,6 +21,12 @@ from api.lifespan import PredictionLog, RuleEngine
 from src.contracts import FEATURE_NAMES as FEATURE_ORDER
 
 
+@pytest.fixture(autouse=True)
+def isolated_prediction_log(monkeypatch: pytest.MonkeyPatch, tmp_path: Any) -> None:
+    """Every test that starts the app logs to a throwaway table, never to data/logs."""
+    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{tmp_path / 'predictions.db'}")
+
+
 @pytest.fixture
 def sample_features() -> dict[str, float]:
     """A plausible feature vector for one customer."""

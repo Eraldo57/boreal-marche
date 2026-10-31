@@ -22,7 +22,9 @@ import logging
 import os
 import subprocess
 import time
+from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime
+from typing import Any
 
 import structlog
 from fastapi import FastAPI, HTTPException, Request, Response
@@ -41,7 +43,7 @@ structlog.configure(
         structlog.processors.add_log_level,
         structlog.processors.TimeStamper(fmt="iso"),
         structlog.dev.ConsoleRenderer()
-        if os.getenv("ENV") != "production"
+        if os.getenv("APP_ENV") != "production"  # documented in .env.example; set in the image
         else structlog.processors.JSONRenderer(),
     ],
     wrapper_class=structlog.make_filtering_bound_logger(logging.INFO),
@@ -73,7 +75,9 @@ app.include_router(monitor.router)
 
 
 @app.middleware("http")
-async def record_traffic(request: Request, call_next):
+async def record_traffic(
+    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+) -> Response:
     """Measure all business routes, including validation failures and batch traffic."""
     start = time.perf_counter()
     response = await call_next(request)
@@ -150,7 +154,7 @@ async def version(request: Request) -> VersionResponse:
 
 
 @app.get("/feature-contract", tags=["prediction"])
-async def feature_contract():
+async def feature_contract() -> dict[str, Any]:
     return {
         "feature_names": FEATURE_NAMES,
         "contract_version": CONTRACT_VERSION,
@@ -162,7 +166,7 @@ async def feature_contract():
 
 
 @app.get("/customers/{customer_id}/features", tags=["prediction"])
-async def customer_features(customer_id: str, request: Request):
+async def customer_features(customer_id: str, request: Request) -> dict[str, Any]:
     """Historical public-data demonstration only; no authentication is implemented."""
     store = getattr(request.app.state, "customer_features", None)
     if store is None:

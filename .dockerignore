@@ -30,6 +30,8 @@ data/chromadb/
 data/processed/
 data/logs/
 reports/
+# Evaluation output from training (per-customer test scores); the API never reads it
+artifacts/test_predictions.parquet
 
 # IDE
 .vscode/
@@ -40,9 +42,8 @@ reports/
 .DS_Store
 Thumbs.db
 
-# Docker
-Dockerfile
-docker-compose*.yml
+# Docker (the Dockerfile is read separately; the build context never needs it)
+docker/
 .dockerignore
 
 # CI/CD

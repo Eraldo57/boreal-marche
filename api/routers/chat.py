@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import os
 import time
+from typing import Any
 
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import ValidationError
@@ -23,7 +24,7 @@ from src.rag.tools import TOOL_REGISTRY
 router = APIRouter(tags=["assistant"])
 
 
-def _check_guardrails(message, customer_id):
+def _check_guardrails(message: str, customer_id: str | None) -> tuple[bool, str | None]:
     for outcome in [
         check_out_of_scope(message),
         check_no_cross_customer(message, current_customer_id=customer_id),
@@ -36,22 +37,24 @@ def _check_guardrails(message, customer_id):
 _detect_language = detect_language
 
 
-def _detect_tool_intent(message):
+def _detect_tool_intent(message: str) -> str | None:
     """Synchronous compatibility helper for unit tests; same provider logic."""
     return asyncio.run(RegexProvider().answer(message, [], [], "en")).tool_name
 
 
-def _retrieve_chunks(index, query, top_k=5, floor=0.25):
+def _retrieve_chunks(
+    index: Any, query: str, top_k: int = 5, floor: float = 0.25
+) -> list[dict[str, Any]]:
     if index is None:
         return []
     return [r for r in index.query(query, top_k=top_k) if r["score"] >= floor]
 
 
-def _format_context(chunks):
+def _format_context(chunks: list[dict[str, Any]]) -> str:
     return "\n".join(f"[{i}] (source: {c['source']}) {c['text']}" for i, c in enumerate(chunks, 1))
 
 
-def _generate_regex(message, context, chunks, language):
+def _generate_regex(message: str, context: str, chunks: list[dict[str, Any]], language: str) -> str:
     """Extractive answer: source wording is preserved, never presented as translation."""
     if not chunks:
         return (
@@ -64,14 +67,14 @@ def _generate_regex(message, context, chunks, language):
         if language == "fr"
         else "Based on our documents: "
     )
-    return intro + chunks[0]["text"]
+    return intro + str(chunks[0]["text"])
 
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat(req: ChatRequest, request: Request) -> ChatResponse:
     language, provider_name = req.language, req.provider.value
 
-    def refusal(reason):
+    def refusal(reason: str) -> ChatResponse:
         return ChatResponse(
             reply=reason,
             provider_used=provider_name,
@@ -82,7 +85,7 @@ async def chat(req: ChatRequest, request: Request) -> ChatResponse:
 
     denied, reason = _check_guardrails(req.message, req.customer_id)
     if denied:
-        return refusal(reason)
+        return refusal(reason or "")
     cfg = load_config()["assistant"]
     index = request.app.state.rag_index
     chunks = await asyncio.to_thread(
@@ -95,7 +98,7 @@ async def chat(req: ChatRequest, request: Request) -> ChatResponse:
     provider = get_provider(
         provider_name,
         openai_model=cfg["openai"]["model"],
-        ollama_model=cfg["ollama"]["model"],
+        ollama_model=os.getenv("OLLAMA_MODEL", cfg["ollama"]["model"]),
         ollama_host=os.getenv("OLLAMA_HOST", cfg["ollama"]["host"]),
     )
     start = time.perf_counter()
@@ -110,7 +113,7 @@ async def chat(req: ChatRequest, request: Request) -> ChatResponse:
         ) from exc
     latency = (time.perf_counter() - start) * 1000
     registry = {t.name: t for t in TOOL_REGISTRY}
-    tool = registry.get(decision.tool_name)
+    tool = registry.get(decision.tool_name or "")
     if tool is None:
         return refusal(
             "No supported, grounded answer was found. / Aucune réponse fondée disponible."

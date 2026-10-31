@@ -54,8 +54,9 @@ coverage.json
 .DS_Store
 Thumbs.db
 
-# Docker
+# Docker (personal overrides, auto-loaded next to docker/compose.yml)
 docker-compose.override.yml
+compose.override.yml
 
 # DVC
 .dvc/cache/

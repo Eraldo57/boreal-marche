@@ -44,7 +44,8 @@ CONFIG_PATH = PROJECT_ROOT / "configs" / "pipeline.yaml"
 def load_config() -> dict:
     """Load and return the pipeline configuration dictionary."""
     with open(CONFIG_PATH) as f:
-        return yaml.safe_load(f)
+        config: dict = yaml.safe_load(f)
+    return config
 
 
 # ---------------------------------------------------------------------------
@@ -76,10 +77,10 @@ def download_dataset(cfg: dict, *, force: bool = False) -> Path:
     """
     import urllib.request
 
-    raw_dir = PROJECT_ROOT / "data" / "raw"
+    raw_dir: Path = PROJECT_ROOT / "data" / "raw"
     raw_dir.mkdir(parents=True, exist_ok=True)
 
-    xlsx_path = raw_dir / cfg["raw_filename"]
+    xlsx_path: Path = raw_dir / cfg["raw_filename"]
 
     if xlsx_path.exists() and not force:
         print(f"[ingest] Found existing file: {xlsx_path}")
@@ -286,7 +287,7 @@ def to_parquet(df: pd.DataFrame, cfg: dict, actual_sha: str, cleaning_report: li
         Path to the saved Parquet file.
     """
     data_cfg = cfg["data"]
-    parquet_path = PROJECT_ROOT / data_cfg["parquet_path"]
+    parquet_path: Path = PROJECT_ROOT / data_cfg["parquet_path"]
     manifest_path = PROJECT_ROOT / data_cfg["manifest_path"]
     parquet_path.parent.mkdir(parents=True, exist_ok=True)
 

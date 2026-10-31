@@ -1,0 +1,149 @@
+# ===========================================================================
+# Boréal Marché — the full local stack: API, interface, database and local LLM.
+# One command, from the repository root:
+#   docker compose -f docker/compose.yml up --build      (or: make up)
+# The API mounts artifacts/ and data/ from the host, so generate them first
+# (make setup && make all). Steps and measured image sizes: docs/CONTAINERS.md
+#
+# Published ports bind to 127.0.0.1 only: these demo endpoints have no authentication.
+# Host ports can be changed (API_PORT, STREAMLIT_PORT, MLFLOW_PORT) when taken.
+# The database and Ollama are not published at all; only the API talks to them.
+# ===========================================================================
+name: boreal-marche
+
+services:
+  # -------------------------------------------------------------------------
+  # PostgreSQL — holds the prediction_log table behind /metrics
+  # -------------------------------------------------------------------------
+  db:
+    image: postgres:17-alpine@sha256:266d3c257594e195b309ae9d1805e54c788f1d7b375f56bf6c367aac6c917e7b
+    container_name: boreal-db
+    environment:
+      POSTGRES_USER: boreal
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-boreal-local-only}
+      POSTGRES_DB: boreal
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U boreal -d boreal"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  # -------------------------------------------------------------------------
+  # FastAPI backend (the same image CD deploys)
+  # -------------------------------------------------------------------------
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: api
+      args:
+        GIT_SHA: ${GIT_SHA:-unknown}  # make up passes the current commit; /version reports it
+    image: boreal-marche/api:local
+    container_name: boreal-api
+    # Matches the host user so the writable bind mounts below work on Linux too.
+    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
+    ports:
+      - "127.0.0.1:${API_PORT:-8000}:8000"
+    env_file:
+      - path: ../.env  # optional; e.g. OPENAI_API_KEY for the OpenAI provider
+        required: false
+    environment:
+      APP_ENV: production  # JSON log lines, whatever ../.env says
+      DATABASE_URL: postgresql+psycopg://boreal:${POSTGRES_PASSWORD:-boreal-local-only}@db:5432/boreal
+      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.2:3b}  # default = configs/pipeline.yaml
+    volumes:
+      - ../artifacts:/app/artifacts:ro
+      - ../data/processed:/app/data/processed:ro
+      - ../docs/corpus:/app/docs/corpus:ro
+      - ../data/chromadb:/app/data/chromadb  # Chroma opens its SQLite store read-write
+      - ../data/model_cache:/app/data/model_cache  # embedding model, downloaded once
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/ready').raise_for_status()"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 300s  # first run downloads the embedding model; healthy as soon as ready
+    restart: unless-stopped
+
+  # -------------------------------------------------------------------------
+  # Streamlit interface
+  # -------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: frontend
+    image: boreal-marche/frontend:local
+    container_name: boreal-frontend
+    ports:
+      - "127.0.0.1:${STREAMLIT_PORT:-8501}:8501"
+    environment:
+      API_BASE_URL: http://api:8000
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # -------------------------------------------------------------------------
+  # Ollama — local LLM for the assistant's "ollama" provider
+  # -------------------------------------------------------------------------
+  ollama:
+    image: ollama/ollama:0.40.13@sha256:b2f0122c476bc9fe7ce679d8bb4bd555351e25e2554eefb156f61cb0a89cf429
+    container_name: boreal-ollama
+    volumes:
+      - ollama-models:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    restart: unless-stopped
+
+  # One-shot: downloads the model into the shared volume, then exits (instant once cached).
+  ollama-pull:
+    image: ollama/ollama:0.40.13@sha256:b2f0122c476bc9fe7ce679d8bb4bd555351e25e2554eefb156f61cb0a89cf429
+    container_name: boreal-ollama-pull
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    entrypoint: ["ollama", "pull", "${OLLAMA_MODEL:-llama3.2:3b}"]
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: "no"
+
+  # -------------------------------------------------------------------------
+  # MLflow tracking server (optional: docker compose -f docker/compose.yml --profile tracking up)
+  # -------------------------------------------------------------------------
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.22.4@sha256:ee81106cd77214d324557a92a06f94be3a1ecf250f8c3640c0182de17c140718
+    profiles: ["tracking"]
+    container_name: boreal-mlflow
+    command: >
+      mlflow server
+      --host 0.0.0.0
+      --port 5000
+      --backend-store-uri sqlite:////mlflow/mlflow.db
+      --default-artifact-root /mlflow/artifacts
+    ports:
+      - "127.0.0.1:${MLFLOW_PORT:-5000}:5000"
+    volumes:
+      - mlflow-data:/mlflow
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+  ollama-models:
+  mlflow-data:

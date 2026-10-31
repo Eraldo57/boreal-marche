@@ -42,7 +42,7 @@ def corpus_hash(corpus_dir: Path) -> str:
 
 
 @lru_cache(maxsize=2)
-def embedding_model(name: str):
+def embedding_model(name: str) -> Any:
     """Load once per process. Explicit repo cache works in local/Docker runs."""
     from sentence_transformers import SentenceTransformer
 
@@ -52,7 +52,9 @@ def embedding_model(name: str):
 class RagIndex:
     """Long-lived query object, shared by API requests."""
 
-    def __init__(self, db_dir=DEFAULT_DB, corpus_dir=DEFAULT_CORPUS):
+    def __init__(
+        self, db_dir: Path | str = DEFAULT_DB, corpus_dir: Path | str = DEFAULT_CORPUS
+    ) -> None:
         import chromadb
 
         self.db_dir = Path(db_dir)
@@ -76,7 +78,7 @@ class RagIndex:
 
     def query(self, question: str, top_k: int = 5) -> list[dict[str, Any]]:
         vectors = self.model.encode([question], normalize_embeddings=True).tolist()
-        result = self.collection.query(
+        result: Any = self.collection.query(
             query_embeddings=vectors,
             n_results=min(top_k, self.collection.count()),
             include=["documents", "metadatas", "distances"],
@@ -104,7 +106,8 @@ def _load_assistant_config() -> dict[str, Any]:
     """Read the ``assistant`` section from pipeline.yaml."""
     with open(CONFIG_PATH) as f:
         cfg = yaml.safe_load(f)
-    return cfg.get("assistant", {})
+    assistant: dict[str, Any] = cfg.get("assistant", {})
+    return assistant
 
 
 def _detect_language(text: str) -> str:
@@ -287,7 +290,7 @@ def build_index(
 
     all_ids: list[str] = []
     all_texts: list[str] = []
-    all_metas: list[dict[str, str | int]] = []
+    all_metas: list[Any] = []
 
     for md_path in md_files:
         text = md_path.read_text(encoding="utf-8")
@@ -365,7 +368,7 @@ def query_index(
     model = embedding_model(model_name)
     q_emb = model.encode([question], normalize_embeddings=True).tolist()
 
-    results = collection.query(
+    results: Any = collection.query(
         query_embeddings=q_emb,
         n_results=n_results,
         include=["documents", "metadatas", "distances"],

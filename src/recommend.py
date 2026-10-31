@@ -158,7 +158,7 @@ class RecommendationEngine:
         return cls(rules, popularity, default_k)
 
     @classmethod
-    def from_records(cls, rules: list[dict], popularity: list[str]):
+    def from_records(cls, rules: list[dict], popularity: list[str]) -> RecommendationEngine:
         """Construct the same engine for evaluation, tests and JSON serving."""
         return cls(
             [

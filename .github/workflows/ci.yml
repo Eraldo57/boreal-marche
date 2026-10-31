@@ -104,24 +104,37 @@ jobs:
           fi
 
   # -----------------------------------------------------------------------
-  # 5. Docker build (verify it builds, don't push)
+  # 5. Docker build of both images (verify they build and report size; don't push)
   # -----------------------------------------------------------------------
   docker-build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [api, frontend]
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build Docker image
+      - name: Build ${{ matrix.target }} image
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: docker/Dockerfile
+          target: ${{ matrix.target }}
           push: false
-          tags: boreal-marche:ci-${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          load: true
+          tags: boreal-marche/${{ matrix.target }}:ci-${{ github.sha }}
+          build-args: GIT_SHA=${{ github.sha }}
+          cache-from: type=gha,scope=${{ matrix.target }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.target }}
+
+      - name: Report image size (linux/amd64, uncompressed)
+        run: |
+          IMAGE=boreal-marche/${{ matrix.target }}:ci-${{ github.sha }}
+          BYTES=$(docker history --human=false --format '{{.Size}}' "$IMAGE" | awk '{s+=$1} END {print s}')
+          echo "${{ matrix.target }} image: $((BYTES / 1000000)) MB uncompressed (sum of layers)" | tee -a "$GITHUB_STEP_SUMMARY"
 
   # -----------------------------------------------------------------------
   # 6. Secret scan

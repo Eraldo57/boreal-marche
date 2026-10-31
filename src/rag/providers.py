@@ -322,7 +322,7 @@ class OllamaProvider(AssistantProvider):
 
     def __init__(
         self,
-        model: str = "llama3.1",
+        model: str = "llama3.2:3b",
         host: str = "http://localhost:11434",
     ) -> None:
         self.model = model
@@ -388,7 +388,7 @@ def get_provider(
     *,
     openai_model: str = "gpt-4o-mini",
     openai_api_key: str | None = None,
-    ollama_model: str = "llama3.1",
+    ollama_model: str = "llama3.2:3b",
     ollama_host: str = "http://localhost:11434",
 ) -> AssistantProvider:
     """Return the provider instance for *name* (``regex``, ``openai``, ``ollama``)."""

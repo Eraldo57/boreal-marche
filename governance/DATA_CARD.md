@@ -39,3 +39,13 @@ Head A counts distinct StockCodes for basket variety; Head B intentionally ident
 Customer identifiers are pseudonymous source identifiers, not proof of anonymization. Rows without usable IDs are excluded, causing selection bias. Geographic/temporal/wholesale patterns may not transfer to Québec grocery shoppers. The first description token is only a category proxy. No demographic fairness inference is supported.
 
 The authored policy documents describe a fictional retailer's rules. Product facts come only from the catalogue export of UCI purchases: 4,624 StockCodes with median observed unit price in GBP. It has no categories, allergens or dietary tags because the source has none.
+
+## Fictional content in the policy corpus and tests
+
+Everything in `docs/corpus/` is authored fiction, not derived from the workbook or the capstone brief. This includes delivery fees and free-shipping thresholds, loyalty tiers and point values, the return fee, store addresses, the contact email, and the named charities. The corpus also refers to features the catalogue does not contain (prepared meals, oversized "LTL" items, organic tags, subscription boxes, frozen/refrigerated handling). The assistant quotes these values as the company's policy; they are demonstration values only.
+
+Several golden questions (`tests/golden/golden_questions.json`) and test fixtures (`tests/conftest.py`, `tests/test_chat.py`) mention grocery products such as bread, butter, maple syrup or vegan cheese. They test routing and refusal behaviour only; those products are not in the UCI catalogue.
+
+## Placeholder cost assumptions
+
+The retention threshold uses a coupon cost of 5 and a retained margin of 25 (`configs/pipeline.yaml`). Neither value is in the brief or derivable from the workbook (revenue in GBP, no costs). The brief's coupon is 15% off; 15% of the median purchase invoice (GBP 304.50 across 36,639 invoices) is about GBP 45.68. Results that depend on the placeholders (threshold 0.22, share selected, utility) are conditional on them.

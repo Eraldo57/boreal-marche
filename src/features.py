@@ -48,7 +48,8 @@ CONFIG_PATH = PROJECT_ROOT / "configs" / "pipeline.yaml"
 def load_config() -> dict:
     """Return the full pipeline config."""
     with open(CONFIG_PATH) as f:
-        return yaml.safe_load(f)
+        config: dict = yaml.safe_load(f)
+    return config
 
 
 def load_transactions(cfg: dict) -> pd.DataFrame:

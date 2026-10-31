@@ -32,7 +32,7 @@ There's also a practical constraint: the UCI dataset runs from December 2009 to 
 
 ### Q5. Why PR-AUC rather than accuracy or ROC-AUC for this problem?
 
-**Accuracy is misleading on imbalanced data.** If 62% of customers return, a model that predicts "everyone returns" gets 62% accuracy — and catches zero churners. It looks good on paper and is useless to the marketing team.
+**Accuracy is misleading on imbalanced data.** In this data, 42.7% of customers in the final test snapshot return within 90 days (54.3% in the earliest training snapshots, 33–35% in the validation, calibration and decision snapshots). A model that predicts "everyone returns" would therefore score 42.7% accuracy on the test snapshot — and catches zero churners. It looks good on paper and is useless to the marketing team.
 
 **ROC-AUC is insensitive to class imbalance.** ROC-AUC measures the trade-off between the true positive rate and the false positive rate. But FPR is computed against the *negative* class (returners), which is large. A model can accumulate many false positives and still show a low FPR because the denominator is so big. ROC-AUC therefore tends to paint an optimistic picture when the positive class (churners) is in the minority.
 
@@ -52,14 +52,16 @@ I select the threshold by maximising **expected profit** across a grid of 181 th
 Expected profit = TP × (margin_retained - cost_coupon) + FP × (-cost_coupon) + FN × (-cost_FN)
 ```
 
-The cost assumptions (stated in `configs/pipeline.yaml`):
-- **Cost of sending a coupon:** $5.00
-- **Average margin from a retained customer:** $25.00
-- **Cost of missing a churner (false negative):** $0 (no coupon sent, no money spent)
+The cost assumptions (stated in `configs/pipeline.yaml`) are **placeholders, not measured values**. They are not in the capstone brief and cannot be derived from the workbook, which holds revenue only (in GBP, no costs or margins):
+- **Cost of sending a coupon:** 5.00 (placeholder, currency unspecified)
+- **Average margin from a retained customer:** 25.00 (placeholder, currency unspecified)
+- **Cost of missing a churner (false negative):** 0 (no coupon sent, no money spent)
 
-The asymmetry is 5:1 — saving a real churner is worth five times more than the wasted coupon sent to a loyal customer. This pushes the optimal threshold *below* 0.5, because we'd rather over-send a few cheap coupons than miss high-value churners.
+What the data does support: the brief's coupon is 15% off. On the workbook's 36,639 purchase invoices, the median order is £304.50, so 15% of a median order is about £45.68 — roughly nine times the placeholder 5. The margin has no data source and must be stated by the team.
 
-The exact threshold is computed on the **calibrated** validation set and recorded in `artifacts/retention_model_metadata.json`. It shifts with every retraining cycle. The business should review the cost assumptions quarterly — if coupon costs rise or margins shrink, the threshold moves.
+With these placeholders the ratio is 5:1, which pushes the optimal threshold *below* 0.5. Any other cost pair moves the threshold, the share of customers selected and the reported utility; the saved results (threshold 0.22, 60.7% selected) hold only under the placeholders.
+
+The threshold is chosen on the calibrated probabilities of the **decision snapshot (2011-06-01)**, separate from the calibration and test snapshots (`src/train.py`), and is recorded in `artifacts/retention_model_metadata.json`. It shifts with every retraining cycle and with the cost assumptions.
 
 **Why not just rank?** Because the marketing team doesn't always want a fixed top-K — they want a yes/no flag with an adjustable budget. The threshold turns a continuous score into an actionable decision. But the score and the rank are always available in the API response for users who prefer to work with probabilities directly.
 
@@ -185,7 +187,7 @@ This separation generalises to every ML serving problem: training and batch infe
 
 The `RuleEngine` in `api/lifespan.py` builds an inverted index keyed by `frozenset(antecedent)`. At query time, it iterates over the index keys and checks `key.issubset(basket_set)`.
 
-With 500K rules:
+Hypothetically, with 500K rules (the real export has 3,567; the figures below are back-of-envelope estimates, not measurements):
 
 - **Memory:** Each rule is a dict with antecedent (list of strings), consequent (list of strings), confidence, lift, support. At ~500 bytes per rule, 500K rules ≈ 250 MB in memory. Non-trivial but manageable on a 1 GB container.
 - **Startup time:** Loading and indexing 500K rules from JSON would take a few seconds instead of milliseconds. Acceptable — it happens once at startup.
@@ -194,7 +196,7 @@ With 500K rules:
 **What I'd change first:**
 1. **Prefix filtering.** Only check keys whose items all appear in the basket. Build a secondary index from individual items → sets of antecedent keys. Intersect the candidate sets before doing subset checks.
 2. **Trie-based lookup.** A hash-map-of-frozensets doesn't scale to millions of keys. A trie (prefix tree) over sorted antecedent items gives logarithmic lookup.
-3. **Prune aggressively.** Do we really need 500K rules? Tighten `min_support` and `min_lift` to keep only high-signal rules. The top 5K rules by lift probably cover 95% of recommendations.
+3. **Prune aggressively.** Tighten `min_support` and `min_lift` to keep only high-signal rules. (The current export has 3,567 rules; the 500K figure above is a hypothetical scale, not something measured here, and no coverage figure for a pruned subset has been measured.)
 
 ---
 
@@ -256,15 +258,15 @@ The spec requires a golden set of 40 questions (15 policy, 10 tool-call, 8 out-o
 3. **Refusal rate on out-of-scope questions** — Should be 100% for the 8 OOS questions.
 4. **Latency and cost per query** — by provider.
 
-The evaluation runs per provider (regex, OpenAI, Ollama), producing a comparison table:
+The evaluation is designed to run per provider (regex, OpenAI, Ollama). Only the regex provider has been run so far (`reports/current_run/assistant_regex_metrics.json`, 40 questions):
 
-| Provider | Tool-choice accuracy | Refusal rate (OOS) | Avg. latency | Cost/1K queries |
+| Provider | Tool-choice accuracy | Refusal rate (OOS) | Latency p50 / p95 | Cost |
 |---|---|---|---|---|
-| Regex | ~85% | ~75% | <10ms | $0 |
-| OpenAI (gpt-4o-mini) | ~92% | ~95% | ~800ms | ~$0.15 |
-| Ollama (llama3.1) | ~88% | ~90% | ~2s | $0 (local) |
+| Regex | 97.5% (96.9% in-scope only) | 100% (8/8) | 15.4 ms / 26.0 ms | no API calls |
+| OpenAI (gpt-4o-mini) | not measured | not measured | not measured | not measured |
+| Ollama (llama3.2:3b) | not measured | not measured | not measured | not measured |
 
-The regex baseline is the floor — it proves how far pattern matching gets you. The OpenAI provider should beat it on nuanced routing (e.g. "Can I get a refund for my frozen blueberries?" requires understanding that this is a return question, not a product question). The gap between regex and LLM providers is the measurable value the language model adds.
+The regex baseline is the floor. Whether an LLM provider beats it on nuanced routing (e.g. "Can I get a refund for my frozen blueberries?" is a return question, not a product question) is untested: no figure for OpenAI or Ollama exists, and none should be quoted until those runs are done. Note that the regex baseline already scores above the brief's 92% "excellent" tool-choice mark, so the open question is what an LLM would add, not whether the target is met.
 
 The tool-choice portion of this evaluation must run in CI so it's automated and reproducible.
 
@@ -344,13 +346,13 @@ Additionally, every training run is logged to **MLflow** with parameters, metric
 
 **`/health` (liveness probe):** Returns 200 if the process is alive. It checks nothing — if FastAPI can respond to HTTP, the process is running. If this fails, the container is **dead** and should be restarted (killed and replaced).
 
-**`/ready` (readiness probe):** Returns 200 only if the models are loaded and the system can serve real predictions. It checks `app.state.model`, `app.state.rule_engine`, and `app.state.rag_index`. If any are missing, it reports which ones are loaded and returns a degraded status.
+**`/ready` (readiness probe):** Returns 200 only if the models are loaded and the system can serve real predictions. It checks `app.state.model`, `app.state.rule_engine` and `app.state.rag_index`, and any startup error (for example a missing customer feature store or an unreachable prediction-log database). If anything is missing, it returns 503 and names what failed.
 
-**Why a load balancer cares:** During startup, the container takes 10–30 seconds to load the joblib model, parse the rules JSON, and build the RAG index. During this window, `/health` returns 200 (the process is alive) but `/ready` returns not-ready (models aren't loaded yet).
+**Why a load balancer cares:** During startup the container loads the joblib model, parses the rules JSON, and loads the prebuilt RAG index and its embedding model. Measured on 2026-10-31 in Compose, with the embedding model already cached, the API reported healthy within 16–18 s of `docker compose up`, which starts the database first (health checked every 10 s). During this window, `/health` returns 200 (the process is alive) but `/ready` returns 503 (models aren't loaded yet).
 
 A load balancer that routes traffic based on `/health` would send requests to a container that can't serve predictions — every request would 500. By routing based on `/ready`, the load balancer waits until the container is warm before sending traffic.
 
-Kubernetes uses the same pattern: `livenessProbe` → `/health` (restart if dead), `readinessProbe` → `/ready` (remove from service pool if not ready). Docker Compose's healthcheck in `docker-compose.yml` uses the same `/health` endpoint.
+Kubernetes uses the same pattern: `livenessProbe` → `/health` (restart if dead), `readinessProbe` → `/ready` (remove from service pool if not ready). The Docker HEALTHCHECK (`docker/Dockerfile`, and its override in `docker/compose.yml`) probes `/ready`, not `/health`, so Compose starts the interface only after the API can serve.
 
 ---
 
@@ -378,7 +380,7 @@ Because **automated deployment of a retrained model is dangerous.** The retraini
 
 The design:
 
-1. `scripts/retrain.py` re-runs ETL, re-mines rules, retrains the model, and checks promotion criteria (new PR-AUC must be within 1% of production).
+1. `scripts/retrain.py` generates a local candidate and never promotes or overwrites the served model. No automated promotion criterion (such as a PR-AUC tolerance) is implemented: its own note says reusing the same historical holdout is not independent promotion evidence, so promotion needs a new holdout and human review.
 2. If criteria pass, the CD workflow creates a branch (`retrain/2026-09-21`), commits the updated artifacts, and opens a pull request.
 3. The PR body says: "⚠️ This does NOT auto-deploy. A human must review the MLflow experiment comparison, verify metrics, approve and merge."
 4. Only a merge to `main` triggers the deployment pipeline (build → push → App Runner update → smoke test).
@@ -435,7 +437,7 @@ The `train.py` script honours `SM_CHANNEL_TRAIN` and `SM_MODEL_DIR`, so it runs 
 
 **When it would be worth it:**
 - **Data scale.** If the transaction table grew to 100M+ rows and feature engineering required distributed compute (Spark, Dask), SageMaker's managed infrastructure would justify itself.
-- **Model complexity.** If the model were a neural network requiring GPU hours, SageMaker's managed spot instances would reduce cost by 60–70%.
+- **Model complexity.** If the model were a neural network requiring GPU hours, SageMaker's managed spot instances could reduce cost (the saving depends on instance type and interruption rate; no figure has been measured here).
 - **Team scale.** If multiple data scientists are running experiments concurrently, SageMaker provides job scheduling, resource management, and experiment tracking that a single laptop doesn't.
 - **Reproducibility in regulated environments.** SageMaker logs the exact container, data, and code for every training job. In a regulated setting (banking, healthcare), this audit trail may be required.
 
@@ -468,9 +470,9 @@ The automated-decision register in `GOVERNANCE_LOI25.md` documents all of this f
 
 ### Q30. You found a recall gap for one subgroup. Walk me through your options and their trade-offs.
 
-The fairness audit (`governance/fairness_audit.md`) checks recall, precision, and selection rate by region, tenure band, and spend quartile. Any group with recall more than 5 percentage points below overall recall is flagged.
+The brief asks for recall, precision and selection rate by region, tenure band and spend quartile, flagging any group more than 5 points below overall recall. The current audit (`governance/fairness_audit.md`) is **partial**: it reports recall and precision for four segments on the test snapshot (repeat vs one-time buyers, UK vs international), without selection rates, spend quartiles, the 5-point flag or implemented mitigations.
 
-**Expected gap:** International customers (~10% of data) likely have lower recall — the model has fewer examples to learn from, and their patterns differ (longer shipping times, different product preferences).
+**Observed gap (test snapshot, threshold 0.22):** one-time buyers have returner recall of 0.173 against 0.920 for repeat buyers (1,588 vs 3,645 rows). International customers are 458 of 5,233 rows (8.8%), and their recall (0.857) is not lower than UK customers' (0.810), so the earlier assumption that international customers are disadvantaged is not supported by this data.
 
 **Option 1 — Do nothing, document it.**
 - *Trade-off:* Honest, but the affected group receives worse service. Under Law 25, failing to flag at-risk international customers means they miss retention coupons. Acceptable only if the gap is small and the business acknowledges it.

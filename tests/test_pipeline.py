@@ -173,7 +173,7 @@ def test_startup_missing_artifacts_is_live_not_ready(monkeypatch, tmp_path):
         raise FileNotFoundError("Build the index")
 
     monkeypatch.setattr(rag, "RagIndex", missing)
-    monkeypatch.setenv("BOREAL_LOG_PATH", str(tmp_path / "requests.jsonl"))
+    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{tmp_path / 'predictions.db'}")
     with TestClient(app) as client:
         assert client.get("/health").status_code == 200
         result = client.get("/ready")

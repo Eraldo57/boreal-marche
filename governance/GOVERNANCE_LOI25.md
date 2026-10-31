@@ -14,7 +14,7 @@ Boréal Marché is fictional. Public source identifiers and transaction historie
 - Shared assistant scope/privacy checks precede tool routing; policy answers cite retrieved text.
 - Retention tools require matching caller-supplied demo customer context.
 - No coupon dispatch or customer-data mutation exists.
-- Durable monitoring JSONL omits customer IDs and chat text, but includes prediction feature vectors.
+- The durable monitoring log (`prediction_log` database table) omits customer IDs and chat text, but includes prediction feature vectors. In Compose the database port is not published outside the stack's internal network.
 - Interface discloses public-data provenance, the historical demo, and optional external provider use.
 
 These controls are limited: a supplied ID is **not authentication**, regex guardrails are not a security boundary, and feature vectors can be identifying. Direct API feature lookup is public to anyone with local API access. Bind to localhost.

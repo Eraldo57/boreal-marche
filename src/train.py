@@ -15,6 +15,7 @@ import time
 from datetime import UTC, datetime
 from importlib.metadata import version
 from pathlib import Path
+from typing import Any
 
 import joblib
 import mlflow
@@ -65,13 +66,13 @@ def temporal_partitions(snapshots: pd.DataFrame) -> dict[str, np.ndarray]:
     return result
 
 
-def recall_at_top_decile(y_true, y_prob) -> float:
+def recall_at_top_decile(y_true: Any, y_prob: Any) -> float:
     """Fraction of actual returners in the highest-scored 10%."""
     selected = np.argsort(-y_prob, kind="stable")[: max(1, len(y_true) // 10)]
     return float(y_true[selected].sum() / y_true.sum()) if y_true.sum() else 0.0
 
 
-def evaluate(y_true, y_prob, fit_seconds=None) -> dict:
+def evaluate(y_true: Any, y_prob: Any, fit_seconds: float | None = None) -> dict[str, Any]:
     return {
         "pr_auc": float(average_precision_score(y_true, y_prob)),
         "roc_auc": float(roc_auc_score(y_true, y_prob)) if len(np.unique(y_true)) > 1 else None,
@@ -84,15 +85,15 @@ def evaluate(y_true, y_prob, fit_seconds=None) -> dict:
 class RecencyHeuristic:
     """Unlearned business ranking baseline: 1 / (1 + recency days)."""
 
-    def fit(self, X, y):
+    def fit(self, X: Any, y: Any) -> RecencyHeuristic:
         return self
 
-    def predict_proba(self, X):
+    def predict_proba(self, X: Any) -> Any:
         score = 1 / (1 + X["recency_days"].to_numpy())
         return np.column_stack([1 - score, score])
 
 
-def pipeline(estimator, scale=False) -> Pipeline:
+def pipeline(estimator: Any, scale: bool = False) -> Pipeline:
     steps = [("imputer", SimpleImputer(strategy="median", keep_empty_features=True))]
     if scale:
         steps.append(("scaler", StandardScaler()))
@@ -125,14 +126,14 @@ def _get_models(seed: int) -> dict:
     }
 
 
-def _get_probas(model, X) -> np.ndarray:
+def _get_probas(model: Any, X: Any) -> np.ndarray:
     if hasattr(model, "predict_proba"):
-        return model.predict_proba(X)[:, 1]
+        return np.asarray(model.predict_proba(X)[:, 1])
     # Ranking transform for spot-check only; not calibrated probabilities.
-    return expit(model.decision_function(X))
+    return np.asarray(expit(model.decision_function(X)))
 
 
-def trial_model(name, trial, seed) -> Pipeline:
+def trial_model(name: str, trial: Any, seed: int) -> Pipeline:
     if name == "LogisticRegression":
         return pipeline(
             LogisticRegression(
@@ -171,7 +172,7 @@ def trial_model(name, trial, seed) -> Pipeline:
     )
 
 
-def utility(y_true, y_prob, threshold, costs) -> float:
+def utility(y_true: Any, y_prob: Any, threshold: float, costs: dict[str, Any]) -> float:
     """Assumed targeting utility; NOT causal coupon uplift or observed profit."""
     chosen = y_prob >= threshold
     return float(
@@ -180,7 +181,9 @@ def utility(y_true, y_prob, threshold, costs) -> float:
     )
 
 
-def select_threshold(y_true, y_prob, cost_cfg) -> tuple[float, dict]:
+def select_threshold(
+    y_true: Any, y_prob: Any, cost_cfg: dict[str, Any]
+) -> tuple[float, dict[str, Any]]:
     thresholds = np.linspace(0, 1, 201)
     values = [utility(y_true, y_prob, t, cost_cfg) for t in thresholds]
     best = int(np.argmax(values))
@@ -194,7 +197,7 @@ def select_threshold(y_true, y_prob, cost_cfg) -> tuple[float, dict]:
     }
 
 
-def error_analysis(y, p, X, threshold) -> dict:
+def error_analysis(y: Any, p: Any, X: Any, threshold: float) -> dict[str, Any]:
     result = {}
     for col in ["is_one_time_buyer", "is_domestic"]:
         for val in sorted(X[col].unique()):
@@ -267,7 +270,7 @@ def run(*, n_trials: int | None = None, output_dir: Path = ARTIFACTS) -> dict:
         for row in [r for r in families if r["model"] in tunable][:2]:
             name = row["model"]
 
-            def objective(trial):
+            def objective(trial: Any) -> float:
                 model = trial_model(name, trial, seed)
                 model.fit(X.loc[tr], y.loc[tr])
                 score = float(average_precision_score(y.loc[va], _get_probas(model, X.loc[va])))
@@ -423,7 +426,7 @@ def run(*, n_trials: int | None = None, output_dir: Path = ARTIFACTS) -> dict:
     return metadata
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--trials", type=int, default=None)
     parser.add_argument("--output-dir", type=Path, default=ARTIFACTS)

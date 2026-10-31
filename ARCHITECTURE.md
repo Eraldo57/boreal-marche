@@ -51,11 +51,11 @@ Rules mine invoices before June 2011, tune support/confidence on June–August, 
 - /predict and /predict/batch: calibrated probability of returning; batch limit 500.
 - /recommend: indexed antecedent matching, highest-lift deduplication, basket exclusion, popularity fallback.
 - /chat: shared pre-guardrails → retrieval/provider routing → strict typed tool → grounded response/refusal.
-- /metrics: durable local request log, observed latencies/errors, PSI and KS when data suffice.
+- /metrics: durable request log (`prediction_log` table: SQLite locally, PostgreSQL in Compose), observed latencies/errors, PSI and KS when data suffice.
 
 ## Operational boundaries
 
-MLflow experiment tracking ran locally using SQLite; registry aliases/promotion did not. DVC local no-SCM metadata records outputs; no remote is configured. Docker Compose uses API service networking and persistent data/cache mounts, but containers were not built or run here. CI retains lint/type/test/coverage/build gates; not all gates pass. CD is manual and opt-in, not an executed deployment.
+MLflow experiment tracking ran locally using SQLite; registry aliases/promotion did not. DVC local no-SCM metadata records outputs; no remote is configured. Docker Compose (`docker/compose.yml`) runs API, Streamlit, PostgreSQL and Ollama on one network, with the API's artifacts and data mounted from the host; both images were built and the stack run locally on linux/arm64 (docs/CONTAINERS.md). CI defines lint, type, test/coverage, data-quality, image-build and secret-scan jobs; the lint, type and test/coverage gates pass locally and both images build, but the secret scan and CI itself have never run, because the repository has no remote. CD is manual and opt-in, not an executed deployment.
 
 Monitoring is single-process demonstration telemetry, not an SLO or production drift study. No automatic purge, delayed-label backfill, alert delivery or retraining trigger is implemented. No authentication or enforceable human-review workflow exists.
 

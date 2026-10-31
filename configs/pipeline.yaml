@@ -50,6 +50,7 @@ cleaning:
     - name: "canonicalise_descriptions"
       description: "Lowercase, strip whitespace, collapse runs"
     - name: "cap_extreme_values"
+      # Caps are judgement values, not derived from a distribution analysis.
       description: "Fixed sensitivity caps; preserve invoice presence and sign"
       max_abs_quantity: 10000
       max_unit_price: 1000
@@ -128,6 +129,9 @@ modelling:
 
   threshold:
     cost_assumptions:
+      # PLACEHOLDERS: not from the capstone brief and not derivable from the workbook
+      # (revenue only, in GBP). The brief's coupon is 15% off; 15% of the median
+      # purchase invoice (GBP 304.50) is about GBP 45.68. Margin has no data source.
       cost_coupon: 5.0        # cost of sending a retention coupon
       margin_retained: 25.0   # average margin from a retained customer
       cost_false_negative: 0  # missed customer — no coupon sent
@@ -151,7 +155,7 @@ assistant:
   providers: ["regex", "openai", "ollama"]
   default_provider: "regex"
   embedding_model: "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
-  similarity_floor: 0.25
+  similarity_floor: 0.25  # judgement value, not tuned on a held-out set
   max_chunks_per_query: 5
   chunk_size: 420  # chars, to reduce truncation at encoder's 128 token limit
   chunk_overlap: 64
@@ -159,13 +163,13 @@ assistant:
   openai:
     model: "gpt-4o-mini"
   ollama:
-    model: "llama3.1"
+    model: "llama3.2:3b"  # newest Llama that fits a laptop (2.02 GB); llama3.3/llama4 are 42/67 GB
     host: "http://localhost:11434"
 
 monitoring:
   drift:
     reference_window: "training"
-    psi_threshold: 0.2
-    ks_threshold: 0.05
+    psi_threshold: 0.2   # common rule of thumb for "significant shift", not calibrated here
+    ks_threshold: 0.05   # conventional p-value cut-off
   alert:
     channels: ["log"]  # add "email", "slack" in production

@@ -152,8 +152,9 @@ with monitoring:
         if result:
             st.json(result)
             st.caption(
-                "Durable local JSONL; PSI/KS require a training reference and sufficient "
-                "prediction traffic. No label backfill or automatic purge yet."
+                "Every request is stored in the prediction_log database table (SQLite "
+                "locally, PostgreSQL in Docker Compose); PSI/KS require a training reference "
+                "and sufficient prediction traffic. No label backfill or automatic purge yet."
             )
 
 with about:

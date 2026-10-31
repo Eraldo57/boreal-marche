@@ -134,18 +134,18 @@ Health is process liveness; readiness is artifact availability. A running proces
 
 **Purpose:** reproducible service packaging and future delivery gates.  
 **Input:** project dependencies/source plus host-generated data/model/index artifacts.  
-**Process:** multi-stage Python 3.12 build; non-root runtime; Compose networking uses api:8000; /ready health check; API/cache/log volumes.  
-**Output:** configuration validated, not an executed image/deployment.  
-**Important files:** Dockerfile, docker-compose.yml, .github/workflows/ci.yml and cd.yml.  
-**Next stage:** validate containers when Docker is running, then review opt-in cloud configuration.  
+**Process:** multi-stage, digest-pinned Python 3.12 build with CPU-only PyTorch; separate API and Streamlit images; non-root runtime; /ready health check; Compose runs API, interface, PostgreSQL (prediction_log) and Ollama, with artifacts and data mounted from the host.  
+**Output:** both images built and the stack run locally on linux/arm64 (sizes and checks in docs/CONTAINERS.md); no cloud deployment.  
+**Important files:** docker/Dockerfile, docker/compose.yml, .dockerignore, .github/workflows/ci.yml and cd.yml.  
+**Next stage:** linux/amd64 build in CI, fresh-clone test on another machine, then the opt-in cloud configuration.  
 **Limitations:** Docker daemon was unavailable. No GitHub run or AWS deployment was executed; CI has known failing gates. CD is explicitly manual/opt-in; cloud credentials and real deployment review remain future work.
 
 ## 12. MLflow, retraining and monitoring
 
 **Purpose:** keep experiments and make operations observable.  
 **Input:** training metrics/artifacts; actual route requests and prediction feature vectors.  
-**Process:** MLflow logs comparison/tuning and final model to local SQLite/files. PredictionLog persists JSONL and maintains a bounded recent buffer. monitor.py compares recent predictions against drift_reference with quantile-bin PSI and two-sided KS.  
-**Output:** MLflow run records, data/logs telemetry, /metrics; timestamped retraining candidates.  
+**Process:** MLflow logs comparison/tuning and final model to local SQLite/files. PredictionLog writes one row per request to the prediction_log table (SQLite locally, PostgreSQL in Compose; URL from DATABASE_URL), replays it on restart and maintains a bounded recent buffer. monitor.py compares recent predictions against drift_reference with quantile-bin PSI and two-sided KS.  
+**Output:** MLflow run records, prediction_log rows, /metrics; timestamped retraining candidates.  
 **Important functions:** src.train.run; scripts/retrain.main; PredictionLog; _compute_drift; scripts/simulate_traffic.main.  
 **Next stage:** human investigation and future approved promotion, not automatic retraining/deployment.  
 **Limitations:** no purge, distributed aggregation, delayed labels, automatic alerts or registry aliases. KS p-value <0.05 is the alert condition, not KS statistic >0.05. Insufficient traffic returns unavailable drift, not fake zero. Deliberately shifted demo traffic cannot establish production drift.

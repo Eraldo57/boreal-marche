@@ -6,6 +6,8 @@ GET /metrics  Live operational metrics computed from the in-memory prediction lo
 
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 import structlog
 from fastapi import APIRouter, Request
@@ -26,7 +28,7 @@ def _percentile(values: list[float], q: float) -> float:
 
 def _compute_drift(
     entries: list[dict],
-    reference=None,
+    reference: Any = None,
     psi_threshold: float = 0.2,
     ks_threshold: float = 0.05,
 ) -> list[DriftMetric]:
@@ -83,7 +85,7 @@ def _compute_drift(
 
 
 def _traffic_light(error_rate: float, drift_metrics: list[DriftMetric]) -> str:
-    """Compute the overall status traffic light."""
+    """Overall status light; the 5% / 10% error-rate cut-offs are judgement values."""
     if error_rate > 0.10:
         return "red"
     if any(m.alert for m in drift_metrics):
@@ -118,4 +120,5 @@ async def metrics(request: Request) -> MonitoringResponse:
         drift_metrics=drift_metrics,
         status=status,
         drift_status="measured" if drift_metrics else "insufficient_data_or_reference",
+        log_write_failures=prediction_log.write_failures,
     )

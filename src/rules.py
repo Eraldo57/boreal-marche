@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 import time
 from datetime import UTC, datetime
+from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -19,7 +21,10 @@ from src.recommend import RecommendationEngine, _Rule
 
 def baskets(df: pd.DataFrame) -> list[list[str]]:
     """Use canonical descriptions, explicitly accepting description/SKU ambiguity."""
-    return df.groupby("Invoice", sort=True)["Description"].agg(lambda s: sorted(set(s))).tolist()
+    grouped: list[list[str]] = (
+        df.groupby("Invoice", sort=True)["Description"].agg(lambda s: sorted(set(s))).tolist()
+    )
+    return grouped
 
 
 def build_transaction_matrix(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
@@ -43,7 +48,14 @@ def build_transaction_matrix(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     return pd.DataFrame.sparse.from_spmatrix(matrix, columns=encoder.columns_), report
 
 
-def mine(basket_df, support, confidence, lift, algorithm="fpgrowth", max_len=3):
+def mine(
+    basket_df: pd.DataFrame,
+    support: float,
+    confidence: float,
+    lift: float,
+    algorithm: str = "fpgrowth",
+    max_len: int = 3,
+) -> tuple[pd.DataFrame, float, int]:
     start = time.perf_counter()
     miner = apriori if algorithm == "apriori" else fpgrowth
     kwargs = {"low_memory": True} if algorithm == "apriori" else {}
@@ -59,18 +71,22 @@ def mine(basket_df, support, confidence, lift, algorithm="fpgrowth", max_len=3):
     return rules, time.perf_counter() - start, len(frequent)
 
 
-def mine_rules_apriori(basket_df, min_support, min_confidence, min_lift):
+def mine_rules_apriori(
+    basket_df: pd.DataFrame, min_support: float, min_confidence: float, min_lift: float
+) -> tuple[pd.DataFrame, float]:
     rules, seconds, _ = mine(basket_df, min_support, min_confidence, min_lift, "apriori")
     return rules, seconds
 
 
-def mine_rules_fpgrowth(basket_df, min_support, min_confidence, min_lift):
+def mine_rules_fpgrowth(
+    basket_df: pd.DataFrame, min_support: float, min_confidence: float, min_lift: float
+) -> tuple[pd.DataFrame, float]:
     rules, seconds, _ = mine(basket_df, min_support, min_confidence, min_lift)
     return rules, seconds
 
 
 def rule_records(rules: pd.DataFrame, max_rules: int) -> list[dict]:
-    records = [
+    records: list[dict[str, Any]] = [
         {
             "antecedent": sorted(r.antecedents),
             "consequent": sorted(r.consequents),
@@ -89,10 +105,13 @@ def compute_popularity(df: pd.DataFrame, top_n: int | None = None) -> list[str]:
     counts = (
         df.groupby("Description")["Invoice"].nunique().sort_values(ascending=False, kind="stable")
     )
-    return counts.head(top_n).index.tolist() if top_n else counts.index.tolist()
+    popular: list[str] = counts.head(top_n).index.tolist() if top_n else counts.index.tolist()
+    return popular
 
 
-def engine_from_records(records, popularity):
+def engine_from_records(
+    records: list[dict[str, Any]], popularity: list[str]
+) -> RecommendationEngine:
     return RecommendationEngine(
         [
             _Rule(
@@ -108,7 +127,7 @@ def engine_from_records(records, popularity):
     )
 
 
-def temporal_baskets(df: pd.DataFrame, train_end: str, validation_end: str, test_end: str):
+def temporal_baskets(df: pd.DataFrame, train_end: str, validation_end: str, test_end: str) -> Any:
     """Assign entire invoices by date; reject invoices spanning a split boundary."""
     history = purchases(df)
     dates = history.groupby("Invoice")["InvoiceDate"].agg(["min", "max"])
@@ -122,7 +141,9 @@ def temporal_baskets(df: pd.DataFrame, train_end: str, validation_end: str, test
     )
 
 
-def evaluate_baskets(engine, heldout, popularity, seed=42, k=5) -> dict:
+def evaluate_baskets(
+    engine: Any, heldout: Any, popularity: Any, seed: int = 42, k: int = 5
+) -> dict[str, Any]:
     """Mask half each later basket; compare rule/fallback hybrid to popularity.
 
     This is basket completion, not next-order prediction. Single-item baskets
@@ -164,7 +185,7 @@ def evaluate_baskets(engine, heldout, popularity, seed=42, k=5) -> dict:
     }
 
 
-def run():
+def run() -> Path:
     cfg = load_config()
     rcfg = cfg["rules"]
     path = PROJECT_ROOT / cfg["data"]["parquet_path"]

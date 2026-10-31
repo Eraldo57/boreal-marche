@@ -305,7 +305,7 @@ def run_pre_guardrails(
 
     Returns the first failing result, or ``None`` if all pass.
     """
-    for check_fn, kwargs in [
+    checks: list[tuple[Any, dict[str, Any]]] = [
         (check_out_of_scope, {"query": query}),
         (
             check_no_cross_customer,
@@ -322,8 +322,9 @@ def run_pre_guardrails(
                 "threshold": similarity_threshold,
             },
         ),
-    ]:
-        result = check_fn(**kwargs)
+    ]
+    for check_fn, kwargs in checks:
+        result: GuardrailResult = check_fn(**kwargs)
         if not result.passed:
             return result
     return None

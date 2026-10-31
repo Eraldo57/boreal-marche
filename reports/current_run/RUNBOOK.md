@@ -59,9 +59,9 @@ With both servers running:
 .venv/bin/mypy src api --ignore-missing-imports
 ```
 
-The coverage and mypy commands currently fail; see REMAINING_ISSUES.md. Keep those gates. Integration tests skip on a fresh checkout until local artifacts exist; unit tests use labelled mocks. UI smoke is AppTest plus server health, not browser visual QA. Monitoring traffic is deliberately synthetic/historical, not a production benchmark.
+On 2026-10-31 these gates passed locally: 188 tests, coverage 90% (89% on a clean checkout, where 5 integration tests skip), ruff clean, mypy 0 errors in 22 files. No CI run has happened yet. Integration tests skip on a fresh checkout until local artifacts exist; unit tests use labelled mocks or labelled synthetic data. UI smoke is AppTest plus server health, not browser visual QA. Monitoring traffic is deliberately synthetic/historical, not a production benchmark.
 
-Assistant external providers are optional: configure OPENAI_API_KEY or start the configured Ollama server/model, then use evaluate_assistant --provider openai|ollama. These paths were not executed. Do not send private information to this demo.
+Assistant external providers are optional: configure OPENAI_API_KEY or start the configured Ollama server/model, then use evaluate_assistant --provider openai|ollama. No evaluation of either was executed. The Ollama request path was exercised inside Compose with the configured `llama3.2:3b` on three questions (docs/CONTAINERS.md); that is wiring, not an evaluation. Do not send private information to this demo.
 
 ## Tracking, DVC and Docker
 
@@ -69,20 +69,21 @@ Assistant external providers are optional: configure OPENAI_API_KEY or start the
 .venv/bin/mlflow ui --backend-store-uri sqlite:///mlflow.db --host 127.0.0.1 --port 5000
 .venv/bin/python -m scripts.retrain --dry-run --skip-etl
 .venv/bin/dvc status
-docker compose config
+docker compose -f docker/compose.yml config --quiet
 ```
 
 MLflow SQLite tracking and nested comparison/tuning runs exist; registry aliases do not. Retrain without --dry-run generates a timestamped candidate and its own report, never automatically promotes it. The same historical holdout is not fresh promotion evidence.
 
 DVC was initialized locally with `dvc init --no-scm`, analytics disabled, then `dvc commit -f` recorded existing outputs in dvc.lock. This records artifacts; it is not evidence of a full `dvc repro` execution. No remote is configured. Chroma mutates its persistence directory on use, so DVC can report the index modified even after read queries. Stop services and design an immutable index export before claiming a clean reusable data registry.
 
-Docker daemon was unavailable. After starting Docker, building/running remains to be validated:
+Docker: generate host artifacts first (the API mounts artifacts/ and data/), then one command starts API, interface, PostgreSQL and Ollama:
 
 ```bash
-LOCAL_UID=$(id -u) LOCAL_GID=$(id -g) docker compose up --build
+make up        # docker compose -f docker/compose.yml up --build -d
+make down
 ```
 
-Generate host artifacts first. The app uses http://api:8000 inside Compose. MLflow and Ollama have optional profiles; inspect docker-compose.yml before enabling them. No AWS command was executed.
+The interface uses http://api:8000 inside Compose; MLflow stays behind the optional `tracking` profile. On Linux set LOCAL_UID/LOCAL_GID in .env. Both images were built and the stack was run on 2026-10-31 (linux/arm64); measured sizes, the macOS folder-permission prerequisite and what was not verified are in docs/CONTAINERS.md. No AWS command was executed.
 
 ## Five-minute screen share
 
