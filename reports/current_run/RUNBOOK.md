@@ -59,7 +59,7 @@ With both servers running:
 .venv/bin/mypy src api --ignore-missing-imports
 ```
 
-On 2026-10-31 these gates passed locally: 188 tests, coverage 90% (89% on a clean checkout, where 5 integration tests skip), ruff clean, mypy 0 errors in 22 files. No CI run has happened yet. Integration tests skip on a fresh checkout until local artifacts exist; unit tests use labelled mocks or labelled synthetic data. UI smoke is AppTest plus server health, not browser visual QA. Monitoring traffic is deliberately synthetic/historical, not a production benchmark.
+On 2026-10-31 these gates passed locally: 189 tests, coverage 90% (89% on a clean checkout, where 5 integration tests skip), ruff clean, mypy 0 errors in 22 files. No CI run has happened yet. Integration tests skip on a fresh checkout until local artifacts exist; unit tests use labelled mocks or labelled synthetic data. UI smoke is AppTest plus server health, not browser visual QA. Monitoring traffic is deliberately synthetic/historical, not a production benchmark.
 
 Assistant external providers are optional: configure OPENAI_API_KEY or start the configured Ollama server/model, then use evaluate_assistant --provider openai|ollama. No evaluation of either was executed. The Ollama request path was exercised inside Compose with the configured `llama3.2:3b` on three questions (docs/CONTAINERS.md); that is wiring, not an evaluation. Do not send private information to this demo.
 
@@ -74,7 +74,7 @@ docker compose -f docker/compose.yml config --quiet
 
 MLflow SQLite tracking and nested comparison/tuning runs exist; registry aliases do not. Retrain without --dry-run generates a timestamped candidate and its own report, never automatically promotes it. The same historical holdout is not fresh promotion evidence.
 
-DVC was initialized locally with `dvc init --no-scm`, analytics disabled, then `dvc commit -f` recorded existing outputs in dvc.lock. This records artifacts; it is not evidence of a full `dvc repro` execution. No remote is configured. Chroma mutates its persistence directory on use, so DVC can report the index modified even after read queries. Stop services and design an immutable index export before claiming a clean reusable data registry.
+DVC was initialized locally with `dvc init --no-scm`, analytics disabled, then `dvc commit -f` recorded existing outputs in dvc.lock. This records artifacts; it is not evidence of a full `dvc repro` execution. Since 2026-11-01 `.dvc/config` sets only `analytics = false`; without `no_scm`, DVC works with git. No remote is configured. Chroma mutates its persistence directory on use, so DVC can report the index modified even after read queries. Stop services and design an immutable index export before claiming a clean reusable data registry.
 
 Docker: generate host artifacts first (the API mounts artifacts/ and data/), then one command starts API, interface, PostgreSQL and Ollama:
 

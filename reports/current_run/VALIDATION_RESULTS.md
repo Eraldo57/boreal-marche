@@ -54,8 +54,8 @@ Sources: assistant_regex_metrics.json, api_smoke.json, ui_smoke.json.
 
 The bullets above record the 2026-09-30 run. On 2026-10-31, after typing fixes, synthetic-data tests and the container work:
 
-- 188 tests passed; coverage 90% locally and 89% on a clean checkout (5 integration tests skip without local artifacts), above the 80% gate; ruff clean; strict mypy 0 errors in 22 files. CI still not run (no remote).
-- Prediction logging moved from JSONL to a `prediction_log` database table (SQLite locally, PostgreSQL in Compose); the earlier `data/logs/requests.jsonl` is left in place and no longer read.
+- 189 tests passed; coverage 90% locally and 89% on a clean checkout (5 integration tests skip without local artifacts), above the 80% gate; ruff clean; strict mypy 0 errors in 22 files. CI still not run (no remote).
+- Prediction logging moved from JSONL to a `prediction_log` database table (SQLite locally, PostgreSQL in Compose). The earlier JSONL log, which holds the 2026-09-30 monitoring traffic described above, is archived at `data/logs/archive/requests.jsonl`, excluded from git and kept until the project is graded; the code no longer reads it.
 - Docker images built and the Compose stack run on linux/arm64. API image 7,376 → 1,993 MB uncompressed, 3,691 → 534 MB compressed; interface image 635 MB / 180 MB. Smoke test 10/10, including the documented `make up` with real mounts; the Ollama path worked with the configured `llama3.2:3b` on three questions (not an evaluation). Details and what was not verified: docs/CONTAINERS.md; raw sizes: container_sizes.json.
 
 See REMAINING_ISSUES.md for the prioritized gaps and RUNBOOK.md for reproduction.
