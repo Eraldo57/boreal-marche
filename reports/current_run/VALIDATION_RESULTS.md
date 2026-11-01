@@ -58,4 +58,8 @@ The bullets above record the 2026-09-30 run. On 2026-10-31, after typing fixes, 
 - Prediction logging moved from JSONL to a `prediction_log` database table (SQLite locally, PostgreSQL in Compose). The earlier JSONL log, which holds the 2026-09-30 monitoring traffic described above, is archived at `data/logs/archive/requests.jsonl`, excluded from git and kept until the project is graded; the code no longer reads it.
 - Docker images built and the Compose stack run on linux/arm64. API image 7,376 → 1,993 MB uncompressed, 3,691 → 534 MB compressed; interface image 635 MB / 180 MB. Smoke test 10/10, including the documented `make up` with real mounts; the Ollama path worked with the configured `llama3.2:3b` on three questions (not an evaluation). Details and what was not verified: docs/CONTAINERS.md; raw sizes: container_sizes.json.
 
+### Re-run on 2026-11-01
+
+- Fixed: a request whose endpoint crashed was missing from the prediction log and the error rate; it is now logged as the 500 the caller receives, and a new test reproduces the crash. 190 tests passed; coverage 90% locally and 89% on a clean checkout (185 passed, 5 skipped); ruff clean; strict mypy 0 errors in 22 files.
+
 See REMAINING_ISSUES.md for the prioritized gaps and RUNBOOK.md for reproduction.

@@ -59,7 +59,7 @@ With both servers running:
 .venv/bin/mypy src api --ignore-missing-imports
 ```
 
-On 2026-10-31 these gates passed locally: 189 tests, coverage 90% (89% on a clean checkout, where 5 integration tests skip), ruff clean, mypy 0 errors in 22 files. No CI run has happened yet. Integration tests skip on a fresh checkout until local artifacts exist; unit tests use labelled mocks or labelled synthetic data. UI smoke is AppTest plus server health, not browser visual QA. Monitoring traffic is deliberately synthetic/historical, not a production benchmark.
+On 2026-11-01 these gates passed locally: 190 tests, coverage 90% (89% on a clean checkout, where 5 integration tests skip), ruff clean, mypy 0 errors in 22 files. No CI run has happened yet. Integration tests skip on a fresh checkout until local artifacts exist; unit tests use labelled mocks or labelled synthetic data. UI smoke is AppTest plus server health, not browser visual QA. Monitoring traffic is deliberately synthetic/historical, not a production benchmark.
 
 Assistant external providers are optional: configure OPENAI_API_KEY or start the configured Ollama server/model, then use evaluate_assistant --provider openai|ollama. No evaluation of either was executed. The Ollama request path was exercised inside Compose with the configured `llama3.2:3b` on three questions (docs/CONTAINERS.md); that is wiring, not an evaluation. Do not send private information to this demo.
 

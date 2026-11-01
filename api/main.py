@@ -74,23 +74,32 @@ app.include_router(chat.router)
 app.include_router(monitor.router)
 
 
-@app.middleware("http")
-async def record_traffic(
-    request: Request, call_next: Callable[[Request], Awaitable[Response]]
-) -> Response:
-    """Measure all business routes, including validation failures and batch traffic."""
-    start = time.perf_counter()
-    response = await call_next(request)
+def _log_business_request(request: Request, status_code: int, start: float) -> None:
     if request.url.path in {"/predict", "/predict/batch", "/recommend", "/chat"}:
         request.app.state.prediction_log.append(
             {
                 "timestamp": datetime.now(UTC).isoformat(),
                 "path": request.url.path,
-                "status_code": response.status_code,
+                "status_code": status_code,
                 "latency_ms": (time.perf_counter() - start) * 1000,
                 "predictions": getattr(request.state, "prediction_records", []),
             }
         )
+
+
+@app.middleware("http")
+async def record_traffic(
+    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+) -> Response:
+    """Measure all business routes, including validation failures, crashes and batch traffic."""
+    start = time.perf_counter()
+    try:
+        response = await call_next(request)
+    except Exception:
+        # An unhandled error reaches the caller as Starlette's 500: log that, then re-raise.
+        _log_business_request(request, 500, start)
+        raise
+    _log_business_request(request, response.status_code, start)
     return response
 
 

@@ -7,6 +7,8 @@ tests self-contained so they also run on a clean CI checkout. Records are synthe
 
 from __future__ import annotations
 
+from unittest.mock import MagicMock
+
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, select
 
@@ -110,6 +112,22 @@ def test_middleware_writes_business_requests_only(monkeypatch, tmp_path):
     assert [r["path"] for r in rows] == ["/recommend"]
     assert rows[0]["record"]["status_code"] == rows[0]["status_code"]
     assert metrics["request_count"] == 1 and metrics["log_write_failures"] == 0
+
+
+def test_crashing_endpoint_is_logged_as_500(monkeypatch, tmp_path, sample_features):
+    url = _url(tmp_path)
+    monkeypatch.setenv("DATABASE_URL", url)
+    app = _offline_app(monkeypatch, tmp_path)
+    crashing_model = MagicMock()
+    crashing_model.predict_proba.side_effect = ValueError("synthetic model failure")
+    with TestClient(app, raise_server_exceptions=False) as client:
+        monkeypatch.setattr(app.state, "model", crashing_model)  # after startup, which resets it
+        batch = {"customers": [{"customer_id": "synthetic-1", "features": sample_features}]}
+        response = client.post("/predict/batch", json=batch)
+        metrics = client.get("/metrics").json()
+    assert response.status_code == 500
+    assert [(r["path"], r["status_code"]) for r in _rows(url)] == [("/predict/batch", 500)]
+    assert metrics["request_count"] == 1 and metrics["error_rate"] == 1.0
 
 
 def test_unusable_database_keeps_api_live_but_not_ready(monkeypatch, tmp_path):
