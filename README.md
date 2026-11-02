@@ -32,7 +32,7 @@ python3.12 -m venv .venv
 In another terminal:
 
 ```bash
-.venv/bin/streamlit run app/streamlit_app.py --server.address 127.0.0.1
+.venv/bin/streamlit run frontend/streamlit_app.py --server.address 127.0.0.1
 ```
 
 Open http://127.0.0.1:8501 and http://127.0.0.1:8000/docs. Use historical customer **12347**, then “Load historical customer features.” These are local demo endpoints with no authentication; do not expose them publicly.

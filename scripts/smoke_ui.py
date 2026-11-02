@@ -12,7 +12,7 @@ from src.contracts import PROJECT_ROOT
 def main():
     health = httpx.get("http://127.0.0.1:8501/_stcore/health")
     health.raise_for_status()
-    app = AppTest.from_file(str(PROJECT_ROOT / "app/streamlit_app.py"), default_timeout=60)
+    app = AppTest.from_file(str(PROJECT_ROOT / "frontend/streamlit_app.py"), default_timeout=60)
     app.run()
     checks = []
 

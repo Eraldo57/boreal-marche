@@ -449,7 +449,7 @@ For a ~4K customer dataset with tree-based models, local training is faster, che
 
 ### Q29. Which decisions in your system are based exclusively on automated processing, and what does that oblige you to do?
 
-Three automated decision points, documented in `governance/GOVERNANCE_LOI25.md`:
+Three automated decision points, documented in `GOVERNANCE_LOI25.md`:
 
 **Head A — Retention prediction:** A probability score and risk label that determines whether a customer is flagged for a coupon campaign. This is *not* fully automated — a human marketing analyst reviews and approves the flagged list before any coupon is sent. Still, the model produces the initial recommendation, which triggers Law 25 obligations.
 

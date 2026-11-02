@@ -88,7 +88,7 @@ def test_runtime_dependencies_exclude_training_and_ui_packages():
 def test_frontend_requirements_match_pyproject():
     wanted = {
         line.strip()
-        for line in (ROOT / "app" / "requirements.txt").read_text().splitlines()
+        for line in (ROOT / "frontend" / "requirements.txt").read_text().splitlines()
         if line.strip() and not line.startswith("#")
     }
     declared = set(_pyproject()["dependencies"]) | set(

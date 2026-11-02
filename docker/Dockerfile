@@ -103,12 +103,12 @@ LABEL maintainer="Eraldo Ibrushi <eraldo.ibrushi@gmail.com>" \
 
 RUN groupadd --system appuser && useradd --system --gid appuser --create-home appuser
 WORKDIR /app
-COPY app/requirements.txt ./app/requirements.txt
-RUN pip install -r app/requirements.txt
-COPY app/ ./app/
+COPY frontend/requirements.txt ./frontend/requirements.txt
+RUN pip install -r frontend/requirements.txt
+COPY frontend/ ./frontend/
 USER appuser
 
 EXPOSE 8501
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
     CMD python -c "import httpx; httpx.get('http://localhost:8501/_stcore/health').raise_for_status()" || exit 1
-CMD ["streamlit", "run", "app/streamlit_app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+CMD ["streamlit", "run", "frontend/streamlit_app.py", "--server.port=8501", "--server.address=0.0.0.0"]

@@ -29,10 +29,10 @@ jobs:
         run: pip install ruff
 
       - name: Lint with ruff
-        run: ruff check src/ api/ app/ tests/ scripts/
+        run: ruff check src/ api/ frontend/ tests/ scripts/
 
       - name: Check formatting
-        run: ruff format --check src/ api/ app/ tests/ scripts/
+        run: ruff format --check src/ api/ frontend/ tests/ scripts/
 
   # -----------------------------------------------------------------------
   # 2. Type checking

@@ -100,7 +100,7 @@ Four tools: policy_search (index), retention_score (look up all features, call /
 
 Health is process liveness; readiness is artifact availability. A running process can be not ready. Exact features/order come from the canonical contract; /predict/batch validates every payload and supports up to 500 customers.
 
-## 8. app/streamlit_app.py
+## 8. frontend/streamlit_app.py
 
 **Purpose:** make the system demonstrable through one interface.  
 **Input:** API_BASE_URL, historical customer ID, basket, question and provider selection.  

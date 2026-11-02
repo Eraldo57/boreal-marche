@@ -34,7 +34,7 @@ train = [
     "mlxtend>=0.23.4,<0.24",
     "openpyxl>=3.1",
 ]
-# Streamlit interface. The frontend image installs app/requirements.txt, which must match.
+# Streamlit interface. The frontend image installs frontend/requirements.txt, which must match.
 frontend = [
     "streamlit>=1.37",
 ]
@@ -80,4 +80,4 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["src*", "api*", "app*", "scripts*"]
+include = ["src*", "api*", "frontend*", "scripts*"]

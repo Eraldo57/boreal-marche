@@ -40,4 +40,4 @@ Do not interpret illustrative periods in the fictional policy corpus as enforced
 
 ## Feature minimization
 
-See FEATURE_INVENTORY.md for the canonical 25 names, order and definitions, including n_countries. Geographic features can act as proxies; integer encoding does not anonymize location. Monetary and average-basket-value duplication should be tested via ablation. No statement that every feature is legally necessary is made.
+See governance/FEATURE_INVENTORY.md for the canonical 25 names, order and definitions, including n_countries. Geographic features can act as proxies; integer encoding does not anonymize location. Monetary and average-basket-value duplication should be tested via ablation. No statement that every feature is legally necessary is made.

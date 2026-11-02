@@ -72,8 +72,8 @@ test: ## Run full test suite with coverage
 
 .PHONY: lint
 lint: ## Lint and format check
-	$(PYTHON) -m ruff check src/ api/ app/ tests/ scripts/
-	$(PYTHON) -m ruff format --check src/ api/ app/ tests/ scripts/
+	$(PYTHON) -m ruff check src/ api/ frontend/ tests/ scripts/
+	$(PYTHON) -m ruff format --check src/ api/ frontend/ tests/ scripts/
 
 .PHONY: typecheck
 typecheck: ## Static type checking
@@ -99,7 +99,7 @@ api: ## Start the API locally (dev mode)
 
 .PHONY: app
 app: ## Start the Streamlit frontend locally
-	$(PYTHON) -m streamlit run app/streamlit_app.py --server.port 8501
+	$(PYTHON) -m streamlit run frontend/streamlit_app.py --server.port 8501
 
 # ---------------------------------------------------------------------------
 # Full pipeline

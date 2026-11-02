@@ -38,7 +38,7 @@ Terminal 1:
 Terminal 2:
 
 ```bash
-API_BASE_URL=http://127.0.0.1:8000 .venv/bin/streamlit run app/streamlit_app.py --server.address 127.0.0.1 --server.port 8501 --browser.gatherUsageStats false
+API_BASE_URL=http://127.0.0.1:8000 .venv/bin/streamlit run frontend/streamlit_app.py --server.address 127.0.0.1 --server.port 8501 --browser.gatherUsageStats false
 ```
 
 Open http://127.0.0.1:8000/docs and http://127.0.0.1:8501. /health should be 200 even if artifact loading fails; /ready is 503 with useful errors until all required components load. Restart API after changing artifacts. Never load an untrusted joblib file.

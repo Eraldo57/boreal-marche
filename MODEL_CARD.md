@@ -10,7 +10,7 @@ Positive target: **will place a positive purchase within 90 days**. Risk labels 
 
 ## Inputs and evaluation
 
-Exactly 25 ordered features in src/contracts.py and FEATURE_INVENTORY.md. Training snapshots precede model-selection validation, calibration, decision and final test periods. Details and every comparison are in reports/current_run/retention_metrics.json. The final estimator fits 10,253 snapshot rows, not 10,253 distinct people. Calibration uses 4,522 rows; final holdout uses 5,233.
+Exactly 25 ordered features in src/contracts.py and governance/FEATURE_INVENTORY.md. Training snapshots precede model-selection validation, calibration, decision and final test periods. Details and every comparison are in reports/current_run/retention_metrics.json. The final estimator fits 10,253 snapshot rows, not 10,253 distinct people. Calibration uses 4,522 rows; final holdout uses 5,233.
 
 | Final chronological holdout | Average precision | ROC-AUC | Brier |
 |---|---:|---:|---:|
@@ -31,7 +31,7 @@ Coupon cost 5, margin 25 and missed-return cost 0 are **assumed monetary units**
 ## Important limitations
 
 - Customers recur across snapshots; observation history expands and seasons differ. Unseen-customer performance is not measured.
-- One-time buyers have much lower observed returner recall; see fairness_audit.md.
+- One-time buyers have much lower observed returner recall; see governance/fairness_audit.md.
 - Country coding is ordinal and category labels are weak first-token proxies; redundant monetary features remain. Necessity/ablation studies are unfinished.
 - Geographic/temporal/source-domain transfer is unvalidated.
 - No confidence intervals, full subgroup audit, coupon experiment, drift-to-performance backfill or cloud HPO exists.
