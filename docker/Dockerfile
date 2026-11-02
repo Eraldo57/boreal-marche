@@ -67,7 +67,7 @@ COPY docs/corpus/ ./docs/corpus/
 COPY artifacts/ ./artifacts/
 COPY src/ ./src/
 COPY api/ ./api/
-RUN mkdir -p data/logs data/chromadb data/model_cache data/processed \
+RUN mkdir -p data/logs data/chromadb data/model_cache data/processed data/registry_cache \
     && chown -R appuser:appuser data
 
 # The commit changes on every build, so it is stamped last: only these metadata layers

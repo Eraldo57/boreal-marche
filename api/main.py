@@ -159,6 +159,7 @@ async def version(request: Request) -> VersionResponse:
         calibration_method=meta.get("calibration_method"),
         metrics=meta.get("metrics", {}),
         decision_threshold=meta.get("decision_threshold"),
+        model_source=getattr(request.app.state, "model_source", None),
     )
 
 

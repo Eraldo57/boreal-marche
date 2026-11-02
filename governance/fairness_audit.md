@@ -80,7 +80,7 @@ Overlap: 3,194 of 5,233 rows (61.0%) are in at least one flagged group. Share of
 
 ## Candidate mitigations and trade-offs
 
-None is implemented. Choosing one is a business and ethics decision.
+None is implemented. Choosing one is a business and ethics decision. In the meantime, the fairness gates in `governance/PROMOTION_POLICY.md` stop a new model from adding a flag or widening one of these gaps.
 
 1. **Lower the threshold for flagged groups.** The last table measures this on the June 2011 decision period, not the test snapshot, so the holdout is not tuned on.
    - *Gain*: it closes each recall gap.

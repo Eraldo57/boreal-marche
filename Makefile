@@ -56,6 +56,10 @@ fairness: ## Subgroup fairness audit of the saved model on the test snapshot
 minimisation: ## Drop-column necessity test of every feature on the decision period
 	$(PYTHON) -m src.minimisation
 
+.PHONY: registry
+registry: ## List model registry versions, aliases and approvals
+	$(PYTHON) -m src.registry status
+
 # ---------------------------------------------------------------------------
 # Head B — Recommendations
 # ---------------------------------------------------------------------------

@@ -166,6 +166,17 @@ assistant:
     model: "llama3.2:3b"  # newest Llama that fits a laptop (2.02 GB); llama3.3/llama4 are 42/67 GB
     host: "http://localhost:11434"
 
+registry:
+  # MLflow model registry. The API serves the version the alias points to; see
+  # governance/PROMOTION_POLICY.md for how a version gets there.
+  model_name: "boreal-retention"
+  alias: "champion"
+  promotion:
+    # Judgement tolerances for this project, not derived from data.
+    max_pr_auc_drop: 0.01               # candidate PR-AUC may be at most this much lower
+    max_brier_increase: 0.01            # candidate Brier score may be at most this much higher
+    max_fairness_gap_widening_pp: 2.0   # an existing fairness flag may not widen by more
+
 monitoring:
   drift:
     reference_window: "training"

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 import os
 from collections import deque
 from collections.abc import AsyncIterator
@@ -12,7 +11,6 @@ from pathlib import Path
 from threading import Lock
 from typing import Any
 
-import joblib
 import pandas as pd
 import structlog
 from sqlalchemy import (
@@ -40,10 +38,9 @@ from src.contracts import (
     MODEL_PATH,
     PROCESSED,
     PROJECT_ROOT,
-    validate_metadata,
 )
-from src.ingest import _sha256
 from src.recommend import RecommendationEngine
+from src.registry import CACHE_DIR, load_checked, resolve_champion
 
 logger = structlog.get_logger(__name__)
 _MODEL_PATH = MODEL_PATH
@@ -159,9 +156,37 @@ class RuleEngine:
         return result["recommendations"], result["because"], result["strategy"]
 
 
+def _first_line(exc: Exception) -> str:
+    return f"{type(exc).__name__}: {(str(exc).splitlines() or [''])[0]}"
+
+
+def _load_retention_model() -> tuple[Any, dict[str, Any], dict[str, Any]]:
+    """The registry's champion first (brief section 3.5); artifacts/ as the local fallback.
+
+    MODEL_SOURCE=local skips the registry. Either way the checksum and contract are
+    verified before the model is used.
+    """
+    if os.getenv("MODEL_SOURCE", "registry") == "registry":
+        # Fail fast to the fallback instead of retrying an unreachable tracking server.
+        os.environ.setdefault("MLFLOW_HTTP_REQUEST_MAX_RETRIES", "0")
+        os.environ.setdefault("MLFLOW_HTTP_REQUEST_TIMEOUT", "10")
+        try:
+            model_path, metadata_path, source = resolve_champion(CACHE_DIR)
+            model, metadata = load_checked(model_path, metadata_path)
+            return model, metadata, source
+        except Exception as exc:  # no registry, no alias, unreachable or failed checks
+            reason = _first_line(exc)
+            logger.warning("registry_unavailable_using_local_model", reason=reason)
+    else:
+        reason = "MODEL_SOURCE=local"
+    model, metadata = load_checked(_MODEL_PATH, _META_PATH)
+    return model, metadata, {"source": "local", "path": "artifacts/", "fallback_reason": reason}
+
+
 @asynccontextmanager
 async def lifespan(app: Any) -> AsyncIterator[None]:
     app.state.model = app.state.rule_engine = app.state.rag_index = None
+    app.state.model_source = None
     app.state.customer_features = app.state.drift_reference = None
     app.state.metadata, app.state.startup_errors = {}, {}
     app.state.threshold, app.state.feature_order = None, FEATURE_NAMES
@@ -172,13 +197,7 @@ async def lifespan(app: Any) -> AsyncIterator[None]:
         app.state.startup_errors["prediction_log"] = str(exc).splitlines()[0]
         logger.error("prediction_log_startup_failed", error=str(exc).splitlines()[0])
     try:
-        metadata = json.loads(_META_PATH.read_text())
-        validate_metadata(metadata)
-        if _sha256(_MODEL_PATH) != metadata["model_sha256"]:
-            raise ValueError("Model checksum does not match metadata")
-        model = joblib.load(_MODEL_PATH)  # trusted locally-generated artifacts only
-        if list(model.feature_names_in_) != FEATURE_NAMES:
-            raise ValueError("Serialized estimator feature order mismatch")
+        model, metadata, app.state.model_source = _load_retention_model()
         app.state.model, app.state.metadata = model, metadata
         app.state.threshold = metadata["decision_threshold"]
     except Exception as exc:

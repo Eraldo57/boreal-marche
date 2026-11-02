@@ -27,6 +27,18 @@ def isolated_prediction_log(monkeypatch: pytest.MonkeyPatch, tmp_path: Any) -> N
     monkeypatch.setenv("DATABASE_URL", f"sqlite:///{tmp_path / 'predictions.db'}")
 
 
+@pytest.fixture(autouse=True)
+def local_model_source(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Tests never read the developer's MLflow registry; registry tests opt back in.
+
+    mlflow.set_tracking_uri/set_registry_uri also write these environment variables, so
+    registering them here makes pytest undo whatever a test (or MLflow) sets.
+    """
+    monkeypatch.setenv("MODEL_SOURCE", "local")
+    monkeypatch.delenv("MLFLOW_TRACKING_URI", raising=False)
+    monkeypatch.delenv("MLFLOW_REGISTRY_URI", raising=False)
+
+
 @pytest.fixture
 def sample_features() -> dict[str, float]:
     """A plausible feature vector for one customer."""

@@ -24,6 +24,9 @@ dependencies = [
     "chromadb>=1.0,<2",
     "pyyaml>=6.0",
     "structlog>=24.1",
+    # Registry client only (~45 MB): resolves the champion alias at startup. The full mlflow
+    # package (server, UI, training integrations) stays in the train extra.
+    "mlflow-skinny>=2.20,<3",
 ]
 
 [project.optional-dependencies]
@@ -66,6 +69,7 @@ select = ["E", "F", "I", "N", "W", "UP"]
 "src/train.py" = ["N803", "N806"]
 "src/fairness.py" = ["N803", "N806"]
 "src/minimisation.py" = ["N803", "N806"]
+"src/registry.py" = ["N803", "N806"]
 
 [tool.mypy]
 python_version = "3.12"

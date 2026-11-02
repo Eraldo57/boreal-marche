@@ -28,6 +28,7 @@ artifacts/rules.json
 mlruns/
 mlartifacts/
 mlflow.db*
+data/registry_cache/
 data/model_cache/
 data/chromadb/
 data/logs/

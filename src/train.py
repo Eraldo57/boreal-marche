@@ -45,6 +45,7 @@ from sklearn.tree import DecisionTreeClassifier
 from src.contracts import ARTIFACTS, CONTRACT_VERSION, FEATURE_NAMES, PROCESSED, PROJECT_ROOT
 from src.ingest import _sha256, load_config
 from src.plots import FIGURES
+from src.registry import register_run
 
 REPORTS = PROJECT_ROOT / "reports" / "current_run"
 SPLITS = ["train", "validation", "calibration", "decision", "test"]
@@ -435,6 +436,11 @@ def run(*, n_trials: int | None = None, output_dir: Path = ARTIFACTS) -> dict:
             ),
             flush=True,
         )
+    # A new registry version is only a candidate; promotion is a separate, human step.
+    registered = register_run(
+        run_info.info.run_id, model_path, output_dir / "retention_model_metadata.json"
+    )
+    print(f"[train] registered version {registered} as a candidate (not promoted)", flush=True)
     return metadata
 
 

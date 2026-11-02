@@ -44,6 +44,9 @@ class VersionResponse(BaseModel):
     calibration_method: str | None = None
     metrics: dict[str, Any] = Field(default_factory=dict)
     decision_threshold: float | None = None
+    # Where the served model came from: the registry alias and version, or the local
+    # fallback with its reason.
+    model_source: dict[str, Any] | None = None
 
 
 # ---------------------------------------------------------------------------
