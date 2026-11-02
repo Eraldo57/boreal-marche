@@ -6,6 +6,7 @@ import os
 import httpx
 import pandas as pd
 import streamlit as st
+from about import mermaid_to_dot, read_document
 
 st.set_page_config(page_title="Boréal Marché", page_icon="🍁", layout="wide")
 API_BASE = st.sidebar.text_input(
@@ -268,25 +269,59 @@ with monitoring:
             "the backfill design is in docs/MONITORING.md."
         )
 
+
+def show_document(name, missing):
+    text = read_document(name, language)
+    if text is None:
+        st.warning(missing)
+    else:
+        st.markdown(text)
+
+
 with about:
-    st.header("Implementation and evidence")
-    version = api_call("GET", "/version")
-    if version:
-        st.json(version)
-    st.write(
-        "Public UCI Online Retail II transactions are re-skinned as fictional Boréal Marché. "
-        "They are not Québec grocery customer data. Original currency: GBP."
+    st.header("About / À propos")
+    notice, card, privacy, provenance, architecture, version_tab = st.tabs(
+        [
+            "Customer notice / Avis",
+            "Model card",
+            "Privacy notice / Confidentialité",
+            "Data provenance",
+            "Architecture",
+            "Version",
+        ]
     )
-    st.write(
-        "The authored policy/product corpus describes a fictional retailer. "
-        "It does not prove actual business operations or legal compliance."
-    )
-    st.write(
-        "Human review, authenticated access, retention/deletion enforcement, cloud deployment "
-        "and full fairness evaluation remain next-phase work."
-    )
-    st.write(
-        "OpenAI may send the message and retrieved context to an external provider. "
-        "Regex runs locally; Ollama requires its own configured server."
-    )
-    st.caption("Evidence: reports/current_run/VALIDATION_RESULTS.md and REMAINING_ISSUES.md")
+    with notice:
+        show_document("notice", "Customer notice missing from this installation.")
+    with card:
+        show_document("model_card", "MODEL_CARD.md missing from this installation.")
+    with privacy:
+        show_document("privacy", "Privacy notice missing from this installation.")
+    with provenance:
+        show_document("provenance", "DATA_CARD.md missing from this installation.")
+    with architecture:
+        source = read_document("architecture")
+        dot = mermaid_to_dot(source) if source else None
+        if dot:
+            st.graphviz_chart(dot)
+        st.caption("Source and rationale: ARCHITECTURE.md")
+    with version_tab:
+        version = api_call("GET", "/version")
+        if version:
+            st.json(version)
+        st.write(
+            "Public UCI Online Retail II transactions are re-skinned as fictional Boréal Marché. "
+            "They are not Québec grocery customer data. Original currency: GBP."
+        )
+        st.write(
+            "The authored policy/product corpus describes a fictional retailer. "
+            "It does not prove actual business operations or legal compliance."
+        )
+        st.write(
+            "OpenAI may send the message and retrieved context to an external provider. "
+            "Regex runs locally; Ollama requires its own configured server."
+        )
+        st.write(
+            "Not built yet: authenticated access, enforced retention and deletion, "
+            "and cloud deployment."
+        )
+        st.caption("Evidence: reports/current_run/VALIDATION_RESULTS.md and REMAINING_ISSUES.md")

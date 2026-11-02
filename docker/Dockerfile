@@ -105,6 +105,10 @@ RUN groupadd --system appuser && useradd --system --gid appuser --create-home ap
 WORKDIR /app
 COPY frontend/requirements.txt ./frontend/requirements.txt
 RUN pip install -r frontend/requirements.txt
+# What the About tab renders: one source of truth, copied rather than duplicated.
+COPY MODEL_CARD.md DATA_CARD.md ARCHITECTURE.md ./
+COPY governance/customer_notice_*.md ./governance/
+COPY docs/corpus/privacy_notice_*.md ./docs/corpus/
 COPY frontend/ ./frontend/
 USER appuser
 

@@ -55,10 +55,14 @@ tests/
 # Notebooks (development only)
 notebooks/
 
-# Documentation sources
+# Documentation sources, except what the images use: the assistant's corpus, and the
+# documents the interface's About tab renders (model card, data card, architecture, notices).
 *.md
 !governance/*.md
 !docs/corpus/*.md
+!MODEL_CARD.md
+!DATA_CARD.md
+!ARCHITECTURE.md
 
 # Environment files
 .env
