@@ -1,14 +1,14 @@
-"""Optional integration checks: never substitute mock artifacts for real evidence."""
+"""Optional integration checks: never substitute mock artifacts for real evidence.
 
-import json
+The data-quality assertions live in test_data_quality.py, which needs only the processed
+data, so CI can run them without the model or the index.
+"""
 
-import pandas as pd
 import pytest
 from fastapi.testclient import TestClient
 
 from api.main import app
-from src.contracts import FEATURE_NAMES, METADATA_PATH, PROCESSED, PROJECT_ROOT
-from src.ingest import _sha256
+from src.contracts import METADATA_PATH, PROJECT_ROOT
 from src.rag.index import RagIndex
 
 pytestmark = [
@@ -18,17 +18,6 @@ pytestmark = [
         reason="Run the real local pipeline to generate model and RAG artifacts",
     ),
 ]
-
-
-def test_data_quality_real_manifest():
-    manifest = json.loads((PROCESSED / "manifest.json").read_text())
-    transactions = pd.read_parquet(PROCESSED / "transactions.parquet")
-    assert len(transactions) == manifest["row_count"]
-    assert _sha256(PROCESSED / "transactions.parquet") == manifest["processed_sha256"]
-    assert transactions["IsPurchase"].sum() == manifest["purchase_rows"]
-    assert transactions["IsReturn"].sum() > 0
-    assert not transactions.loc[transactions["IsPurchase"], "IsReturn"].any()
-    assert list(pd.read_parquet(PROCESSED / "X.parquet").columns) == FEATURE_NAMES
 
 
 def test_multilingual_retrieval_real_index():

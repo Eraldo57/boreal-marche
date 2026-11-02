@@ -46,8 +46,9 @@ dev = [
     "boreal-marche[train,frontend]",
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
-    "ruff>=0.5",
-    "mypy>=1.10",
+    # Exact versions: both gate CI, and a newer release can add rules or errors on unchanged code.
+    "ruff==0.16.9",  # keep in step with the lint job in .github/workflows/ci.yml
+    "mypy==2.3.1",
     "coverage>=7.5",
     "dvc>=3,<4",
 ]

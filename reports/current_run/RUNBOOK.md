@@ -65,6 +65,7 @@ With both servers running:
 
 - 273 tests passed locally, with 90% coverage. On a clean checkout, 7 integration tests skip and coverage is 89%.
 - ruff is clean, and mypy reports 0 errors in 31 files.
+- Re-run on 2026-11-02 with the same result: logs/tests_20261102.log, logs/tests_clean_checkout_20261102.log.
 - No CI run has happened yet.
 
 **What the tests are and are not.**

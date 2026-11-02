@@ -1,0 +1,118 @@
+........................................................................ [ 26%]
+.........................s....................s..................s...... [ 52%]
+........................s........................s...................... [ 79%]
+....ss...................................................                [100%]
+=============================== warnings summary ===============================
+../../../../../../../Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/mlflow/utils/pydantic_utils.py:33
+tests/test_registry.py::test_registering_creates_a_candidate_and_moves_no_alias
+tests/test_registry.py::test_registering_creates_a_candidate_and_moves_no_alias
+tests/test_registry.py::test_registering_creates_a_candidate_and_moves_no_alias
+tests/test_registry.py::test_registering_creates_a_candidate_and_moves_no_alias
+  /Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/mlflow/utils/pydantic_utils.py:33: PydanticDeprecatedSince212: Using `@model_validator` with mode='after' on a classmethod is deprecated. Instead, use an instance method. See the documentation at https://docs.pydantic.dev/2.13/concepts/validators/#model-after-validator. Deprecated in Pydantic V2.12 to be removed in V3.0.
+    return pydantic_model_validator(mode=mode)(func)
+
+../../../../../../../Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/mlflow/gateway/config.py:454
+  /Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/mlflow/gateway/config.py:454: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class Route(ConfigModel):
+
+tests/test_ingest_features_run.py: 5784 warnings
+  /private/tmp/AI evaluator-501/-Users-eraldoibrushi-Desktop-DataScience-ML-Vanier-AI-Development-Project/cd2251cc-fc19-4fe0-b1fa-236e20b60eaa/scratchpad/cleanroom_20261102_6NCv/tests/test_ingest_features_run.py:45: DeprecationWarning: The 'generic' unit for NumPy timedelta is deprecated, and will raise an error in the future. This includes implicit conversion of bare integers (e.g. `+ 1`). Please use a specific unit instead.
+    stamp = start + pd.Timedelta(days=int(rng.integers(0, span_days)), hours=10)
+
+tests/test_ingest_features_run.py: 11 warnings
+  /private/tmp/AI evaluator-501/-Users-eraldoibrushi-Desktop-DataScience-ML-Vanier-AI-Development-Project/cd2251cc-fc19-4fe0-b1fa-236e20b60eaa/scratchpad/cleanroom_20261102_6NCv/src/features.py:484: DeprecationWarning: The 'generic' unit for NumPy timedelta is deprecated, and will raise an error in the future. This includes implicit conversion of bare integers (e.g. `+ 1`). Please use a specific unit instead.
+    end = pd.Timestamp(cutoff) + pd.Timedelta(days=window)
+
+tests/test_pipeline.py::test_temporal_partitions_require_mature_labels
+  /private/tmp/AI evaluator-501/-Users-eraldoibrushi-Desktop-DataScience-ML-Vanier-AI-Development-Project/cd2251cc-fc19-4fe0-b1fa-236e20b60eaa/scratchpad/cleanroom_20261102_6NCv/tests/test_pipeline.py:101: DeprecationWarning: The 'generic' unit for NumPy timedelta is deprecated, and will raise an error in the future. This includes implicit conversion of bare integers (e.g. `+ 1`). Please use a specific unit instead.
+    snapshots["label_end"] = pd.to_datetime(snapshots["cutoff"]) + pd.Timedelta(days=90)
+
+tests/test_pipeline.py::test_sparse_matrix_and_no_future_mining
+tests/test_rules_run.py::test_run_writes_rules_with_header
+tests/test_rules_run.py::test_run_finds_the_planted_association
+tests/test_rules_run.py::test_run_writes_popularity_and_metrics
+tests/test_rules_run.py::test_mine_apriori_and_fpgrowth_agree
+tests/test_rules_run.py::test_mine_handles_no_frequent_pairs
+  /private/tmp/AI evaluator-501/-Users-eraldoibrushi-Desktop-DataScience-ML-Vanier-AI-Development-Project/cd2251cc-fc19-4fe0-b1fa-236e20b60eaa/scratchpad/cleanroom_20261102_6NCv/src/rules.py:48: FutureWarning: Allowing arbitrary scalar fill_value in SparseDtype is deprecated. In a future version, the fill_value must be a valid value for the SparseDtype.subtype.
+    return pd.DataFrame.sparse.from_spmatrix(matrix, columns=encoder.columns_), report
+
+tests/test_registry.py: 9 warnings
+tests/test_retrain_report.py: 1 warning
+tests/test_train_run.py: 2 warnings
+  /Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/mlflow/models/model.py:365: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    self.utc_time_created = str(utc_time_created or datetime.utcnow())
+
+tests/test_registry.py::test_registering_creates_a_candidate_and_moves_no_alias
+  /Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/mlflow/types/chat.py:162: PydanticDeprecatedSince20: `min_items` is deprecated and will be removed, use `min_length` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    stop: Optional[list[str]] = Field(None, min_items=1)
+
+tests/test_registry.py::test_registering_creates_a_candidate_and_moves_no_alias
+  /Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/mlflow/types/chat.py:216: PydanticDeprecatedSince20: `min_items` is deprecated and will be removed, use `min_length` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    messages: list[ChatMessage] = Field(..., min_items=1)
+
+tests/test_registry.py::test_registering_creates_a_candidate_and_moves_no_alias
+  /Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/mlflow/types/chat.py:217: PydanticDeprecatedSince20: `min_items` is deprecated and will be removed, use `min_length` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    tools: Optional[list[ChatTool]] = Field(None, min_items=1)
+
+tests/test_sagemaker.py: 5 warnings
+tests/test_train_run.py: 20 warnings
+  /private/tmp/AI evaluator-501/-Users-eraldoibrushi-Desktop-DataScience-ML-Vanier-AI-Development-Project/cd2251cc-fc19-4fe0-b1fa-236e20b60eaa/scratchpad/cleanroom_20261102_6NCv/tests/test_train_run.py:29: DeprecationWarning: The 'generic' unit for NumPy timedelta is deprecated, and will raise an error in the future. This includes implicit conversion of bare integers (e.g. `+ 1`). Please use a specific unit instead.
+    cutoff = pd.Timestamp("2020-01-01") + pd.Timedelta(days=100 * position)
+
+tests/test_sagemaker.py: 750 warnings
+tests/test_train_run.py: 3000 warnings
+  /private/tmp/AI evaluator-501/-Users-eraldoibrushi-Desktop-DataScience-ML-Vanier-AI-Development-Project/cd2251cc-fc19-4fe0-b1fa-236e20b60eaa/scratchpad/cleanroom_20261102_6NCv/tests/test_train_run.py:42: DeprecationWarning: The 'generic' unit for NumPy timedelta is deprecated, and will raise an error in the future. This includes implicit conversion of bare integers (e.g. `+ 1`). Please use a specific unit instead.
+    "label_end": (cutoff + pd.Timedelta(days=90)).strftime("%Y-%m-%d"),
+
+tests/test_train_run.py::test_run_produces_artifacts_on_synthetic_data
+tests/test_train_run.py::test_run_produces_artifacts_on_synthetic_data
+tests/test_train_run.py::test_script_mode_full_run_without_registry
+tests/test_train_run.py::test_script_mode_full_run_without_registry
+  /Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/mlflow/types/utils.py:452: UserWarning: Hint: Inferred schema contains integer column(s). Integer columns in Python cannot represent missing values. If your input data contains missing values at inference time, it will be encoded as floats and will cause a schema enforcement error. The best way to avoid this problem is to infer the model schema based on a realistic data sample (training dataset) that includes missing values. Alternatively, you can declare integer columns as doubles (float64) whenever these columns may have missing values. See `Handling Integers With Missing Values <https://www.mlflow.org/docs/latest/models.html#handling-integers-with-missing-values>`_ for more details.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_data_quality.py:40: Run python -m src.ingest and python -m src.features to build the processed data
+SKIPPED [1] tests/test_fairness.py:115: Run the real local pipeline to generate the model and features
+SKIPPED [1] tests/test_minimisation.py:63: Run the real local pipeline to generate the model and features
+SKIPPED [1] tests/test_pipeline.py:297: Run python -m src.catalogue first
+SKIPPED [1] tests/test_predict.py:162: retention_model.joblib not built; run make train
+SKIPPED [1] tests/test_real_artifacts.py:23: Run the real local pipeline to generate model and RAG artifacts
+SKIPPED [1] tests/test_real_artifacts.py:28: Run the real local pipeline to generate model and RAG artifacts
+266 passed, 7 skipped, 9602 warnings in 38.60s
+Name                       Stmts   Miss  Cover
+----------------------------------------------
+api/__init__.py                0      0   100%
+api/lifespan.py              158     11    93%
+api/main.py                   80      6    92%
+api/monitoring.py            171      7    96%
+api/routers/__init__.py        0      0   100%
+api/routers/chat.py          164     27    84%
+api/routers/decisions.py      48      1    98%
+api/routers/monitor.py        14      1    93%
+api/routers/predict.py        72     12    83%
+api/routers/recommend.py      19      1    95%
+api/sagemaker_serve.py        44      0   100%
+api/schemas.py               170      2    99%
+api/storage.py                13      0   100%
+src/__init__.py                0      0   100%
+src/catalogue.py              34     10    71%
+src/contracts.py              18      3    83%
+src/fairness.py              156     35    78%
+src/features.py              180      4    98%
+src/generated_docs.py         10      0   100%
+src/ingest.py                165      7    96%
+src/minimisation.py           88     24    73%
+src/plots.py                  58      4    93%
+src/rag/__init__.py            0      0   100%
+src/rag/guardrails.py         57     19    67%
+src/rag/index.py             168      4    98%
+src/rag/providers.py         152     71    53%
+src/rag/tools.py             143     16    89%
+src/recommend.py              91     12    87%
+src/registry.py              210     35    83%
+src/rules.py                 120      1    99%
+src/train.py                 240      5    98%
+----------------------------------------------
+TOTAL                       2843    318    89%

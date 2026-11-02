@@ -122,4 +122,21 @@ The retention model, rules and index are unchanged from 2026-09-30. Everything b
   - A tuning trial printed `validation_pr_auc=0.673018`.
   - The endpoint answered `/ping`, and `/invocations` scored customer 12347 at 0.711864, as the API does.
 
+### Re-run on 2026-11-02
+
+The same code, plus the CI changes below. Logs are in `logs/` under the names given.
+
+- **Quality gates, unchanged.**
+  - 273 tests pass locally with 90% coverage (`tests_20261102.log`, `coverage_20261102.log`).
+  - On a clean checkout, 266 pass and 7 integration tests skip, with 89% coverage (`tests_clean_checkout_20261102.log`).
+  - ruff, formatting and mypy (0 errors in 31 files) are clean, and actionlint finds no problems in the three workflows (`actionlint_20261102.log`).
+- **Data-quality suite.**
+  - The assertions moved to `tests/test_data_quality.py`, which needs only the processed data. They now cover every cleaning rule and the bounds that the feature definitions imply. They pass on the real data.
+  - CI's data-quality job used to skip every time, because CI has no data. It now rebuilds the processed data from the public workbook, checked against its pinned SHA-256, and runs the suite.
+- **CI reproducibility.**
+  - ruff, mypy and the secret scanner are pinned.
+  - PyTorch is installed CPU-only, as in the Docker image.
+  - pip downloads are cached.
+- **Not yet verified:** CI itself, because the repository still has no remote.
+
 See REMAINING_ISSUES.md for the prioritized gaps and RUNBOOK.md for reproduction.

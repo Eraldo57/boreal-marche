@@ -1,6 +1,11 @@
 # ===========================================================================
 # CI — runs on every pull request and push to main
 # ===========================================================================
+# Tool versions are pinned (ruff and mypy in the dev extra, TruffleHog below), so a new
+# upstream release cannot turn the pipeline red on unchanged code. PyTorch is installed
+# CPU-only, as in docker/Dockerfile: the default Linux wheel brings ~4.4 GB of NVIDIA CUDA
+# libraries that no test uses.
+# ===========================================================================
 name: CI
 
 on:
@@ -25,8 +30,8 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install ruff
-        run: pip install ruff
+      - name: Install ruff (the version pinned in the dev extra)
+        run: pip install "ruff==0.16.9"
 
       - name: Lint with ruff
         run: ruff check src/ api/ frontend/ tests/ scripts/
@@ -45,9 +50,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
 
-      - name: Install dependencies
-        run: pip install ".[dev]"
+      - name: Install dependencies (CPU-only PyTorch first)
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu "torch==2.15.0+cpu"
+          pip install ".[dev]"
 
       - name: Run mypy
         run: mypy src/ api/ --ignore-missing-imports
@@ -63,9 +72,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
 
-      - name: Install dependencies
-        run: pip install ".[dev]"
+      - name: Install dependencies (CPU-only PyTorch first)
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu "torch==2.15.0+cpu"
+          pip install ".[dev]"
 
       - name: Run tests with coverage
         run: |
@@ -91,35 +104,58 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
 
-      - name: Install dependencies
-        run: pip install ".[dev]"
+      - name: Install dependencies (CPU-only PyTorch first)
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu "torch==2.15.0+cpu"
+          pip install ".[dev]"
 
       - name: Golden-set tool choice (rule provider; no API, index or LLM needed)
         run: python -m pytest tests/test_assistant_eval.py -v
 
   # -----------------------------------------------------------------------
-  # 4. Data-quality assertions (only if processed data exists)
+  # 4. Data-quality assertions on the real data, rebuilt from the public workbook
   # -----------------------------------------------------------------------
   data-quality:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
 
-      - name: Install dependencies
-        run: pip install ".[dev]"
-
-      - name: Run data-quality checks
+      - name: Install dependencies (CPU-only PyTorch first)
         run: |
-          if [ -f data/processed/transactions.parquet ]; then
-            python -m pytest tests/ -k "data_quality" -v
-          else
-            echo "No processed data found — skipping data-quality checks."
-          fi
+          pip install --index-url https://download.pytorch.org/whl/cpu "torch==2.15.0+cpu"
+          pip install ".[dev]"
+
+      # The UCI workbook is public (CC BY 4.0), but its server is slow, so it is cached.
+      # src.ingest checks it against the SHA-256 pinned in configs/pipeline.yaml either way.
+      - name: Read the pinned workbook checksum
+        id: source
+        run: |
+          SHA=$(python -c 'import yaml; print(yaml.safe_load(open("configs/pipeline.yaml"))["data"]["source_sha256"])')
+          echo "sha256=${SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Cache the UCI workbook
+        uses: actions/cache@v4
+        with:
+          path: data/raw/online_retail_II.xlsx
+          key: uci-online-retail-ii-${{ steps.source.outputs.sha256 }}
+
+      - name: Rebuild the processed data (download if not cached, verify, clean, features)
+        run: |
+          python -m src.ingest
+          python -m src.features
+
+      - name: Run the data-quality suite
+        run: python -m pytest tests/test_data_quality.py -v
 
   # -----------------------------------------------------------------------
   # 5. Docker build of both images (verify they build and report size; don't push)
@@ -162,9 +198,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # full history for scanning
+          fetch-depth: 0  # the scan reads the pushed or pull-request commit range
 
       - name: TruffleHog secret scan
-        uses: trufflesecurity/trufflehog@main
+        uses: trufflesecurity/trufflehog@v3.99.2
         with:
+          version: 3.99.2  # the scanner image; without it the pinned action runs :latest
           extra_args: --only-verified

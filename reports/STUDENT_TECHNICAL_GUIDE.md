@@ -126,9 +126,9 @@ Health is process liveness; readiness is artifact availability. A running proces
 **Input:** small deterministic fixtures, preserved golden questions, optionally real generated artifacts.  
 **Process:** pytest tests contracts, checksum rejection, cleaning, cutoff boundaries, train-only medians, temporal maturity, readiness, tools, guards, recommendation behavior and drift. Separate scripts execute real API, UI and golden-set evaluation.  
 **Output:** logs, JSON reports and coverage.  
-**Important files:** tests/test_pipeline.py, test_real_artifacts.py, existing route/provider tests; scripts/smoke_api.py, smoke_ui.py, evaluate_assistant.py.  
-**Next stage:** CI gates and regression protection.  
-**Limitations:** On 2026-11-01, 273 tests pass locally with 90% coverage. On a clean checkout, 266 pass and 7 integration tests skip, with 89% coverage; the gate is 80%. Strict mypy reports 0 errors. Mocked golden API probabilities are fixtures, not model results. The golden set's tool-choice test (tests/test_assistant_eval.py) uses pass marks of 40–60%, well below the measured 97.5%, so it would miss small regressions.
+**Important files:** tests/test_pipeline.py, test_real_artifacts.py, test_data_quality.py, existing route/provider tests; scripts/smoke_api.py, smoke_ui.py, evaluate_assistant.py.  
+**Next stage:** CI gates and regression protection. CI's data-quality job rebuilds data/processed from the public workbook, checked against its pinned SHA-256, and runs test_data_quality.py: each assertion follows a cleaning rule or a feature definition.  
+**Limitations:** On 2026-11-01, 273 tests pass locally with 90% coverage. On a clean checkout, 266 pass and 7 integration tests skip, with 89% coverage; the gate is 80%. The 2026-11-02 re-run gave the same counts (reports/current_run/logs/tests_20261102.log and tests_clean_checkout_20261102.log). Strict mypy reports 0 errors. Mocked golden API probabilities are fixtures, not model results. The golden set's tool-choice test (tests/test_assistant_eval.py) uses pass marks of 40–60%, well below the measured 97.5%, so it would miss small regressions.
 
 ## 11. Docker and workflows
 
