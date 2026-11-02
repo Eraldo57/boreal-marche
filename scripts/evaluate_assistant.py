@@ -11,8 +11,54 @@ from fastapi.testclient import TestClient
 
 from api.main import app
 from src.contracts import PROJECT_ROOT
+from src.rag.guardrails import detect_language
 from src.rag.index import RagIndex
 from src.rag.providers import RegexProvider
+
+
+def generation_check(client, questions, provider):
+    """Policy questions through /chat/stream: does the model write the answer, in the
+    requested language, with citations? (Language models only; regex quotes sources.)"""
+    rows = []
+    for question in questions:
+        if question["expected_tool"] != "policy_search":
+            continue
+        payload = {
+            "message": question["text"],
+            "language": question["language"],
+            "provider": provider,
+        }
+        start = time.perf_counter()
+        with client.stream("POST", "/chat/stream", json=payload) as response:
+            events = [json.loads(line) for line in response.iter_lines() if line]
+        done = next(e for e in events if e["type"] == "done")
+        reply = done["reply"]
+        rows.append(
+            {
+                "id": question["id"],
+                "language": question["language"],
+                "answer_written_by": done["answer_written_by"],
+                "fell_back": any(e["type"] == "fallback" for e in events),
+                "reply_language": detect_language(reply) if not done["refused"] else None,
+                "cited": bool(done["citations"]),
+                "seconds": time.perf_counter() - start,
+                "reply": reply,
+            }
+        )
+    written = [r for r in rows if r["answer_written_by"] == provider]
+    return {
+        "policy_questions": len(rows),
+        "written_by_model": len(written),
+        "fallbacks": sum(r["fell_back"] for r in rows),
+        "language_match_rate": sum(r["reply_language"] == r["language"] for r in written)
+        / len(written)
+        if written
+        else None,
+        "french_written": sum(r["language"] == "fr" for r in written),
+        "all_written_answers_cited": all(r["cited"] for r in written),
+        "seconds_p50": float(np.median([r["seconds"] for r in rows])) if rows else None,
+        "questions": rows,
+    }
 
 
 def main():
@@ -68,6 +114,9 @@ def main():
                     "reply": data.get("reply", data),
                 }
             )
+        generation = (
+            generation_check(client, questions, args.provider) if args.provider != "regex" else None
+        )
     oos = [r for r in rows if r["category"] == "out_of_scope"]
     in_scope = [r for r in rows if r["category"] != "out_of_scope"]
     sourced = [r for r in rows if r["expected_source"]]
@@ -91,6 +140,8 @@ def main():
         else None,
         "latency_p50_ms": float(np.median([r["latency_ms"] for r in rows])),
         "latency_p95_ms": float(np.percentile([r["latency_ms"] for r in rows], 95)),
+        "cost_usd_per_query": rows[0]["cost_usd"] if rows else None,
+        "streamed_generation": generation,
         "multilingual_smoke": {
             "query_fr": french_query,
             "hits": hits,
@@ -101,10 +152,12 @@ def main():
         "limitations": [
             "Golden set is a development regression set, not an unseen evaluation set",
             "Extractive grounding proxy does not measure answer relevance or completeness",
-            "French policy answers may quote English source text; "
-            "fluent translation is not implemented",
+            "/chat policy answers quote the source text, which may be English for a French "
+            "question; with OpenAI or Ollama, /chat/stream has the model write the answer "
+            "(streamed_generation); its correctness is not scored here",
             "OpenAI and Ollama results are absent unless explicitly executed with --provider",
-            "Costs unknown for external providers; no pricing assumptions fabricated",
+            "Local providers cost nothing per query; OpenAI's cost is not estimated because "
+            "no price list is stored",
         ],
         "questions": rows,
     }

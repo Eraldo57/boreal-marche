@@ -249,7 +249,9 @@ async def _orchestrate(req: ChatRequest, request: Request) -> _Outcome:
         language=language,
         provider_latency_ms=latency,
         token_usage=decision.token_usage,
-        cost_usd=0.0 if provider_name == "regex" else None,
+        # Local providers have no per-question charge; OpenAI's depends on a price list that
+        # this repository does not store, so it stays unknown rather than estimated.
+        cost_usd=0.0 if provider_name in {"regex", "ollama"} else None,
     )
     return _Outcome(response, req.message, grounded[:GENERATION_EXCERPTS], provider)
 
