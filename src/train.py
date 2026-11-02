@@ -219,20 +219,67 @@ def error_analysis(y: Any, p: Any, X: Any, threshold: float) -> dict[str, Any]:
     return result
 
 
-def run(*, n_trials: int | None = None, output_dir: Path = ARTIFACTS) -> dict:
-    """Lock selection/calibration/threshold decisions before scoring final test."""
-    cfg = load_config()
-    seed = cfg["data"]["seed"]
-    n_trials = n_trials if n_trials is not None else cfg["modelling"]["tuning"]["n_trials"]
-    X = pd.read_parquet(PROCESSED / "X.parquet")
-    y = pd.read_parquet(PROCESSED / "y.parquet")["will_return"]
-    snapshots = pd.read_parquet(PROCESSED / "snapshots.parquet")
+def _load(data_dir: Path) -> tuple[pd.DataFrame, pd.Series, pd.DataFrame]:
+    X = pd.read_parquet(data_dir / "X.parquet")
+    y = pd.read_parquet(data_dir / "y.parquet")["will_return"]
+    snapshots = pd.read_parquet(data_dir / "snapshots.parquet")
     if (
         list(X.columns) != FEATURE_NAMES
         or not X.index.equals(y.index)
         or not X.index.equals(snapshots.index)
     ):
         raise ValueError("Feature/target/snapshot contract mismatch; rerun features")
+    return X, y, snapshots
+
+
+def _git_state() -> tuple[str, bool | None]:
+    """Commit and dirty flag; outside a git checkout (e.g. SageMaker) GIT_SHA, else unknown."""
+    try:
+        commit = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=PROJECT_ROOT, stderr=subprocess.DEVNULL
+        )
+        status = subprocess.check_output(
+            ["git", "status", "--porcelain"], cwd=PROJECT_ROOT, stderr=subprocess.DEVNULL
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return os.getenv("GIT_SHA", "unknown"), None
+    return commit.decode().strip(), bool(status.strip())
+
+
+def hpo_trial(data_dir: Path, model_dir: Path, params: dict[str, int]) -> float:
+    """One managed tuning trial (SageMaker): the selected family, a random forest, with the
+    given hyperparameters, fitted on the training snapshots and scored on the model-selection
+    validation snapshot, the same split the local Optuna study used. The printed line is what
+    the tuning job's metric regex reads."""
+    seed = load_config()["data"]["seed"]
+    X, y, snapshots = _load(data_dir)
+    parts = temporal_partitions(snapshots)
+    model = pipeline(RandomForestClassifier(**params, random_state=seed, n_jobs=-1))
+    start = time.perf_counter()
+    model.fit(X.loc[parts["train"]], y.loc[parts["train"]])
+    seconds = time.perf_counter() - start
+    validation = parts["validation"]
+    score = float(average_precision_score(y.loc[validation], _get_probas(model, X.loc[validation])))
+    model_dir.mkdir(parents=True, exist_ok=True)
+    result = {"params": params, "validation_pr_auc": score, "fit_seconds": seconds}
+    (model_dir / "hpo_trial.json").write_text(json.dumps(result, indent=2))
+    print(f"validation_pr_auc={score:.6f}", flush=True)
+    return score
+
+
+def run(
+    *,
+    n_trials: int | None = None,
+    output_dir: Path = ARTIFACTS,
+    data_dir: Path | None = None,
+    register: bool = True,
+) -> dict:
+    """Lock selection/calibration/threshold decisions before scoring final test."""
+    cfg = load_config()
+    seed = cfg["data"]["seed"]
+    n_trials = n_trials if n_trials is not None else cfg["modelling"]["tuning"]["n_trials"]
+    data_dir = data_dir or PROCESSED
+    X, y, snapshots = _load(data_dir)
     parts = temporal_partitions(snapshots)
     tr, va, ca, de, te = [parts[s] for s in SPLITS]
     mlflow.set_tracking_uri(
@@ -358,9 +405,10 @@ def run(*, n_trials: int | None = None, output_dir: Path = ARTIFACTS) -> dict:
             "error_analysis": error_analysis(y.loc[te].to_numpy(), p_test, X.loc[te], threshold),
         }
         (reports_dir / "retention_metrics.json").write_text(json.dumps(report, indent=2))
-        feature_meta = json.loads((PROCESSED / "feature_metadata.json").read_text())
+        feature_meta = json.loads((data_dir / "feature_metadata.json").read_text())
         model_path = output_dir / "retention_model.joblib"
         joblib.dump(final, model_path)
+        git_commit, git_dirty = _git_state()
         metadata = {
             "contract_version": CONTRACT_VERSION,
             "model_version": "0.2.0",
@@ -376,15 +424,11 @@ def run(*, n_trials: int | None = None, output_dir: Path = ARTIFACTS) -> dict:
             "decision_threshold": threshold,
             "evaluation_metric": "average_precision",
             "source_data_sha256": feature_meta["source_data_sha256"],
-            "feature_sha256": _sha256(PROCESSED / "X.parquet"),
+            "feature_sha256": _sha256(data_dir / "X.parquet"),
             "model_sha256": _sha256(model_path),
             "config_sha256": _sha256(PROJECT_ROOT / "configs/pipeline.yaml"),
-            "git_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=PROJECT_ROOT)
-            .decode()
-            .strip(),
-            "git_dirty": bool(
-                subprocess.check_output(["git", "status", "--porcelain"], cwd=PROJECT_ROOT).strip()
-            ),
+            "git_commit": git_commit,
+            "git_dirty": git_dirty,
             "source_code_sha256": hashlib.sha256(
                 b"".join(p.read_bytes() for p in sorted((PROJECT_ROOT / "src").rglob("*.py")))
             ).hexdigest(),
@@ -436,20 +480,55 @@ def run(*, n_trials: int | None = None, output_dir: Path = ARTIFACTS) -> dict:
             ),
             flush=True,
         )
-    # A new registry version is only a candidate; promotion is a separate, human step.
-    registered = register_run(
-        run_info.info.run_id, model_path, output_dir / "retention_model_metadata.json"
-    )
-    print(f"[train] registered version {registered} as a candidate (not promoted)", flush=True)
+    if register:
+        # A new registry version is only a candidate; promotion is a separate, human step.
+        registered = register_run(
+            run_info.info.run_id, model_path, output_dir / "retention_model_metadata.json"
+        )
+        print(f"[train] registered version {registered} as a candidate (not promoted)", flush=True)
     return metadata
 
 
 def main() -> None:
+    """Local runs and SageMaker jobs share this entry point (SageMaker script mode).
+
+    SageMaker passes hyperparameters as arguments and the data and model folders as
+    SM_CHANNEL_TRAIN and SM_MODEL_DIR; locally the defaults are data/processed and
+    artifacts/. ``--mode hpo-trial`` is one tuning trial of a managed tuning job.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--mode", choices=["full", "hpo-trial"], default="full")
     parser.add_argument("--trials", type=int, default=None)
-    parser.add_argument("--output-dir", type=Path, default=ARTIFACTS)
+    parser.add_argument(
+        "--train-dir", type=Path, default=Path(os.getenv("SM_CHANNEL_TRAIN", str(PROCESSED)))
+    )
+    parser.add_argument(
+        "--model-dir",
+        "--output-dir",
+        dest="model_dir",
+        type=Path,
+        default=Path(os.getenv("SM_MODEL_DIR", str(ARTIFACTS))),
+    )
+    parser.add_argument("--no-register", action="store_true", help="skip the MLflow registry")
+    # Random-forest hyperparameters for --mode hpo-trial (same ranges as the Optuna study).
+    parser.add_argument("--n-estimators", type=int, default=150)
+    parser.add_argument("--max-depth", type=int, default=8)
+    parser.add_argument("--min-samples-leaf", type=int, default=1)
     args = parser.parse_args()
-    run(n_trials=args.trials, output_dir=args.output_dir)
+    if args.mode == "hpo-trial":
+        params = {
+            "n_estimators": args.n_estimators,
+            "max_depth": args.max_depth,
+            "min_samples_leaf": args.min_samples_leaf,
+        }
+        hpo_trial(args.train_dir, args.model_dir, params)
+        return
+    run(
+        n_trials=args.trials,
+        output_dir=args.model_dir,
+        data_dir=args.train_dir,
+        register=not args.no_register,
+    )
 
 
 if __name__ == "__main__":

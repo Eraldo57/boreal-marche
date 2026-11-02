@@ -60,6 +60,11 @@ minimisation: ## Drop-column necessity test of every feature on the decision per
 registry: ## List model registry versions, aliases and approvals
 	$(PYTHON) -m src.registry status
 
+.PHONY: sagemaker-image
+sagemaker-image: ## Build the SageMaker training/endpoint image for AWS (linux/amd64)
+	docker buildx build --platform linux/amd64 -f docker/Dockerfile --target sagemaker \
+		-t boreal-marche/sagemaker:$$(git rev-parse --short HEAD) --load .
+
 # ---------------------------------------------------------------------------
 # Head B — Recommendations
 # ---------------------------------------------------------------------------

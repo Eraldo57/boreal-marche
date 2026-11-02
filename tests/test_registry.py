@@ -47,6 +47,8 @@ def tracking(tmp_path, monkeypatch):
     monkeypatch.setenv("MLFLOW_TRACKING_URI", uri)
     monkeypatch.chdir(tmp_path)  # MLflow writes its artifact store relative to cwd
     mlflow.set_tracking_uri(uri)
+    # MLflow keeps the active experiment process-wide; another test's id would not exist here.
+    mlflow.set_experiment("registry-tests")
     monkeypatch.setattr(registry, "EVIDENCE_DIR", tmp_path / "evidence")
     processed = tmp_path / "processed"
     processed.mkdir()

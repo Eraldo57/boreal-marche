@@ -116,3 +116,31 @@ EXPOSE 8501
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
     CMD python -c "import httpx; httpx.get('http://localhost:8501/_stcore/health').raise_for_status()" || exit 1
 CMD ["streamlit", "run", "frontend/streamlit_app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+
+# ---------------------------------------------------------------------------
+# Stage 4: sagemaker — one image for SageMaker training, tuning and the real-time endpoint
+# (brief section 3.5). SageMaker runs it as `train` or `serve`; scripts/sagemaker_entry.py
+# implements that contract, so src/train.py is the same file locally and on SageMaker.
+# AWS's prebuilt scikit-learn images run an older Python than this project needs (3.12,
+# scikit-learn 1.6+ for FrozenEstimator), so this image is built here and pushed to ECR.
+# It runs as root because SageMaker mounts /opt/ml owned by root. Not part of Compose.
+# ---------------------------------------------------------------------------
+FROM ${PYTHON_IMAGE} AS sagemaker
+ENV PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_ROOT_USER_ACTION=ignore \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/opt/program \
+    MLFLOW_TRACKING_URI=file:///tmp/mlruns
+WORKDIR /opt/program
+COPY docker/sagemaker-requirements.txt ./
+RUN pip install -r sagemaker-requirements.txt
+COPY configs/ ./configs/
+COPY src/ ./src/
+COPY api/__init__.py api/schemas.py api/sagemaker_serve.py ./api/
+COPY scripts/sagemaker_entry.py ./scripts/
+RUN printf '#!/bin/sh\nexec python -m scripts.sagemaker_entry train\n' > /usr/local/bin/train \
+    && printf '#!/bin/sh\nexec python -m scripts.sagemaker_entry serve\n' > /usr/local/bin/serve \
+    && chmod +x /usr/local/bin/train /usr/local/bin/serve
+EXPOSE 8080

@@ -82,6 +82,44 @@ def test_run_produces_artifacts_on_synthetic_data(tmp_path, monkeypatch):
     assert stored["model_sha256"] == metadata["model_sha256"]
 
 
+def test_script_mode_reads_sagemaker_folders_and_runs_a_tuning_trial(tmp_path, monkeypatch, capsys):
+    channel, model_dir = tmp_path / "input" / "data" / "train", tmp_path / "model"
+    channel.mkdir(parents=True)
+    _synthetic_inputs(channel)
+    monkeypatch.setenv("SM_CHANNEL_TRAIN", str(channel))
+    monkeypatch.setenv("SM_MODEL_DIR", str(model_dir))
+    args = ["train", "--mode", "hpo-trial", "--n-estimators", "20", "--max-depth", "3"]
+    monkeypatch.setattr("sys.argv", args)
+    train.main()
+    result = json.loads((model_dir / "hpo_trial.json").read_text())
+    assert result["params"] == {"n_estimators": 20, "max_depth": 3, "min_samples_leaf": 1}
+    printed = capsys.readouterr().out
+    assert f"validation_pr_auc={result['validation_pr_auc']:.6f}" in printed
+
+
+def test_script_mode_full_run_without_registry(tmp_path, monkeypatch):
+    channel, model_dir = tmp_path / "train", tmp_path / "model"
+    channel.mkdir()
+    _synthetic_inputs(channel)
+    monkeypatch.setenv("MLFLOW_TRACKING_URI", f"sqlite:///{tmp_path / 'mlflow.db'}")
+    monkeypatch.chdir(tmp_path)
+    args = ["--train-dir", str(channel), "--model-dir", str(model_dir), "--trials", "0"]
+    monkeypatch.setattr("sys.argv", ["train", *args, "--no-register"])
+    monkeypatch.setattr(train, "register_run", lambda *a: pytest.fail("must not register"))
+    train.main()
+    assert (model_dir / "retention_model.joblib").exists()
+    assert (model_dir / "reports" / "retention_metrics.json").exists()
+
+
+def test_git_state_falls_back_outside_a_checkout(monkeypatch):
+    def no_git(*args, **kwargs):
+        raise OSError("git not installed")
+
+    monkeypatch.setattr(train.subprocess, "check_output", no_git)
+    monkeypatch.setenv("GIT_SHA", "abc123")
+    assert train._git_state() == ("abc123", None)
+
+
 def test_run_rejects_misaligned_snapshots(tmp_path, monkeypatch):
     processed = tmp_path / "processed"
     processed.mkdir()

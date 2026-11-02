@@ -97,6 +97,19 @@ def test_frontend_requirements_match_pyproject():
     assert wanted <= declared, wanted - declared
 
 
+def test_sagemaker_requirements_match_pyproject():
+    wanted = {
+        line.strip()
+        for line in (ROOT / "docker" / "sagemaker-requirements.txt").read_text().splitlines()
+        if line.strip() and not line.startswith("#")
+    }
+    declared = set(_pyproject()["dependencies"]) | set(
+        _pyproject()["optional-dependencies"]["train"]
+    )
+    assert wanted <= declared, wanted - declared
+    assert not {w for w in wanted if w.startswith(("torch", "sentence", "chromadb"))}
+
+
 def test_compose_brings_up_api_interface_database_and_llm():
     services = yaml.safe_load(COMPOSE.read_text())["services"]
     for name in ("api", "frontend", "db", "ollama", "ollama-pull"):

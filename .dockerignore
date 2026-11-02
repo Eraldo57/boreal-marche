@@ -42,8 +42,9 @@ artifacts/test_predictions.parquet
 .DS_Store
 Thumbs.db
 
-# Docker (the Dockerfile is read separately; the build context never needs it)
+# Docker (the Dockerfile is read separately; only the SageMaker stage's pip list is copied)
 docker/
+!docker/sagemaker-requirements.txt
 .dockerignore
 
 # CI/CD
