@@ -82,6 +82,20 @@ def test_snapshot_status_is_the_worst_check():
     assert levels["input_drift"] == "not_evaluated"  # no reference: not computed, not "green"
     assert all(c.rule for c in result.checks), "every check states its rule"
     assert result.requests_by_route == {"/predict": 30}
+    assert levels["predict_latency_p95_ms"] == "green"  # single /predict requests at 5 ms
+    assert result.latency_p95_by_route_ms == {"/predict": 5.0}
+
+
+def test_latency_check_ignores_slower_batch_requests():
+    log = PredictionLog()
+    for _ in range(30):
+        log.append(_prediction(0.5))
+    for _ in range(10):
+        log.append({**_prediction(0.5), "path": "/predict/batch", "latency_ms": 2000.0})
+    result = monitoring.snapshot(SimpleNamespace(prediction_log=log))
+    check = next(c for c in result.checks if c.check == "predict_latency_p95_ms")
+    assert check.level == "green" and check.value == 5.0
+    assert result.latency_p95_by_route_ms["/predict/batch"] == 2000.0
 
 
 def _red_error_rate(level: str = "red") -> list[Check]:

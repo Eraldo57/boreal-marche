@@ -1,14 +1,14 @@
 # Automated-decision inventory — implementation and plans
 
-Updated 2026-09-30. An engineering inventory, not evidence of legal compliance.
+Updated 2026-11-01. An engineering inventory, not evidence of legal compliance.
 
 | Component | Actual output | Actual downstream action | Missing controls |
 |---|---|---|---|
 | Retention | P(will_return in 90 days), thresholded return decision, inverse risk label | A proposed action (offer a coupon or not), which a named reviewer approves or rejects with a reason; stored in the `decision_log` table; nothing is sent | Verified reviewer identity (no authentication), customer appeal and correction process, individual explanations, causal validation of coupons |
 | Recommendations | Ranked UCI descriptions, firing rules and fallback strategy | Display basket suggestions | Curated product identity, merchandising approval, online impact evaluation |
-| Assistant | Cited policy excerpts or actual typed-tool result; refusal where checks fail | Display only | Robust adversarial defense, fluent bilingual generation, real human handoff |
-| Monitoring | Local latency/error summary and measured PSI / KS p-value | Dashboard status only | Alert delivery, label backfill, log purge and production validation |
-| Retraining | Local candidate artifact directory; dry-run command path checked | No automatic promotion | New holdout, registry alias workflow, human review and tested cloud automation |
+| Assistant | Cited policy excerpts or actual typed-tool results; refusal where checks fail. When streamed with OpenAI or Ollama, a model writes the policy answer from the cited excerpts, with a figure check | Display only | Robust adversarial defence, reliable model-written answers (the 3B local model wrote one false policy answer during tuning), real human handoff |
+| Monitoring | Error rate, `/predict` latency, input and prediction drift (PSI and KS), data quality and rule fire rate, each with its rule | Automated alerts: log, `alert_log` table, optional webhook | Label backfill (designed, not built), log purge, multi-worker aggregation, production validation |
+| Retraining | A candidate version in the MLflow registry with gate results; the weekly workflow opens a pull request | No automatic promotion: a named approver moves the champion alias; nothing has been promoted yet | A genuinely new holdout period, a shared registry server, executed cloud automation |
 
 Drift alert conditions are PSI > 0.2 or **KS p-value < 0.05**. They are engineering investigation thresholds, not guarantees. Multiple comparisons and large-sample sensitivity are not corrected.
 

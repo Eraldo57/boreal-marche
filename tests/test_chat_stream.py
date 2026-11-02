@@ -95,6 +95,28 @@ def test_answer_prompt_carries_language_sources_and_the_question():
     assert messages[1]["content"].endswith("Délai ?")
 
 
+def test_figure_check_flags_invented_and_omitted_figures():
+    excerpts = [
+        {"text": "Returns are accepted within 30 days of delivery."},
+        {"text": "Report damage within 48 hours."},
+    ]
+    faithful = chat_router.figure_check("Vous avez 30 jours pour retourner un article.", excerpts)
+    assert faithful == {"figures_not_in_sources": [], "top_source_figures_missing": []}
+    # The real failure seen live: the model said there was no deadline at all.
+    omitted = chat_router.figure_check("Il n'y a pas de délai spécifique.", excerpts)
+    assert omitted["top_source_figures_missing"] == ["30"]
+    invented = chat_router.figure_check("You have 60 days, or 48 hours for damage.", excerpts)
+    assert invented["figures_not_in_sources"] == ["60"]
+
+
+@pytest.mark.asyncio
+async def test_written_answers_carry_the_figure_check(client, monkeypatch):
+    llm = _StandInLLM(["Deliveries take ", "2 to 5 business days."])
+    monkeypatch.setattr(chat_router, "get_provider", lambda *a, **k: llm)
+    events = await _events(client, {"message": "Delivery policy?", "provider": "ollama"})
+    assert "figure_check" in events[-1]
+
+
 def test_ollama_stream_lines_are_parsed():
     assert ollama_piece('{"message": {"content": "Bon"}, "done": false}') == ("Bon", False)
     assert ollama_piece('{"done": true}') == ("", True)

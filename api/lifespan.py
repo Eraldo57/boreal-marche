@@ -136,7 +136,8 @@ class RuleEngine:
 
 
 def _first_line(exc: Exception) -> str:
-    return f"{type(exc).__name__}: {(str(exc).splitlines() or [''])[0]}"
+    """Short enough for /version: connection errors can run to several hundred characters."""
+    return f"{type(exc).__name__}: {(str(exc).splitlines() or [''])[0][:200]}"
 
 
 def _load_retention_model() -> tuple[Any, dict[str, Any], dict[str, Any]]:

@@ -1,0 +1,75 @@
+{
+  "executed_at": "2026-11-02T07:05:26.212889+00:00",
+  "purpose": "the SageMaker image run locally with the /opt/ml contract; not run on AWS",
+  "image": {
+    "tag": "boreal-marche/sagemaker:local",
+    "id": "sha256:ae20abace8892da00924381580f80efed0c718a997e83fa61751b75c2e78e21f",
+    "architecture": "arm64",
+    "built_at": "2026-11-01T22:08:34.117387761Z"
+  },
+  "train_channel": "data/processed (real UCI-derived features), mounted read-only",
+  "full_training_job": {
+    "command": "docker run --rm -v <scratch>/full:/opt/ml -v <repo>/data/processed:/opt/ml/input/data/train:ro boreal-marche/sagemaker:local train",
+    "exit_code": 0,
+    "wall_seconds": 18.2,
+    "output_tail": "02 07:05:39,550] Trial 3 finished with value: 0.6691196709056051 and parameters: {'C': 0.37570597138026446}. Best is trial 1 with value: 0.6696302533134575.\n[I 2026-11-02 07:05:39,580] Trial 4 finished with value: 0.6578702228081057 and parameters: {'C': 0.004688574837063985}. Best is trial 1 with value: 0.6696302533134575.\n[I 2026-11-02 07:05:39,611] Trial 5 finished with value: 0.6578688368868268 and parameters: {'C': 0.004687454996076497}. Best is trial 1 with value: 0.6696302533134575.\n[I 2026-11-02 07:05:39,638] Trial 6 finished with value: 0.6483978632470284 and parameters: {'C': 0.0017775399007348214}. Best is trial 1 with value: 0.6696302533134575.\n[I 2026-11-02 07:05:39,679] Trial 7 finished with value: 0.6695586046129745 and parameters: {'C': 5.314343038625026}. Best is trial 1 with value: 0.6696302533134575.\n[I 2026-11-02 07:05:39,729] Trial 8 finished with value: 0.669122531164793 and parameters: {'C': 0.3849583075868115}. Best is trial 1 with value: 0.6696302533134575.\n[I 2026-11-02 07:05:39,789] Trial 9 finished with value: 0.669462214636049 and parameters: {'C': 1.1103027007359598}. Best is trial 1 with value: 0.6696302533134575.\n[I 2026-11-02 07:05:39,879] Trial 10 finished with value: 0.6696058298846587 and parameters: {'C': 14.907888012947884}. Best is trial 1 with value: 0.6696302533134575.\n[I 2026-11-02 07:05:39,937] Trial 11 finished with value: 0.6696353343796676 and parameters: {'C': 13.302768407132174}. Best is trial 11 with value: 0.6696353343796676.\n",
+    "hyperparameters": {
+      "mode": "full",
+      "trials": "12"
+    },
+    "selected_model": "RandomForestClassifier",
+    "final_test": {
+      "pr_auc": 0.7430379084309567,
+      "roc_auc": 0.7809627606139234,
+      "brier_score": 0.19539851063119004,
+      "recall_top_decile": 0.21556350626118068,
+      "fit_time_s": 0.5120064170041587,
+      "assumed_test_utility": 29605.0
+    },
+    "matches_reported_test_pr_auc": true,
+    "model_file_identical_to_artifacts": {
+      "retention_model.joblib": false
+    }
+  },
+  "tuning_trial": {
+    "command": "docker run --rm -v <scratch>/hpo:/opt/ml -v <repo>/data/processed:/opt/ml/input/data/train:ro boreal-marche/sagemaker:local train",
+    "exit_code": 0,
+    "wall_seconds": 2.5,
+    "output_tail": "validation_pr_auc=0.673018\n",
+    "hyperparameters": {
+      "mode": "hpo-trial",
+      "n-estimators": "121",
+      "max-depth": "6",
+      "min-samples-leaf": "2"
+    },
+    "hpo_trial_json": {
+      "params": {
+        "n_estimators": 121,
+        "max_depth": 6,
+        "min_samples_leaf": 2
+      },
+      "validation_pr_auc": 0.6730179905059519,
+      "fit_seconds": 0.17254916699312162
+    },
+    "printed_metric_lines": [
+      "validation_pr_auc=0.673018"
+    ]
+  },
+  "endpoint": {
+    "command": "docker run -d --rm --name boreal-sm-check -p 127.0.0.1:18080:8080 -v <full job model>:/opt/ml/model:ro boreal-marche/sagemaker:local serve",
+    "request_features_source": "api_smoke.json, /customers/12347/features",
+    "ping_status": 200,
+    "seconds_until_ping_ok": 2.1,
+    "invocations_status": 200,
+    "invocations_response": {
+      "predictions": [
+        {
+          "probability": 0.711864,
+          "will_return": true
+        }
+      ],
+      "model_version": "0.2.0",
+      "threshold": 0.22
+    }
+  }
+}

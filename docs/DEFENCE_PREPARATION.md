@@ -295,7 +295,7 @@ Two reasons — one technical, one legal:
 
 The Ollama provider runs **entirely locally** — customer messages never leave the deployment. This is not just a nice-to-have; it's the legally conservative default. The `pipeline.yaml` sets `default_provider: "regex"` (no external calls at all), and Ollama is the recommended upgrade path for production.
 
-**2. Demonstrating where an LLM adds value.** By offering three providers behind the same interface, I can compare tool-choice accuracy, latency, and cost. The regex baseline proves that simple routing works for ~85% of queries. The LLM providers only justify their cost if they handle the remaining 15% (ambiguous questions, French-English code-switching, complex multi-part queries) measurably better.
+**2. Demonstrating where an LLM adds value.** Three providers sit behind the same interface, so tool-choice accuracy, latency and cost can be compared on the same 40 golden questions. The rule-based router chose the right tool 97.5% of the time; the local `llama3.2:3b` model managed 80%, at a median of 2.4–4.2 s per question over two runs. An LLM provider would justify its cost only by handling the hard cases (ambiguous questions, French-English code-switching, multi-part queries) measurably better, and on this golden set the 3B model did not. OpenAI was not evaluated.
 
 If the LLM providers showed no improvement over regex, that would be a legitimate finding — it would mean the problem doesn't need a language model. The three-provider design lets me prove or disprove that empirically.
 
@@ -338,7 +338,12 @@ The `artifacts/` directory contains two files that together constitute a model v
 - `pipeline_steps`: ordered list of pipeline step names
 - `libraries`: exact versions of scikit-learn, optuna, mlflow
 
-Additionally, every training run is logged to **MLflow** with parameters, metrics, the git SHA, and the serialised model. The MLflow model registry allows tagging versions as Staging or Production with a promotion policy.
+Additionally, every training run is logged to **MLflow** with parameters, metrics, the git SHA, data hashes, two plots and the serialised model.
+
+- **Registered as a candidate.** Each run's model becomes a candidate version in the MLflow registry.
+- **Promoted by a person.** A named approver moves the `champion` alias, and only after the gates in `governance/PROMOTION_POLICY.md` pass.
+- **Served with a fallback.** The API serves the champion, falling back to `artifacts/` if the registry is unavailable.
+- **Rollback.** Move the alias back and restart; no new image is needed.
 
 ---
 
@@ -423,15 +428,19 @@ This is the delayed-ground-truth problem. For 90 days, I cannot compute real acc
 
 **4. Proxy labels (partial ground truth).** Some labels arrive faster than 90 days. A customer who makes a purchase 10 days after being scored is a confirmed positive — their label resolves early. By tracking these early positives, I can compute a lower bound on recall. If the fraction of early positives drops relative to historical patterns, that's a soft signal.
 
-**5. Backfill.** Once the 90-day window closes for a cohort, I compute retrospective accuracy and backfill the monitoring dashboard. This is the "backfill design" the spec mentions. The first true accuracy signal for today's predictions arrives on December 15 (90 days from today). The monitoring dashboard documents this delay explicitly.
+**5. Backfill.** Once the 90-day window closes for a cohort, I compute retrospective accuracy and backfill the monitoring dashboard. This is the "backfill design" the spec mentions, documented in `docs/MONITORING.md` but not built.
+
+- **First labels:** 91 days after the first logged prediction, that is the 90-day window plus the daily job.
+- **First complete weekly cohort:** day 97.
+- **Until then:** drift and data quality are the only signals.
 
 ---
 
 ### Q28. When would managed cloud training have been worth it for this project, and why was it not?
 
-The `train.py` script honours `SM_CHANNEL_TRAIN` and `SM_MODEL_DIR`, so it runs as a SageMaker training job without modification. But for this project, managed training was not worth it:
+`src/train.py` honours `SM_CHANNEL_TRAIN` and `SM_MODEL_DIR`, so the same file runs as a SageMaker training job. Run locally in its SageMaker container, a full training job reproduced the reported PR-AUC exactly (0.7430379). It has not run on AWS. For this project, managed training is not worth it:
 
-**Cost.** An Optuna run with 100 trials on ~4,300 customers and 25 features takes **5–15 minutes on a laptop CPU.** The dataset fits in memory. SageMaker's minimum billing is per-second with a startup overhead of ~2 minutes per job. Running 100 Optuna trials as separate SageMaker jobs would cost more in startup overhead than the actual computation.
+**Cost and time.** Measured locally, the whole training protocol took **13 seconds**: 8 model families and 2 baselines, 24 Optuna trials, calibration and the test. One random-forest trial takes well under a second. The model is fitted on about 10,000 snapshot rows (not distinct customers), which fit in memory. A managed job pays minutes of start-up each, so a tuning study as separate jobs is slower and costs more than the computation itself. `scripts/sagemaker_jobs.py compare` turns this into numbers from real job timings and the day's price.
 
 **Complexity.** SageMaker requires an ECR image, IAM roles, S3 buckets for data and artifacts, and a job definition. For a dataset that fits in a laptop's RAM, this infrastructure adds cost and debugging surface without a performance benefit.
 
@@ -441,7 +450,7 @@ The `train.py` script honours `SM_CHANNEL_TRAIN` and `SM_MODEL_DIR`, so it runs 
 - **Team scale.** If multiple data scientists are running experiments concurrently, SageMaker provides job scheduling, resource management, and experiment tracking that a single laptop doesn't.
 - **Reproducibility in regulated environments.** SageMaker logs the exact container, data, and code for every training job. In a regulated setting (banking, healthcare), this audit trail may be required.
 
-For a ~4K customer dataset with tree-based models, local training is faster, cheaper, and simpler. The SageMaker compatibility is there for when the data outgrows the laptop.
+For about 10,000 training rows and tree-based models, local training is faster, cheaper, and simpler. The SageMaker path is there for when the data outgrows the laptop.
 
 ---
 
@@ -451,43 +460,65 @@ For a ~4K customer dataset with tree-based models, local training is faster, che
 
 Three automated decision points, documented in `GOVERNANCE_LOI25.md`:
 
-**Head A — Retention prediction:** A probability score and risk label that determines whether a customer is flagged for a coupon campaign. This is *not* fully automated — a human marketing analyst reviews and approves the flagged list before any coupon is sent. Still, the model produces the initial recommendation, which triggers Law 25 obligations.
+**Head A — Retention prediction.** A probability score and risk label lead to a proposed action: offer a coupon or not. That is exactly the design consequence the brief asks for, so the decision is *not* exclusively automated.
+- In the Prediction tab, a named reviewer approves or rejects each proposal and gives a reason.
+- The decision is stored in `decision_log` (`POST` and `GET /decisions`). Nothing is ever sent.
+- Without authentication, the reviewer's name is declared, not verified.
 
-**Head B — Product recommendations:** Fully automated — suggestions appear in real time without human review. However, the decision is a product suggestion (analogous to shelf placement), not a consequential decision affecting the customer's rights. The rule set is reviewed by a merchandising analyst before deployment.
+**Head B — Product recommendations.** Fully automated: suggestions appear in real time. They are product suggestions (comparable to shelf placement), not consequential decisions about a person. No merchandising review of the rule set exists yet; the decision register lists it as missing.
 
-**Head C — Customer assistant:** Partially automated — the assistant generates responses, but guardrails enforce refusal for out-of-scope questions and a human-handoff path when confidence is low. The assistant never modifies customer data.
+**Head C — Customer assistant.** It answers or refuses. Guardrails refuse out-of-scope questions, and refusals point to customer service, though there is no real handoff. The assistant never modifies customer data.
 
 **What Law 25 obliges me to do:**
 
-1. **Inform the individual** — before or at the time the decision is made — that automated processing was used. The Streamlit "About" tab displays this notice in both French and English.
-2. **Disclose the principal factors.** The API returns `top_factors` with each prediction. The recommendations endpoint returns the firing rule with confidence and lift.
-3. **Provide a right to human review.** The governance document specifies the path: contact support, and a human re-evaluates.
-4. **Allow access and correction.** The customer can request to see or correct their data.
+1. **Inform the individual** — before or at the time the decision is made — that automated processing was used. The Streamlit "About" tab displays a plain-language notice in French and English (`governance/customer_notice_*.md`).
+2. **Disclose the principal factors.** The API returns `top_factors` with each prediction. These are global importance hints, not individual explanations. The recommendations endpoint returns the firing rule with confidence and lift.
+3. **Provide a right to human review.** A person already decides every proposal. The notice tells customers how to ask for a review and add their comments, via the fictional privacy officer's address.
+4. **Allow access and correction.** The notice tells customers they can ask; no workflow for it is built yet.
 
-The automated-decision register in `GOVERNANCE_LOI25.md` documents all of this for each head, including what personal information is used, what is explicitly *not* used, and the retention period for logs.
+`GOVERNANCE_LOI25.md` and `governance/decision_register.md` document all of this for each head: what personal information is used and what is explicitly *not* used. Retention periods for the logs are still to be set.
 
 ---
 
 ### Q30. You found a recall gap for one subgroup. Walk me through your options and their trade-offs.
 
-The brief asks for recall, precision and selection rate by region, tenure band and spend quartile, flagging any group more than 5 points below overall recall. The current audit (`governance/fairness_audit.md`) is **partial**: it reports recall and precision for four segments on the test snapshot (repeat vs one-time buyers, UK vs international), without selection rates, spend quartiles, the 5-point flag or implemented mitigations.
+The audit (`governance/fairness_audit.md`, written by `python -m src.fairness`) does what the brief asks:
+- recall, precision and selection rate by region, tenure band and spend quartile, plus one-time versus repeat buyers;
+- Wilson 95% intervals;
+- the 5-point flag.
 
-**Observed gap (test snapshot, threshold 0.22):** one-time buyers have returner recall of 0.173 against 0.920 for repeat buyers (1,588 vs 3,645 rows). International customers are 458 of 5,233 rows (8.8%), and their recall (0.857) is not lower than UK customers' (0.810), so the earlier assumption that international customers are disadvantaged is not supported by this data.
+**What it found** (test snapshot, 5,233 rows, threshold 0.22, overall recall 81.4%):
 
-**Option 1 — Do nothing, document it.**
-- *Trade-off:* Honest, but the affected group receives worse service. Under Law 25, failing to flag at-risk international customers means they miss retention coupons. Acceptable only if the gap is small and the business acknowledges it.
+- **No region is flagged.** Other Europe's recall (85.4%) is above the United Kingdom's (80.9%); the earlier assumption that international customers are disadvantaged is not supported.
+- **Five groups are strongly flagged, all customers with a thin purchase history:**
+  - one-time buyers, 17.3%;
+  - lowest spend quartile, 14.2%;
+  - second spend quartile, 62.7%;
+  - tenure under 6 months, 69.5%;
+  - tenure 6–12 months, 64.9%.
 
-**Option 2 — Adjust the threshold per subgroup.**
-- Use a lower threshold for the underperforming group (e.g. international customers get flagged at 0.25 instead of 0.35). This boosts their recall at the cost of precision — more coupons wasted on false positives in that group.
-- *Trade-off:* Improved fairness, but higher cost. The coupon budget for international customers increases disproportionately. The business must decide if equity justifies the spend.
+  They overlap heavily: 80% of the lowest spend quartile are one-time buyers.
+- **Why.** The model ranks on purchase history, and these customers really do return less often (19% in the lowest spend quartile against 74% in the highest). With different base rates, a calibrated model cannot also give every group the same recall at one threshold.
 
-**Option 3 — Collect more data or engineer group-specific features.**
-- The gap may be caused by data scarcity. International customers have fewer transactions, so feature estimates (e.g. `avg_days_between_orders`) are noisier. Adding features like `shipping_region_latency` or oversampling the minority group during training could close the gap.
-- *Trade-off:* Most principled, but requires time and new data. Does not help the current model immediately.
+**The options and their trade-offs** (all five are in the audit):
 
-**What I would NOT do:** Add demographic features (age, gender, ethnicity) to "fix" the gap. This introduces new fairness risks, violates data minimisation, and the data isn't even available.
+1. **A lower threshold for the flagged group.** Measured on June data, not the test set, for the lowest spend quartile: the threshold drops from 0.22 to 0.11, and recall rises from 18% to 94%.
+   - *Cost:* precision halves (25% → 12%), and most of the group gets a coupon.
+   - *Ethics:* it also treats customers differently by group, which needs a written justification.
+2. **Better cold-start features or a separate model for thin-history customers.**
+   - *Gain:* it could raise recall without selecting everyone.
+   - *Cost:* research and a new holdout.
+3. **Change the objective to uplift.** Who does a coupon persuade?
+   - *Gain:* the most principled question.
+   - *Cost:* it needs a randomized experiment that this data cannot replace.
+4. **Send borderline flagged cases to the human reviewer,** who already decides every coupon proposal.
+5. **Reweight training.**
+   - *Gain:* cheap to try.
+   - *Cost:* may lower PR-AUC and calibration.
 
-I'd recommend Option 2 as the immediate mitigation (it's deployable now) while pursuing Option 3 for the next model version. Both the gap and the mitigation are documented in the fairness audit with exact numbers.
+**What I would NOT do:** add demographic features (age, gender, ethnicity) to "fix" the gap. That introduces new fairness risks and violates data minimisation, and the data isn't available anyway.
+
+No mitigation is chosen yet; it is a business and ethics decision. Meanwhile, the promotion policy's gates stop any new model from adding a flag or widening one by more than 2 points.
 
 ---
 

@@ -265,6 +265,25 @@ def _line(event: dict[str, Any]) -> str:
     return json.dumps(event, ensure_ascii=False) + "\n"
 
 
+# A figure with its unit ("30 days", "48 h", "15 %", "$5"): what a policy answer must not alter.
+_FIGURE = re.compile(
+    r"(?:[$£]\s?)?(\d+(?:[.,]\d+)?)\s*(?:days?|jours?|hours?|heures?|h\b|%|\$|CAD|GBP|£)",
+    re.IGNORECASE,
+)
+
+
+def figure_check(answer: str, excerpts: list[dict[str, Any]]) -> dict[str, list[str]]:
+    """Figures a written answer adds that no cited excerpt states, and figures the top
+    excerpt states that the answer leaves out. A signal for the reader, not a proof."""
+    stated = set(_FIGURE.findall(answer))
+    sources = set(_FIGURE.findall(" ".join(e["text"] for e in excerpts)))
+    top = set(_FIGURE.findall(excerpts[0]["text"])) if excerpts else set()
+    return {
+        "figures_not_in_sources": sorted(stated - sources),
+        "top_source_figures_missing": sorted(top - stated),
+    }
+
+
 def _words(text: str) -> list[str]:
     return re.findall(r"\S+\s*", text)
 
@@ -311,6 +330,8 @@ async def _events(outcome: _Outcome) -> AsyncIterator[str]:
         answer_written_by=written_by,
         citations=[c.model_dump() for c in citations],
     )
+    if generated:
+        final["figure_check"] = figure_check(reply, outcome.excerpts)
     yield _line(final)
 
 

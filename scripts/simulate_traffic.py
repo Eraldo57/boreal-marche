@@ -21,6 +21,8 @@ import pandas as pd
 
 from src.contracts import FEATURE_NAMES, PROCESSED, PROJECT_ROOT
 
+SINGLE = 20  # sent one by one to /predict; the rest go to /predict/batch in groups of 30
+
 
 def real_baskets(count: int, seed: int) -> list[list[str]]:
     """Half of each of *count* real later invoices (canonical descriptions, first-seen order)."""
@@ -33,13 +35,16 @@ def real_baskets(count: int, seed: int) -> list[list[str]]:
     return [basket[: len(basket) // 2] for basket in items]
 
 
-def wait_for_alerts(client: httpx.Client, already: int, seconds: float) -> dict:
+def wait_for_alerts(client: httpx.Client, seconds: float) -> dict:
+    """Wait until the background monitor has alerted on every currently breached check."""
     deadline = time.monotonic() + seconds
-    alerts = client.get("/alerts").json()
-    while len(alerts["alerts"]) <= already and time.monotonic() < deadline:
-        time.sleep(2)
+    while True:
+        checks = client.get("/metrics").json()["checks"]
+        breached = {c["check"] for c in checks if c["level"] in ("yellow", "red")}
         alerts = client.get("/alerts").json()
-    return alerts
+        if breached <= set(alerts["active"]) or time.monotonic() > deadline:
+            return alerts
+        time.sleep(2)
 
 
 def main():
@@ -72,8 +77,9 @@ def main():
     ]
     with httpx.Client(base_url=args.base_url, timeout=120) as client:
         before = client.get("/metrics").json()
-        alerts_before = len(client.get("/alerts").json()["alerts"])
-        for offset in range(0, len(requests), 30):
+        for payload in requests[:SINGLE]:  # one-customer lookups: what the latency target is for
+            client.post("/predict", json=payload).raise_for_status()
+        for offset in range(SINGLE, len(requests), 30):
             response = client.post(
                 "/predict/batch", json={"customers": requests[offset : offset + 30]}
             )
@@ -83,8 +89,8 @@ def main():
             client.post("/recommend", json={"basket": basket, "top_k": 5}).raise_for_status()
         rejected = sum(client.post("/predict", json=p).status_code == 422 for p in invalid)
         client.post("/chat", json={"message": "What is the return policy?"}).raise_for_status()
+        alerts = wait_for_alerts(client, args.wait_alerts)
         after = client.get("/metrics").json()
-        alerts = wait_for_alerts(client, alerts_before, args.wait_alerts)
     assert after["drift_status"] == "measured"
     report = {
         "executed_at": datetime.now(UTC).isoformat(),

@@ -216,6 +216,14 @@ def snapshot(state: Any) -> MonitoringResponse:
         else None
     )
     p95 = _percentile(latencies, 95)
+    by_route: dict[str, list[float]] = {}
+    for entry in entries:
+        if "latency_ms" in entry:
+            by_route.setdefault(entry.get("path", "unknown"), []).append(entry["latency_ms"])
+    # The brief's latency target is for single predictions (Appendix B: /predict p95); a
+    # 500-row batch is legitimately slower and would hide or fake a problem.
+    single = by_route.get("/predict", [])
+    predict_p95 = _percentile(single, 95) if single else None
     checks = [
         Check(
             check="error_rate",
@@ -227,10 +235,10 @@ def snapshot(state: Any) -> MonitoringResponse:
             ),
         ),
         Check(
-            check="latency_p95_ms",
-            value=p95 if latencies else None,
-            rule=f"yellow above {limits['latency_p95_ms_yellow']} ms",
-            level=_above(p95 if latencies else None, limits["latency_p95_ms_yellow"]),
+            check="predict_latency_p95_ms",
+            value=predict_p95,
+            rule=f"yellow above {limits['latency_p95_ms_yellow']} ms, single /predict requests",
+            level=_above(predict_p95, limits["latency_p95_ms_yellow"]),
         ),
         _drift_check("input_drift", inputs, psi, ks),
         _drift_check("prediction_drift", outputs, psi, ks),
@@ -276,6 +284,9 @@ def snapshot(state: Any) -> MonitoringResponse:
         drift_status="measured" if inputs else "insufficient_data_or_reference",
         log_write_failures=log.write_failures,
         requests_by_route=dict(Counter(e.get("path", "unknown") for e in entries)),
+        latency_p95_by_route_ms={
+            route: round(_percentile(v, 95), 2) for route, v in by_route.items()
+        },
         prediction_drift=outputs,
         data_quality=quality,
         recommendation=recommendation,

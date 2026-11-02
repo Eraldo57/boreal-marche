@@ -1,6 +1,6 @@
 # SageMaker training, tuning and endpoint
 
-Updated 2026-11-01. Covers brief section 3.5. **Nothing here has run on AWS yet.** The code and image are built and were verified locally, as recorded below; the AWS steps need an account.
+Updated 2026-11-02. Covers brief section 3.5. **Nothing here has run on AWS yet.** The code and image are built and were verified locally, as recorded below; the AWS steps need an account.
 
 ## What exists
 
@@ -14,14 +14,13 @@ Updated 2026-11-01. Covers brief section 3.5. **Nothing here has run on AWS yet.
 
 **Why a custom image.** AWS's prebuilt scikit-learn images run an older Python. This project needs Python 3.12 and scikit-learn 1.6 or later: the calibration uses `FrozenEstimator`, and the code uses `datetime.UTC`.
 
-## Verified locally (2026-11-01, linux/arm64, Docker Desktop)
+## Verified locally (linux/arm64, Docker Desktop)
 
-These ran the image exactly as SageMaker would, with `/opt/ml` folders mounted from disk, but **not on AWS**:
+These ran the image exactly as SageMaker would, with `/opt/ml` folders mounted from disk, but **not on AWS**. The re-run of 2026-11-02, with the image built on 2026-11-01, is recorded with its commands, timings and outputs in `reports/current_run/sagemaker_local.json`:
 
-- **Build.** `docker build --target sagemaker` finished in about 64 seconds.
 - **Tuning trial.** With hyperparameters `n-estimators=121`, `max-depth=6`, `min-samples-leaf=2` on the real processed data, it printed `validation_pr_auc=0.673018` (December 2010 validation snapshot).
-- **Full training job.** With 12 Optuna trials per family it took 16 seconds and selected a random forest. It reproduced the reported test PR-AUC exactly (0.7430379), with the same model files as `artifacts/`.
-- **Endpoint.** Serving that job's model folder, `/ping` returned 200. `/invocations` for historical customer 12347 returned probability 0.711864, "will return" at threshold 0.22.
+- **Full training job.** With 12 Optuna trials per family it took 18.2 seconds, including container start, and selected a random forest. It reproduced the reported test metrics exactly (PR-AUC 0.7430379). The model file is not byte-identical to `artifacts/`, so the match rests on the metrics; the image has numpy 2.5.4, where `artifacts/` was built with 2.5.3.
+- **Endpoint.** Serving that job's model folder, `/ping` returned 200. `/invocations` for historical customer 12347 returned probability 0.711864, "will return" at threshold 0.22, the same as the API.
 
 ## Running it on AWS
 

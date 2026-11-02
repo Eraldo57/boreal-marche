@@ -8,7 +8,7 @@ where each requirement is met, why each choice was made, and what was and was no
 
 | Requirement | Where |
 |---|---|
-| Multi-stage build | `docker/Dockerfile`: `api-deps` → `api`, plus a separate `frontend` stage |
+| Multi-stage build | `docker/Dockerfile`: `api-deps` → `api`, a separate `frontend` stage, and a `sagemaker` stage for training and the endpoint (docs/SAGEMAKER.md) |
 | Digest-pinned base | `ARG PYTHON_IMAGE=python:3.12-slim-bookworm@sha256:e697c818…` |
 | Non-root runtime user | `USER appuser` in both runtime stages |
 | HEALTHCHECK | API probes `/ready`; interface probes Streamlit's `/_stcore/health` |
@@ -85,6 +85,19 @@ counts both copies and is not an image size. The API image shrank by 73.0% uncom
 which measure they mean: the API image is below 2 GB but above 1 GB uncompressed, and below
 700 MB compressed.
 
+**Re-measured on 2026-11-01** after three changes, with the same machine and method:
+
+- **API:** 2,064 MB uncompressed and 553 MB compressed.
+  - The image now carries the MLflow registry client, so it can serve the registry's champion (brief section 3.5).
+  - Of the +71 MB, about 46 MB is that client: `mlflow-skinny` 28 MB, `databricks-sdk` 16 MB, GitPython and small packages.
+  - The rest comes from newer versions of dependencies that are not locked.
+  - This moves the uncompressed size just past the brief's 2 GB line; compressed, it stays under 700 MB.
+  - Resolving the registry over plain HTTP instead would win those 46 MB back, at the cost of hand-written registry code.
+- **Interface:** 630 MB and 179 MB. It now also copies the documents its About tab shows.
+- **SageMaker image (new):** 1,044 MB and 290 MB. It holds training and serving libraries only, with no PyTorch.
+
+Raw numbers are in `container_sizes.json` under `remeasured`.
+
 Installed Python packages went from 7,005 MB to 1,702 MB, measured the same way in both
 images. The main contributions (each measured on its own, so they do not add up exactly):
 
@@ -112,7 +125,9 @@ rebuilding the index and re-running the assistant evaluation.
 | Only `[project].dependencies` installed | `pyproject.toml` separates what the API imports from the `train` and `frontend` extras. `pip install -e ".[dev]"` still installs everything for development and CI |
 | `pyproject.toml` copied before any code | The dependency layer is rebuilt only when dependencies change; a code edit reuses it |
 | No compiler in the build | Every dependency has a prebuilt wheel for linux/amd64 and linux/arm64 (checked with `pip install --dry-run --only-binary=:all:` for both), so `gcc`/`g++` were removed |
-| Separate `frontend` image | The interface only calls the API over HTTP. Its image is 635 MB instead of carrying PyTorch and the model libraries |
+| Separate `frontend` image | The interface only calls the API over HTTP. Its image is 630 MB instead of carrying PyTorch and the model libraries. It copies only the documents its About tab renders (model card, data card, architecture, notices), so each has one source of truth |
+| MLflow registry client (`mlflow-skinny`) in the API, not the full `mlflow` | The API must resolve the registry's champion at startup. The client is about 46 MB; full MLflow (server, UI, training integrations) stays in the `train` extra. In Compose, `MLFLOW_TRACKING_URI` points at the optional `mlflow` service, and without it the API falls back to the mounted `artifacts/` within a second and says so in `/version` |
+| `sagemaker` stage, root user, no Compose service | One image for SageMaker training, tuning and the endpoint. It runs as root because SageMaker mounts `/opt/ml` owned by root. AWS's prebuilt scikit-learn images run an older Python than this project needs |
 | `USER appuser`; code root-owned; only `data/` writable | A compromised process cannot rewrite the application code |
 | HEALTHCHECK on `/ready`, not `/health` | Compose starts the interface only once the API reports model, rules, index and prediction log loaded. The start period (120 s in the image, 300 s in Compose) covers a first-run download of the embedding model; a passing check ends it early |
 | `.dockerignore` | Keeps `.env` secrets, raw data, the virtualenv, tests, git history and the per-customer `test_predictions.parquet` out of the build context |
@@ -163,8 +178,26 @@ bullet onwards, and for the third latency run, the stack used the real mounts:
   Memory in use with the whole stack up: Ollama 3.0 GB, API 1.2 GB, PostgreSQL and interface under
   0.1 GB each, of the 7.75 GB Docker VM.
 
-Not verified: a linux/amd64 build (the CI job does it); a fresh clone on a different machine (the
-brief's pre-deployment checklist); an evaluation of the Ollama provider; any cloud deployment.
+## Verified on 2026-11-01
+
+- All three images were rebuilt on the same machine; the API's dependency layer was rebuilt because `pyproject.toml` changed.
+- `docker compose up -d` from those images, on ports 18000 and 18501:
+  - The API became healthy, and `/ready` showed all three heads loaded.
+  - `/version` reported the local fallback, with the reason that the optional `mlflow` host was not running.
+  - A decision posted to `/decisions` was stored in PostgreSQL. That test row was deleted afterwards.
+  - `/chat/stream` answered with a citation, `/alerts` responded, and the interface was healthy.
+- The SageMaker image, run as SageMaker would (docs/SAGEMAKER.md; re-run and recorded on 2026-11-02 in `reports/current_run/sagemaker_local.json`):
+  - A full training job inside it reproduced the reported test PR-AUC exactly (0.7430379).
+  - Its endpoint scored customer 12347 at 0.711864.
+
+Not verified:
+
+- a linux/amd64 build (the CI job does it);
+- a fresh clone on a different machine (the brief's pre-deployment checklist);
+- the registry inside Compose: it needs the `tracking` profile and a promoted model in that server;
+- any cloud deployment.
+
+The Ollama provider was evaluated with the native app on the Mac's GPU, not in Docker (`reports/current_run/assistant_ollama_metrics.json`).
 
 ## Known gaps
 

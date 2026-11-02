@@ -8,8 +8,8 @@ Every business request (`/predict`, `/predict/batch`, `/recommend`, `/chat`) is 
 
 | Check | How it is measured | Rule | Why this rule |
 |---|---|---|---|
-| Error rate | Share of logged requests with status 400 or higher, since the log began | Yellow above 0.05, red above 0.10 | Judgement values for a demo service |
-| Latency p95 | 95th percentile of request latency in the window | Yellow above 500 ms | The brief's Appendix B calls anything above 500 ms "weak" |
+| Error rate | Share of logged requests with status 400 or higher, since the log began, so validation rejections count too | Yellow above 0.05, red above 0.10 | Judgement values for a demo service; the invalid-request check below isolates the rejections |
+| Latency p95 | 95th percentile latency of single `/predict` requests. Every route's p95 is also reported, but batches are legitimately slower, so they are not judged | Yellow above 500 ms | The brief's Appendix B judges `/predict` p95 and calls anything above 500 ms "weak" |
 | Input drift | PSI over the reference's deciles, and a two-sided KS test, for each of the 25 features | Red when any PSI > 0.2 or any KS p-value < 0.05 | PSI 0.2 is a common rule of thumb; 0.05 is the conventional p-value cut-off |
 | Prediction drift | The same two tests on the served probabilities, against the model's scores on its own training reference | Same as input drift | A shift in what the model outputs can matter even when no single input moved |
 | Invalid request rate (data quality) | Share of prediction requests rejected by input validation (HTTP 422) | Yellow above 0.05, once 20 prediction requests exist | Judgement value |

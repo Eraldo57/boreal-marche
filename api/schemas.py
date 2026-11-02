@@ -255,6 +255,7 @@ class MonitoringResponse(BaseModel):
     window_description: str = "bounded local request log"
     log_write_failures: int = 0  # rows that could not be written to the prediction_log table
     requests_by_route: dict[str, int] = {}
+    latency_p95_by_route_ms: dict[str, float] = {}
     prediction_drift: list[DriftMetric] = []  # distribution of predicted probabilities
     data_quality: dict[str, Any] = {}
     recommendation: dict[str, Any] = {}

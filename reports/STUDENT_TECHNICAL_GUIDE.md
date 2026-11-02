@@ -128,27 +128,84 @@ Health is process liveness; readiness is artifact availability. A running proces
 **Output:** logs, JSON reports and coverage.  
 **Important files:** tests/test_pipeline.py, test_real_artifacts.py, existing route/provider tests; scripts/smoke_api.py, smoke_ui.py, evaluate_assistant.py.  
 **Next stage:** CI gates and regression protection.  
-**Limitations:** 123 local tests pass, but roughly 64% src/api coverage misses the unchanged 80% gate; strict mypy also fails. Mocked golden API probabilities are fixtures, not model results. Real integration tests skip when artifacts are absent.
+**Limitations:** On 2026-11-01, 273 tests pass locally with 90% coverage. On a clean checkout, 266 pass and 7 integration tests skip, with 89% coverage; the gate is 80%. Strict mypy reports 0 errors. Mocked golden API probabilities are fixtures, not model results. The golden set's tool-choice test (tests/test_assistant_eval.py) uses pass marks of 40–60%, well below the measured 97.5%, so it would miss small regressions.
 
 ## 11. Docker and workflows
 
 **Purpose:** reproducible service packaging and future delivery gates.  
 **Input:** project dependencies/source plus host-generated data/model/index artifacts.  
 **Process:** multi-stage, digest-pinned Python 3.12 build with CPU-only PyTorch; separate API and Streamlit images; non-root runtime; /ready health check; Compose runs API, interface, PostgreSQL (prediction_log) and Ollama, with artifacts and data mounted from the host.  
-**Output:** both images built and the stack run locally on linux/arm64 (sizes and checks in docs/CONTAINERS.md); no cloud deployment.  
-**Important files:** docker/Dockerfile, docker/compose.yml, .dockerignore, .github/workflows/ci.yml and cd.yml.  
-**Next stage:** linux/amd64 build in CI, fresh-clone test on another machine, then the opt-in cloud configuration.  
-**Limitations:** Docker daemon was unavailable. No GitHub run or AWS deployment was executed; CI has known failing gates. CD is explicitly manual/opt-in; cloud credentials and real deployment review remain future work.
+**Output:** the API, interface and SageMaker images built and the stack run locally on linux/arm64 (sizes and checks in docs/CONTAINERS.md); no cloud deployment.  
+**Important files:** docker/Dockerfile, docker/compose.yml, .dockerignore, and the .github/workflows/ files ci.yml, cd.yml and retrain.yml.  
+**Next stage:** a GitHub remote so CI runs (it builds linux/amd64), a fresh-clone test on another machine, then AWS for CD.  
+**Limitations:** No GitHub run or AWS deployment has happened. CD triggers on merge to main but stays off until `ENABLE_CLOUD_DEPLOYMENT` is set. The weekly retraining workflow stays off until `ENABLE_RETRAINING` is set.
 
 ## 12. MLflow, retraining and monitoring
 
 **Purpose:** keep experiments and make operations observable.  
 **Input:** training metrics/artifacts; actual route requests and prediction feature vectors.  
-**Process:** MLflow logs comparison/tuning and final model to local SQLite/files. PredictionLog writes one row per request to the prediction_log table (SQLite locally, PostgreSQL in Compose; URL from DATABASE_URL), replays it on restart and maintains a bounded recent buffer. monitor.py compares recent predictions against drift_reference with quantile-bin PSI and two-sided KS.  
-**Output:** MLflow run records, prediction_log rows, /metrics; timestamped retraining candidates.  
-**Important functions:** src.train.run; scripts/retrain.main; PredictionLog; _compute_drift; scripts/simulate_traffic.main.  
-**Next stage:** human investigation and future approved promotion, not automatic retraining/deployment.  
-**Limitations:** no purge, distributed aggregation, delayed labels, automatic alerts or registry aliases. KS p-value <0.05 is the alert condition, not KS statistic >0.05. Insufficient traffic returns unavailable drift, not fake zero. Deliberately shifted demo traffic cannot establish production drift.
+**Process:**
+- **MLflow** logs the comparison, the tuning trials, the final model, provenance tags (git commit, data hashes) and two plots. It then registers the model as a candidate version.
+- **PredictionLog** writes one row per request to the prediction_log table: SQLite locally, PostgreSQL in Compose, with the URL from DATABASE_URL. It replays the table on restart and keeps a bounded recent window.
+- **api/monitoring.py** turns that window into checks, each with its rule from configs/pipeline.yaml: error rate, `/predict` p95 latency, input drift and prediction drift (quantile-bin PSI and two-sided KS against drift_reference), data quality and the rule fire rate.
+- **A background task** re-evaluates the checks every ALERT_INTERVAL_SECONDS. It raises an alert when a check turns yellow or red, and resolves it when the check recovers.
+
+**Output:** MLflow runs and registry versions, prediction_log and alert_log rows, /metrics and /alerts.  
+**Important functions:** src.train.run; src.registry; api.monitoring.snapshot and AlertManager; scripts/simulate_traffic.main.  
+**Next stage:** the project owner promotes a version; a webhook makes alerts reach a person.  
+**Limitations:** no purge, no multi-worker aggregation, and delayed-label backfill is only designed (docs/MONITORING.md). KS p-value <0.05 is the alert condition, not KS statistic >0.05. Insufficient traffic is reported as `not_evaluated`, not as green or zero. Real 2011 demo traffic already drifts from the 2010 training reference, which is genuine temporal drift; the `--shifted` perturbations are deliberate and synthetic.
+
+## 13. Fairness and data minimisation (src/fairness.py, src/minimisation.py)
+
+**Purpose:** answer the brief's two governance audits (section 3.7) with code, so every number in the documents is regenerated, not typed.  
+**Input:** the saved model (checksum verified), the processed features, and the June 2011 decision period and September 2011 test period.  
+**Process:**
+- **Fairness.** Recall, precision and selection rate by region, tenure band, spend quartile and purchase history. Wilson 95% intervals. Flags groups more than 5 points below overall recall. Estimates on June data the group threshold that would close each gap.
+- **Minimisation.** Refits the selected pipeline without each feature, then without all the doubtful ones together, and measures the PR-AUC loss with paired-bootstrap intervals on June data.
+
+**Output:** fairness_audit.json, minimisation_audit.json, and the generated tables inside governance/fairness_audit.md and governance/FEATURE_INVENTORY.md (src/generated_docs.py).  
+**Next stage:** the owner chooses a fairness mitigation and decides on removing the 13 features.  
+**Limitations:** the groups are behavioural proxies, not protected characteristics. The minimisation audit recommends; it changes nothing.
+
+## 14. Registry and promotion (src/registry.py)
+
+**Purpose:** serve a model chosen by a person, with rollback that needs no new image (section 3.5).  
+**Input:** registered versions; the holdout from data/processed.  
+**Process:** gates run on one shared holdout:
+- beats the baseline (first champion only);
+- same feature encoding;
+- PR-AUC and Brier not worse than the champion, within a tolerance;
+- no new or widened fairness flags.
+
+`promote` needs a named approver, a reason, and an acknowledgement of known flags, then moves the `champion` alias. `rollback` moves it back. The API resolves the alias at startup and otherwise falls back to artifacts/.  
+**Output:** alias, approval tags, and evidence in reports/current_run/registry/.  
+**Limitations:** nothing promoted yet; the local registry is a SQLite file. MLflow cannot stop someone with write access from moving the alias by hand.
+
+## 15. Human approval and the customer notice
+
+**Purpose:** the design consequence of Law 25, section 12.1: the model proposes and a person decides.  
+**Process:**
+- The Prediction tab shows the model's proposed action; a reviewer approves or rejects it with a reason (`POST /decisions`, stored in `decision_log`).
+- The About tab renders the French or English customer notice, the model card, the privacy notice, the data card and the architecture diagram.
+
+**Limitations:** no authentication, so the reviewer's name is declared, not verified. Nothing is ever sent to a customer.
+
+## 16. Streaming assistant (api/routers/chat.py, src/rag/providers.py)
+
+**Purpose:** answers that appear word by word, and fluent answers in the requested language (section 3.6).  
+**Process:** `/chat/stream` uses the same guardrails and tools as `/chat`.
+- **OpenAI or Ollama, policy question:** the model writes the answer from the cited excerpts.
+- **Figure check:** flags figures the answer adds, or figures the main excerpt states that the answer leaves out.
+- **Fallback:** if generation fails, the stream shows the source text instead.
+- **Regex:** streams its quote.
+
+**Limitations:** on 2026-11-01, `llama3.2:3b` wrote in the right language 15 times out of 15. During prompt tuning it also stated a false policy (frozen returns "within 30 days"), which the figure check caught. Model-written policy answers are a demonstration, not a reliable channel.
+
+## 17. SageMaker (scripts/sagemaker_entry.py, api/sagemaker_serve.py, scripts/sagemaker_jobs.py)
+
+**Purpose:** the same training file locally and on SageMaker, a managed Bayesian tuning job, and an endpoint deployed once and then deleted (section 3.5).  
+**Output:** the image (target `sagemaker`) and launcher commands that record evidence.  
+**Limitations:** verified only locally in the container (`reports/current_run/sagemaker_local.json`). The full training job reproduced PR-AUC 0.7430379, and the endpoint scored customer 12347. Nothing has run on AWS.
 
 ## Questions to be ready for
 
@@ -156,5 +213,7 @@ Health is process liveness; readiness is artifact availability. A running proces
 - **Why is the model not HistGradientBoosting?** The current temporal comparison selected RandomForest; architecture does not predetermine the winner.
 - **Does a citation guarantee truth?** It identifies retrieved evidence. Wrong-source retrieval and incomplete excerpts remain measured errors.
 - **Does the utility prove profit?** No, it uses assumed costs/margins and does not estimate intervention effects.
-- **Why not deploy now?** Auth/privacy controls, fairer segment behavior, CI gates and container/cloud validation are unfinished.
-- **What next?** Improve retrieval and cold-start validation, close typing/coverage gaps, make immutable data/model promotion, then evaluate deployment and governance enforcement.
+- **Why not deploy now?** The cloud side needs a GitHub remote and an AWS account. Authentication, deletion enforcement and a decision on the fairness gaps are also unfinished.
+- **Does the language model help?** Not for routing: on the golden set, rules picked the right tool 97.5% of the time and `llama3.2:3b` 80%. It does help with answers in the user's language, but it can contradict the source, so its answers come with the excerpt and a figure check.
+- **Does drift mean the model is broken?** No. Real 2011 traffic drifts from the 2010 training reference, yet the model scored PR-AUC 0.743 on the 2011 test period. Drift is a reason to look, and only labels (delayed by 90 days) can show accuracy.
+- **What next?** Push to GitHub so CI runs; promote a champion; decide on minimisation and the fairness mitigations; then AWS (CD with OIDC, SageMaker, App Runner or Render).

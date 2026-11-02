@@ -208,6 +208,17 @@ with assistant:
             st.error(final["error"])
         if "fallback" in final:
             st.warning(final["fallback"])
+        figures = final.get("figure_check", {})
+        if figures.get("figures_not_in_sources"):
+            st.warning(
+                "The answer states figures no cited source contains: "
+                f"{', '.join(figures['figures_not_in_sources'])}. Trust the excerpts below."
+            )
+        if figures.get("top_source_figures_missing"):
+            st.warning(
+                "The main source states figures the answer leaves out: "
+                f"{', '.join(figures['top_source_figures_missing'])}. Read the excerpt below."
+            )
         if "reply" in final:
             st.caption(
                 f"Provider: {final['provider_used']}; refused: {final['refused']}; "
@@ -229,9 +240,13 @@ with monitoring:
         result = api_call("GET", "/metrics")
         alerts = api_call("GET", "/alerts")
         if result:
-            show = {"green": st.success, "yellow": st.warning, "red": st.error}
-            show.get(result["status"], st.info)(
-                f"Status: {result['status']} (the worst level among the checks below)"
+            # A status, not an application error: coloured text rather than an error box.
+            colour = {"green": "green", "yellow": "orange", "red": "red"}.get(
+                result["status"], "gray"
+            )
+            st.markdown(
+                f"### :{colour}[Status: {result['status']}]  \n"
+                "The worst level among the checks below."
             )
             fire_rate = result["recommendation"].get("rule_fire_rate")
             kpis = st.columns(4)

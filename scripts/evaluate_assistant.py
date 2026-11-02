@@ -41,11 +41,14 @@ def generation_check(client, questions, provider):
                 "fell_back": any(e["type"] == "fallback" for e in events),
                 "reply_language": detect_language(reply) if not done["refused"] else None,
                 "cited": bool(done["citations"]),
+                "figure_check": done.get("figure_check"),
                 "seconds": time.perf_counter() - start,
                 "reply": reply,
             }
         )
     written = [r for r in rows if r["answer_written_by"] == provider]
+    added = [r["id"] for r in written if r["figure_check"]["figures_not_in_sources"]]
+    dropped = [r["id"] for r in written if r["figure_check"]["top_source_figures_missing"]]
     return {
         "policy_questions": len(rows),
         "written_by_model": len(written),
@@ -56,6 +59,9 @@ def generation_check(client, questions, provider):
         else None,
         "french_written": sum(r["language"] == "fr" for r in written),
         "all_written_answers_cited": all(r["cited"] for r in written),
+        # Proxies for faithfulness, not proof: figures invented, and top-source figures omitted.
+        "answers_adding_figures": added,
+        "answers_omitting_top_source_figures": dropped,
         "seconds_p50": float(np.median([r["seconds"] for r in rows])) if rows else None,
         "questions": rows,
     }

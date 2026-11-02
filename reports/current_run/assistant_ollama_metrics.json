@@ -1,5 +1,5 @@
 {
-  "executed_at": "2026-11-01T22:15:00.649130+00:00",
+  "executed_at": "2026-11-01T22:34:12.108927+00:00",
   "provider": "ollama",
   "golden_count": 40,
   "category_counts": {
@@ -14,8 +14,8 @@
   "in_scope_refusal_count": 4,
   "expected_source_accuracy": 0.7222222222222222,
   "policy_extract_grounding_proxy": 1.0,
-  "latency_p50_ms": 2386.248729075305,
-  "latency_p95_ms": 2711.329083098098,
+  "latency_p50_ms": 4163.20418799296,
+  "latency_p95_ms": 4930.702807963825,
   "cost_usd_per_query": 0.0,
   "streamed_generation": {
     "policy_questions": 18,
@@ -24,7 +24,17 @@
     "language_match_rate": 1.0,
     "french_written": 3,
     "all_written_answers_cited": true,
-    "seconds_p50": 4.807993833092041,
+    "answers_adding_figures": [],
+    "answers_omitting_top_source_figures": [
+      1,
+      2,
+      3,
+      6,
+      9,
+      14,
+      35
+    ],
+    "seconds_p50": 8.768207792192698,
     "questions": [
       {
         "id": 1,
@@ -33,7 +43,13 @@
         "fell_back": false,
         "reply_language": "en",
         "cited": true,
-        "seconds": 3.5884040829259902,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "14"
+          ]
+        },
+        "seconds": 6.408605874981731,
         "reply": "I cannot answer that from the policies. I suggest contacting customer service. \n\nSource document: [1] (return_policy.md)"
       },
       {
@@ -43,7 +59,14 @@
         "fell_back": false,
         "reply_language": "en",
         "cited": true,
-        "seconds": 4.594127875054255,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "4",
+            "48"
+          ]
+        },
+        "seconds": 8.347429582849145,
         "reply": "I cannot answer that from the policies and suggest contacting customer service. \n\nSource document: Delivery Policy (section 2.3)"
       },
       {
@@ -53,7 +76,13 @@
         "fell_back": false,
         "reply_language": "en",
         "cited": true,
-        "seconds": 5.0373294171877205,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "48"
+          ]
+        },
+        "seconds": 9.19806916685775,
         "reply": "According to our policy, we do not ship frozen products. However, for orders containing frozen items that are shipped to Zone 1 or 2, they are shipped in insulated containers with dry ice.\n\nSource document: [4.3 Ambient items](delivery_policy.md)"
       },
       {
@@ -63,7 +92,8 @@
         "fell_back": false,
         "reply_language": null,
         "cited": false,
-        "seconds": 3.3333435838576406,
+        "figure_check": null,
+        "seconds": 5.560786250047386,
         "reply": "Tool request could not be validated: ValidationError. / Requête non validée."
       },
       {
@@ -73,7 +103,11 @@
         "fell_back": false,
         "reply_language": "en",
         "cited": true,
-        "seconds": 5.59529379196465,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "seconds": 10.093877542065457,
         "reply": "According to policy excerpt [2] (loyalty_terms.md), members earn **1 point per $1 spent** (before taxes, after discounts) on every purchase. Shipping fees do not earn points. There are no bonus categories for earning points, but certain product categories may have specific rules or restrictions. I recommend reviewing the full policy excerpt for more information.\n\nSource document: [2] (loyalty_terms.md)"
       },
       {
@@ -83,7 +117,13 @@
         "fell_back": false,
         "reply_language": "en",
         "cited": true,
-        "seconds": 4.444025749806315,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "72"
+          ]
+        },
+        "seconds": 7.908701042179018,
         "reply": "I cannot answer that from the policies and suggest contacting customer service. \n\nSource document: [1] (return_policy.md)"
       },
       {
@@ -93,7 +133,11 @@
         "fell_back": false,
         "reply_language": "en",
         "cited": true,
-        "seconds": 5.990212749922648,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "seconds": 11.550370000069961,
         "reply": "According to our Privacy Notice, we collect personal information such as name, email address, and other contact information. We also collect information about your online activities on our platform, including your browsing history and purchase history. This information is collected for the purpose of providing you with a better shopping experience and to comply with applicable laws, including the Electronic Documents Act (PIPEDA). (Source: Privacy Notice_en.md)"
       },
       {
@@ -103,7 +147,11 @@
         "fell_back": false,
         "reply_language": "en",
         "cited": true,
-        "seconds": 5.299317166907713,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "seconds": 10.010285082971677,
         "reply": "I couldn't find any information on how to cancel an existing order in the provided policy excerpts. According to section [1] (return_policy.md), to cancel a subscription entirely, you need to go to \"My Account\" → \"Subscriptions\" → \"Cancel\". I recommend contacting customer service for further assistance. (Source: return_policy.md)"
       },
       {
@@ -113,7 +161,13 @@
         "fell_back": false,
         "reply_language": "en",
         "cited": true,
-        "seconds": 4.385275749955326,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "10"
+          ]
+        },
+        "seconds": 7.903920958982781,
         "reply": "I couldn't find the information about the tiers in the loyalty program from the provided policy excerpts. I recommend contacting our customer service team for more details. (Source: loyalty_terms.md)"
       },
       {
@@ -123,7 +177,11 @@
         "fell_back": false,
         "reply_language": "en",
         "cited": true,
-        "seconds": 4.442459709011018,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "seconds": 8.433774625184014,
         "reply": "I cannot answer that question from the provided policy excerpts. I suggest contacting customer service for more information. \n\nSource document: delivery_policy.md (Section 4)"
       },
       {
@@ -133,7 +191,8 @@
         "fell_back": false,
         "reply_language": null,
         "cited": false,
-        "seconds": 3.1028445418924093,
+        "figure_check": null,
+        "seconds": 4.840991958044469,
         "reply": "Tool request could not be validated: ValidationError. / Requête non validée."
       },
       {
@@ -143,7 +202,11 @@
         "fell_back": false,
         "reply_language": "en",
         "cited": true,
-        "seconds": 5.0218597911298275,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "seconds": 9.10264095920138,
         "reply": "I couldn't find any information on what happens to loyalty points when returning an item in our policies. According to section [1] (loyalty_terms.md), points have no cash value and cannot be exchanged for cash, but it does not mention the outcome of returning an item. I recommend contacting customer service for more information on this specific scenario. \n\nSource document: [1] (loyalty_terms.md)"
       },
       {
@@ -153,7 +216,13 @@
         "fell_back": false,
         "reply_language": "en",
         "cited": true,
-        "seconds": 4.285216290969402,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "30"
+          ]
+        },
+        "seconds": 7.54107587505132,
         "reply": "I cannot answer that from the policies. I suggest contacting customer service for more information. \n\nSource document: [1] (return_policy.md)"
       },
       {
@@ -163,7 +232,11 @@
         "fell_back": false,
         "reply_language": "en",
         "cited": true,
-        "seconds": 5.71641124994494,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "seconds": 10.254300624830648,
         "reply": "I couldn't find any information on picking up an order in-store from the provided policy excerpts. According to section 5.3, non-perishable items can be picked up at the nearest depot for a fee of $9.95. I recommend contacting customer service for more information on this option.\n\nSource document: delivery_policy.md"
       },
       {
@@ -173,7 +246,11 @@
         "fell_back": false,
         "reply_language": "fr",
         "cited": true,
-        "seconds": 5.594565167091787,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "seconds": 10.267244833055884,
         "reply": "D'après notre politique de retour (document [1](return_policy.md)), nous n'avons pas d'informations spécifiques sur la politique de retour pour les produits congelés. Pour obtenir plus d'informations, je vous recommande de contacter notre service client.\n\nSource : Politique de retour (document [1](return_policy.md))"
       },
       {
@@ -183,7 +260,13 @@
         "fell_back": false,
         "reply_language": "fr",
         "cited": true,
-        "seconds": 5.339511875063181,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "48"
+          ]
+        },
+        "seconds": 9.283337749773636,
         "reply": "Selon notre politique de livraison, les commandes sont prêtes dans 4 heures après confirmation. Vous pouvez récolter vos commandes en personne au magasin de Montréal ou à Québec City.\n\nSource : Politique de livraison (page 2)\n\n[1] (delivery_policy.md)"
       },
       {
@@ -193,7 +276,11 @@
         "fell_back": false,
         "reply_language": "fr",
         "cited": true,
-        "seconds": 5.98054441716522,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "seconds": 10.798267042031512,
         "reply": "Selon les règles de fidélité, vous pouvez supprimer votre compte en contant notre adresse e-mail : fidelite@borealmarche.ca. Votre demande sera traitée dans les plus brefs délais. Nous vous remercions de nous avoir contactés pour toute question ou préoccupation. (Source : Loyauté_terms.md)"
       },
       {
@@ -203,7 +290,8 @@
         "fell_back": false,
         "reply_language": null,
         "cited": false,
-        "seconds": 3.604020999977365,
+        "figure_check": null,
+        "seconds": 6.215042083058506,
         "reply": "Tool request could not be validated: ValidationError. / Requête non validée."
       }
     ]
@@ -271,8 +359,8 @@
       "source_correct": true,
       "refused": false,
       "http_status": 200,
-      "latency_ms": 6340.259665856138,
-      "provider_latency_ms": 6249.76566596888,
+      "latency_ms": 3067.6754999440163,
+      "provider_latency_ms": 2986.0725831240416,
       "policy_excerpt_in_reply": true,
       "cost_usd": 0.0,
       "token_usage": null,
@@ -292,8 +380,8 @@
       "source_correct": true,
       "refused": false,
       "http_status": 200,
-      "latency_ms": 2583.075374830514,
-      "provider_latency_ms": 2524.418625049293,
+      "latency_ms": 4697.991958120838,
+      "provider_latency_ms": 4642.807082971558,
       "policy_excerpt_in_reply": true,
       "cost_usd": 0.0,
       "token_usage": null,
@@ -313,8 +401,8 @@
       "source_correct": true,
       "refused": false,
       "http_status": 200,
-      "latency_ms": 2392.053000163287,
-      "provider_latency_ms": 2340.6320000067353,
+      "latency_ms": 4264.338291948661,
+      "provider_latency_ms": 4199.282499961555,
       "policy_excerpt_in_reply": true,
       "cost_usd": 0.0,
       "token_usage": null,
@@ -332,7 +420,7 @@
       "source_correct": false,
       "refused": true,
       "http_status": 200,
-      "latency_ms": 2551.344915991649,
+      "latency_ms": 5130.271208006889,
       "provider_latency_ms": null,
       "policy_excerpt_in_reply": null,
       "cost_usd": null,
@@ -353,8 +441,8 @@
       "source_correct": true,
       "refused": false,
       "http_status": 200,
-      "latency_ms": 2556.1633750330657,
-      "provider_latency_ms": 2489.724458195269,
+      "latency_ms": 4285.071542020887,
+      "provider_latency_ms": 4187.336958013475,
       "policy_excerpt_in_reply": true,
       "cost_usd": 0.0,
       "token_usage": null,
@@ -374,8 +462,8 @@
       "source_correct": true,
       "refused": false,
       "http_status": 200,
-      "latency_ms": 2557.8079998958856,
-      "provider_latency_ms": 2513.328791828826,
+      "latency_ms": 4360.498709138483,
+      "provider_latency_ms": 4293.635833077133,
       "policy_excerpt_in_reply": true,
       "cost_usd": 0.0,
       "token_usage": null,
@@ -395,8 +483,8 @@
       "source_correct": true,
       "refused": false,
       "http_status": 200,
-      "latency_ms": 2705.6621247902513,
-      "provider_latency_ms": 2656.3094169832766,
+      "latency_ms": 4920.199207961559,
+      "provider_latency_ms": 4847.598124993965,
       "policy_excerpt_in_reply": true,
       "cost_usd": 0.0,
       "token_usage": null,
@@ -416,8 +504,8 @@
       "source_correct": true,
       "refused": false,
       "http_status": 200,
-      "latency_ms": 2330.8994590770453,
-      "provider_latency_ms": 2288.264208007604,
+      "latency_ms": 3930.542082991451,
+      "provider_latency_ms": 3878.931500017643,
       "policy_excerpt_in_reply": true,
       "cost_usd": 0.0,
       "token_usage": null,
@@ -437,8 +525,8 @@
       "source_correct": true,
       "refused": false,
       "http_status": 200,
-      "latency_ms": 2253.090542042628,
-      "provider_latency_ms": 2207.74900005199,
+      "latency_ms": 3909.020208986476,
+      "provider_latency_ms": 3830.2447500173002,
       "policy_excerpt_in_reply": true,
       "cost_usd": 0.0,
       "token_usage": null,
@@ -458,8 +546,8 @@
       "source_correct": true,
       "refused": false,
       "http_status": 200,
-      "latency_ms": 2514.086457900703,
-      "provider_latency_ms": 2459.410334005952,
+      "latency_ms": 4139.123041881248,
+      "provider_latency_ms": 4080.377417150885,
       "policy_excerpt_in_reply": true,
       "cost_usd": 0.0,
       "token_usage": null,
@@ -479,8 +567,8 @@
       "source_correct": null,
       "refused": false,
       "http_status": 200,
-      "latency_ms": 2377.956749871373,
-      "provider_latency_ms": 2321.1341248825192,
+      "latency_ms": 4289.394290884957,
+      "provider_latency_ms": 4173.082000110298,
       "policy_excerpt_in_reply": true,
       "cost_usd": 0.0,
       "token_usage": null,
@@ -498,7 +586,7 @@
       "source_correct": false,
       "refused": true,
       "http_status": 200,
-      "latency_ms": 2197.226124815643,
+      "latency_ms": 3572.295624995604,
       "provider_latency_ms": null,
       "policy_excerpt_in_reply": null,
       "cost_usd": null,
@@ -519,8 +607,8 @@
       "source_correct": true,
       "refused": false,
       "http_status": 200,
-      "latency_ms": 2474.5312919840217,
-      "provider_latency_ms": 2414.0786670614034,
+      "latency_ms": 4327.267542015761,
+      "provider_latency_ms": 4236.271708039567,
       "policy_excerpt_in_reply": true,
       "cost_usd": 0.0,
       "token_usage": null,
@@ -540,8 +628,8 @@
       "source_correct": false,
       "refused": false,
       "http_status": 200,
-      "latency_ms": 2299.612292088568,
-      "provider_latency_ms": 2256.3055830542,
+      "latency_ms": 4312.3862920328975,
+      "provider_latency_ms": 4244.363208068535,
       "policy_excerpt_in_reply": true,
       "cost_usd": 0.0,
       "token_usage": null,
@@ -561,8 +649,8 @@
       "source_correct": true,
       "refused": false,
       "http_status": 200,
-      "latency_ms": 2643.311541993171,
-      "provider_latency_ms": 2595.196583075449,
+      "latency_ms": 4540.106332860887,
+      "provider_latency_ms": 4475.811125012115,
       "policy_excerpt_in_reply": true,
       "cost_usd": 0.0,
       "token_usage": null,
@@ -580,7 +668,7 @@
       "source_correct": null,
       "refused": true,
       "http_status": 200,
-      "latency_ms": 1887.8041659481823,
+      "latency_ms": 3477.960417047143,
       "provider_latency_ms": null,
       "policy_excerpt_in_reply": null,
       "cost_usd": null,
@@ -601,8 +689,8 @@
       "source_correct": null,
       "refused": false,
       "http_status": 200,
-      "latency_ms": 2552.2760001476854,
-      "provider_latency_ms": 2473.1204588897526,
+      "latency_ms": 4021.843916969374,
+      "provider_latency_ms": 3967.5181249622256,
       "policy_excerpt_in_reply": true,
       "cost_usd": 0.0,
       "token_usage": null,
@@ -620,8 +708,8 @@
       "source_correct": null,
       "refused": false,
       "http_status": 200,
-      "latency_ms": 2500.7357080467045,
-      "provider_latency_ms": 2465.1108330581337,
+      "latency_ms": 5754.3002078309655,
+      "provider_latency_ms": 5707.17979199253,
       "policy_excerpt_in_reply": null,
       "cost_usd": 0.0,
       "token_usage": null,
@@ -639,8 +727,8 @@
       "source_correct": null,
       "refused": false,
       "http_status": 200,
-      "latency_ms": 2327.7215829584748,
-      "provider_latency_ms": 2290.096875047311,
+      "latency_ms": 4458.762709051371,
+      "provider_latency_ms": 4342.983334092423,
       "policy_excerpt_in_reply": null,
       "cost_usd": 0.0,
       "token_usage": null,
@@ -658,8 +746,8 @@
       "source_correct": null,
       "refused": false,
       "http_status": 200,
-      "latency_ms": 2269.5182499010116,
-      "provider_latency_ms": 2170.311334077269,
+      "latency_ms": 3859.8029168788344,
+      "provider_latency_ms": 3738.35420794785,
       "policy_excerpt_in_reply": null,
       "cost_usd": 0.0,
       "token_usage": null,
@@ -679,8 +767,8 @@
       "source_correct": null,
       "refused": false,
       "http_status": 200,
-      "latency_ms": 2190.413124859333,
-      "provider_latency_ms": 2127.7917500119656,
+      "latency_ms": 4201.853208942339,
+      "provider_latency_ms": 4107.378083048388,
       "policy_excerpt_in_reply": null,
       "cost_usd": 0.0,
       "token_usage": null,
@@ -698,8 +786,8 @@
       "source_correct": null,
       "refused": false,
       "http_status": 200,
-      "latency_ms": 2594.8500831145793,
-      "provider_latency_ms": 2564.193667145446,
+      "latency_ms": 4321.798916906118,
+      "provider_latency_ms": 4252.825249917805,
       "policy_excerpt_in_reply": null,
       "cost_usd": 0.0,
       "token_usage": null,
@@ -717,8 +805,8 @@
       "source_correct": null,
       "refused": false,
       "http_status": 200,
-      "latency_ms": 2110.0290410686284,
-      "provider_latency_ms": 2025.1082079485059,
+      "latency_ms": 3859.0574169065803,
+      "provider_latency_ms": 3761.956708971411,
       "policy_excerpt_in_reply": null,
       "cost_usd": 0.0,
       "token_usage": null,
@@ -738,8 +826,8 @@
       "source_correct": null,
       "refused": false,
       "http_status": 200,
-      "latency_ms": 2447.226959047839,
-      "provider_latency_ms": 2400.113167008385,
+      "latency_ms": 4007.548541063443,
+      "provider_latency_ms": 3937.0011668652296,
       "policy_excerpt_in_reply": true,
       "cost_usd": 0.0,
       "token_usage": null,
@@ -757,8 +845,8 @@
       "source_correct": null,
       "refused": false,
       "http_status": 200,
-      "latency_ms": 2604.2766659520566,
-      "provider_latency_ms": 2572.442416800186,
+      "latency_ms": 4909.15891691111,
+      "provider_latency_ms": 4857.985208043829,
       "policy_excerpt_in_reply": null,
       "cost_usd": 0.0,
       "token_usage": null,
@@ -776,7 +864,7 @@
       "source_correct": null,
       "refused": true,
       "http_status": 200,
-      "latency_ms": 2.3511669132858515,
+      "latency_ms": 2.7083749882876873,
       "provider_latency_ms": null,
       "policy_excerpt_in_reply": null,
       "cost_usd": null,
@@ -795,7 +883,7 @@
       "source_correct": null,
       "refused": true,
       "http_status": 200,
-      "latency_ms": 2.170416060835123,
+      "latency_ms": 1.866375096142292,
       "provider_latency_ms": null,
       "policy_excerpt_in_reply": null,
       "cost_usd": null,
@@ -814,7 +902,7 @@
       "source_correct": null,
       "refused": true,
       "http_status": 200,
-      "latency_ms": 2.1790838800370693,
+      "latency_ms": 3.346333047375083,
       "provider_latency_ms": null,
       "policy_excerpt_in_reply": null,
       "cost_usd": null,
@@ -833,7 +921,7 @@
       "source_correct": null,
       "refused": true,
       "http_status": 200,
-      "latency_ms": 2.19979090616107,
+      "latency_ms": 1.523124985396862,
       "provider_latency_ms": null,
       "policy_excerpt_in_reply": null,
       "cost_usd": null,
@@ -852,7 +940,7 @@
       "source_correct": null,
       "refused": true,
       "http_status": 200,
-      "latency_ms": 1.6847499646246433,
+      "latency_ms": 1.3257500249892473,
       "provider_latency_ms": null,
       "policy_excerpt_in_reply": null,
       "cost_usd": null,
@@ -871,7 +959,7 @@
       "source_correct": null,
       "refused": true,
       "http_status": 200,
-      "latency_ms": 2.1037920378148556,
+      "latency_ms": 1.793749863281846,
       "provider_latency_ms": null,
       "policy_excerpt_in_reply": null,
       "cost_usd": null,
@@ -890,7 +978,7 @@
       "source_correct": null,
       "refused": true,
       "http_status": 200,
-      "latency_ms": 1.7657079733908176,
+      "latency_ms": 1.4317079912871122,
       "provider_latency_ms": null,
       "policy_excerpt_in_reply": null,
       "cost_usd": null,
@@ -909,7 +997,7 @@
       "source_correct": null,
       "refused": true,
       "http_status": 200,
-      "latency_ms": 1.399375032633543,
+      "latency_ms": 1.4207500498741865,
       "provider_latency_ms": null,
       "policy_excerpt_in_reply": null,
       "cost_usd": null,
@@ -930,8 +1018,8 @@
       "source_correct": true,
       "refused": false,
       "http_status": 200,
-      "latency_ms": 2471.9730420038104,
-      "provider_latency_ms": 2414.7159999702126,
+      "latency_ms": 4165.130167035386,
+      "provider_latency_ms": 4086.737208068371,
       "policy_excerpt_in_reply": true,
       "cost_usd": 0.0,
       "token_usage": null,
@@ -951,8 +1039,8 @@
       "source_correct": true,
       "refused": false,
       "http_status": 200,
-      "latency_ms": 2693.5383330564946,
-      "provider_latency_ms": 2642.978874966502,
+      "latency_ms": 4643.07799981907,
+      "provider_latency_ms": 4545.750041957945,
       "policy_excerpt_in_reply": true,
       "cost_usd": 0.0,
       "token_usage": null,
@@ -970,8 +1058,8 @@
       "source_correct": null,
       "refused": false,
       "http_status": 200,
-      "latency_ms": 2206.7019999958575,
-      "provider_latency_ms": 2116.6382080409676,
+      "latency_ms": 4317.199625074863,
+      "provider_latency_ms": 4171.539666131139,
       "policy_excerpt_in_reply": null,
       "cost_usd": 0.0,
       "token_usage": null,
@@ -991,8 +1079,8 @@
       "source_correct": null,
       "refused": false,
       "http_status": 200,
-      "latency_ms": 2556.520292069763,
-      "provider_latency_ms": 2518.683417001739,
+      "latency_ms": 4159.856707789004,
+      "provider_latency_ms": 4112.209249986336,
       "policy_excerpt_in_reply": null,
       "cost_usd": 0.0,
       "token_usage": null,
@@ -1012,8 +1100,8 @@
       "source_correct": false,
       "refused": false,
       "http_status": 200,
-      "latency_ms": 2500.6380409467965,
-      "provider_latency_ms": 2441.297834040597,
+      "latency_ms": 4161.2782089505345,
+      "provider_latency_ms": 4088.926916010678,
       "policy_excerpt_in_reply": true,
       "cost_usd": 0.0,
       "token_usage": null,
@@ -1033,8 +1121,8 @@
       "source_correct": null,
       "refused": false,
       "http_status": 200,
-      "latency_ms": 2380.4444579873234,
-      "provider_latency_ms": 2339.4163749180734,
+      "latency_ms": 4475.19841697067,
+      "provider_latency_ms": 4427.247334038839,
       "policy_excerpt_in_reply": null,
       "cost_usd": 0.0,
       "token_usage": null,
@@ -1052,7 +1140,7 @@
       "source_correct": false,
       "refused": true,
       "http_status": 200,
-      "latency_ms": 2819.001290947199,
+      "latency_ms": 4622.785292100161,
       "provider_latency_ms": null,
       "policy_excerpt_in_reply": null,
       "cost_usd": null,

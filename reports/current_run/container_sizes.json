@@ -62,5 +62,62 @@
         "torch_mb": 0
       }
     }
-  ]
+  ],
+  "remeasured": {
+    "measured_at": "2026-11-01T22:40:00+00:00",
+    "reason": "rebuilt after adding the MLflow registry client to the API, the About documents to the interface, and the SageMaker stage",
+    "note": "Same machine and method, linux/arm64. API growth +71 MB: about 46 MB is the registry client (mlflow-skinny 28, databricks-sdk 16, GitPython and small packages; opentelemetry was already present); the rest is newer versions of dependencies that are not locked.",
+    "images": [
+      {
+        "description": "docker/Dockerfile --target api",
+        "tag": "boreal-marche/api:local",
+        "image_id": "sha256:e3b6bbbc36e7e9b079d8df7cbebe8607c43ac56cfd8c1d55f8b6ef1235d2977d",
+        "architecture": "arm64",
+        "uncompressed_bytes": 2064277504,
+        "uncompressed_mb": 2064,
+        "compressed_bytes": 553196613,
+        "compressed_mb": 553,
+        "largest_layer_mb": 1894,
+        "python_packages": {
+          "site_packages_dir": "/opt/venv/lib/python3.12/site-packages",
+          "site_packages_mb": 1807,
+          "torch_mb": 508,
+          "mlflow_client_mb": 28
+        }
+      },
+      {
+        "description": "docker/Dockerfile --target frontend",
+        "tag": "boreal-marche/frontend:local",
+        "image_id": "sha256:221e1e60ac79be7b7c51df59b25b381661e57ee5ebc561b2d353085a4b9893d1",
+        "architecture": "arm64",
+        "uncompressed_bytes": 630468608,
+        "uncompressed_mb": 630,
+        "compressed_bytes": 179132325,
+        "compressed_mb": 179,
+        "largest_layer_mb": 464,
+        "python_packages": {
+          "site_packages_dir": "/usr/local/lib/python3.12/site-packages",
+          "site_packages_mb": 428,
+          "torch_mb": 0
+        }
+      },
+      {
+        "description": "docker/Dockerfile --target sagemaker (training, tuning and endpoint; not in Compose)",
+        "tag": "boreal-marche/sagemaker:local",
+        "image_id": "sha256:ae20abace8892da00924381580f80efed0c718a997e83fa61751b75c2e78e21f",
+        "architecture": "arm64",
+        "uncompressed_bytes": 1043959808,
+        "uncompressed_mb": 1044,
+        "compressed_bytes": 289555090,
+        "compressed_mb": 290,
+        "largest_layer_mb": 877,
+        "python_packages": {
+          "site_packages_dir": "/usr/local/lib/python3.12/site-packages",
+          "site_packages_mb": 844,
+          "torch_mb": 0,
+          "mlflow_mb": 110
+        }
+      }
+    ]
+  }
 }

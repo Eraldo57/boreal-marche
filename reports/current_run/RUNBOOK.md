@@ -54,25 +54,65 @@ With both servers running:
 .venv/bin/python -m scripts.run_logged monitoring .venv/bin/python -m scripts.simulate_traffic --count 120 --shifted
 .venv/bin/python -m scripts.run_logged tests .venv/bin/coverage run --source=src,api -m pytest -q
 .venv/bin/coverage report --fail-under=80
-.venv/bin/ruff check src api app scripts tests
-.venv/bin/ruff format --check src api app scripts tests
+.venv/bin/ruff check src api frontend scripts tests
+.venv/bin/ruff format --check src api frontend scripts tests
 .venv/bin/mypy src api --ignore-missing-imports
 ```
 
-On 2026-11-01 these gates passed locally: 190 tests, coverage 90% (89% on a clean checkout, where 5 integration tests skip), ruff clean, mypy 0 errors in 22 files. No CI run has happened yet. Integration tests skip on a fresh checkout until local artifacts exist; unit tests use labelled mocks or labelled synthetic data. UI smoke is AppTest plus server health, not browser visual QA. Monitoring traffic is deliberately synthetic/historical, not a production benchmark.
+`smoke_api` takes `--base-url` and `smoke_ui` takes `--streamlit-url` when the servers use other ports. For `smoke_ui`, also set `API_BASE_URL`.
 
-Assistant external providers are optional: configure OPENAI_API_KEY or start the configured Ollama server/model, then use evaluate_assistant --provider openai|ollama. No evaluation of either was executed. The Ollama request path was exercised inside Compose with the configured `llama3.2:3b` on three questions (docs/CONTAINERS.md); that is wiring, not an evaluation. Do not send private information to this demo.
+**Gates, 2026-11-01.**
+
+- 273 tests passed locally, with 90% coverage. On a clean checkout, 7 integration tests skip and coverage is 89%.
+- ruff is clean, and mypy reports 0 errors in 31 files.
+- No CI run has happened yet.
+
+**What the tests are and are not.**
+
+- Integration tests skip on a fresh checkout until local artifacts exist. Unit tests use labelled mocks or labelled synthetic data.
+- UI smoke is AppTest plus server health, not browser visual QA. It includes the live what-if update and a streamed answer.
+- Monitoring traffic is real historical rows and baskets, plus deliberate synthetic shifts. It is not a production benchmark.
+
+**Offline audits and charts** (after training; each writes its JSON and refreshes its generated table):
+
+```bash
+.venv/bin/python -m src.plots          # reliability and threshold charts -> reports/current_run/figures/
+.venv/bin/python -m src.fairness       # subgroup audit -> governance/fairness_audit.md
+.venv/bin/python -m src.minimisation   # drop-column necessity test -> governance/FEATURE_INVENTORY.md
+```
+
+**Assistant providers are optional.**
+
+- **To evaluate one:** configure OPENAI_API_KEY, or start the configured Ollama server and model. Then run `evaluate_assistant --provider openai|ollama`.
+- **Ollama:** evaluated on 2026-11-01 with the native app (VALIDATION_RESULTS.md), including the streamed, model-written answers and their figure check.
+- **OpenAI:** not evaluated.
+
+Do not send private information to this demo.
 
 ## Tracking, DVC and Docker
 
 ```bash
 .venv/bin/mlflow ui --backend-store-uri sqlite:///mlflow.db --host 127.0.0.1 --port 5000
 .venv/bin/python -m scripts.retrain --dry-run --skip-etl
+.venv/bin/python -m src.registry status                      # versions, aliases, approvals
+.venv/bin/python -m src.registry evaluate --version 1        # promotion gates, read-only
 .venv/bin/dvc status
 docker compose -f docker/compose.yml config --quiet
 ```
 
-MLflow SQLite tracking and nested comparison/tuning runs exist; registry aliases do not. Retrain without --dry-run generates a timestamped candidate and its own report, never automatically promotes it. The same historical holdout is not fresh promotion evidence.
+**MLflow.**
+
+- SQLite tracking holds nested comparison and tuning runs, now with plots and git and data tags.
+- Every training run registers its model as a candidate version of `boreal-retention`. Version 1 is the current model.
+- **Promotion is a human decision.** The approver runs:
+
+  ```bash
+  .venv/bin/python -m src.registry promote --version N --approver "Name" --reason "why" [--acknowledge-fairness-flags]
+  ```
+
+  The policy is `governance/PROMOTION_POLICY.md`. Then restart the API so it serves the champion. `rollback` moves the alias back. Until a promotion, `/version` reports the local fallback.
+
+**Retraining.** `scripts.retrain` without `--dry-run` generates a timestamped candidate and its report. It never promotes. The same historical holdout is not fresh promotion evidence.
 
 DVC was initialized locally with `dvc init --no-scm`, analytics disabled, then `dvc commit -f` recorded existing outputs in dvc.lock. This records artifacts; it is not evidence of a full `dvc repro` execution. Since 2026-11-01 `.dvc/config` sets only `analytics = false`; without `no_scm`, DVC works with git. No remote is configured. Chroma mutates its persistence directory on use, so DVC can report the index modified even after read queries. Stop services and design an immutable index export before claiming a clean reusable data registry.
 
@@ -83,16 +123,24 @@ make up        # docker compose -f docker/compose.yml up --build -d
 make down
 ```
 
-The interface uses http://api:8000 inside Compose; MLflow stays behind the optional `tracking` profile. On Linux set LOCAL_UID/LOCAL_GID in .env. Both images were built and the stack was run on 2026-10-31 (linux/arm64); measured sizes, the macOS folder-permission prerequisite and what was not verified are in docs/CONTAINERS.md. No AWS command was executed.
+- **Inside Compose,** the interface reaches the API at http://api:8000.
+- **MLflow** stays behind the optional `tracking` profile. When that profile is up, the API serves that server's champion.
+- **On Linux,** set LOCAL_UID and LOCAL_GID in .env.
+- **Verified locally.** The images were rebuilt and the stack run on 2026-11-01 (linux/arm64). Measured sizes, the macOS folder-permission prerequisite and what was not verified are in docs/CONTAINERS.md.
+- **SageMaker** has its own image and launcher (docs/SAGEMAKER.md). No AWS command has been run.
 
 ## Five-minute screen share
 
 1. 0:00–0:45: architecture and configs/pipeline.yaml; distinguish UCI events from fictional policy corpus.
 2. 0:45–1:30: manifest + cleaning_report; show preserved cancellations and fixed caps.
-3. 1:30–2:15: temporal cutoffs, canonical features, retention_metrics and real model metadata.
+3. 1:30–2:15: temporal cutoffs, canonical features, the reliability chart, retention_metrics and real model metadata.
 4. 2:15–3:00: recommendation_metrics and rules header; explain popularity comparison.
-5. 3:00–4:15: API /ready and Streamlit customer 12347 → Predict; one basket; English/French policy citations.
-6. 4:15–5:00: test results, remaining issues and next-phase slide. Explain incomplete source relevance, fairness, CI gates and cloud work.
+5. 3:00–4:15: API /ready, then in Streamlit:
+   - customer 12347, changing recency to show the live what-if, then recording a reviewer decision;
+   - one basket;
+   - a French policy question streamed with Ollama, opening its cited excerpt;
+   - the Monitoring tab after `simulate_traffic --shifted`.
+6. 4:15–5:00: test results, the fairness audit's flags, remaining issues and the next-phase slide.
 
 Do not present notebooks or DEFENCE_PREPARATION.md as current validated evidence. Stop servers with Ctrl-C when finished.
 

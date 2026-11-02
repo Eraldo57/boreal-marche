@@ -1,31 +1,71 @@
 # Remaining work — prioritized, not hidden
 
+Updated 2026-11-01.
+
 ## P0 — before any real/customer-facing exposure
 
-- No authenticated identity, authorization, rate limiting or secure customer feature lookup. Bind local servers to localhost only. Matching a caller-supplied ID is not authentication.
-- No implemented human approval, appeal/correction workflow, coupon dispatch or support handoff.
-- No enforced retention/purge across logs, features, raw data, DVC cache, backups and model lineage. Prediction vectors can be identifying.
-- Joblib deserialization requires trusted artifacts. Hash matching alone does not authenticate a publisher.
+- **No authentication or authorization.** There is no authenticated identity, authorization, rate limiting or secure customer feature lookup, so bind local servers to localhost only. Matching a caller-supplied ID is not authentication, and the approval step's reviewer name is declared, not verified.
+- **No downstream processes.** There is no appeal or correction workflow, coupon dispatch or support handoff. The human approval step records decisions; it does not act on them.
+- **No enforced retention or purge.** This applies across:
+  - the prediction, alert and decision logs (`decision_log` holds customer IDs);
+  - features, raw data and the DVC cache;
+  - backups, the MLflow registry and model lineage.
+
+  Prediction vectors can be identifying.
+- **Joblib deserialization requires trusted artifacts,** whether local or from the registry. A hash match does not authenticate a publisher, and anyone with registry write access can move the champion alias.
 
 ## P1 — next integration/validation milestone
 
-- **CI never run:** locally on 2026-11-01, strict mypy reports 0 errors in 22 files and coverage is 90% (89% on a clean checkout), above the unchanged 80% gate, with 190 tests passing. The repository has no remote, so no GitHub Actions run, branch protection or green pipeline exists yet. Coverage shows the code paths run; model quality still comes from the real-data runs.
-- **Assistant relevance:** 39/40 tool/refusal paths match the development golden set, but expected policy source accuracy is 15/18. Questions 12, 14 and 38 retrieve the wrong leading source. Question 16 references an unavailable historical customer and correctly returns no invented score. Improve paragraph-aware chunking, retrieval/reranking and completeness evaluation on a new holdout.
-- **Bilingual generation partial:** French questions retrieve English policy chunks; regex can quote English with a French wrapper. OpenAI was not run. Ollama ran in Compose with the configured `llama3.2:3b` (changed from `llama3.1` on 2026-10-31) on three questions, a wiring check; it has not been evaluated. Inside Docker on a Mac it runs on the CPU (7–18 s per answer), whereas the native Ollama app uses the Apple GPU. Provider evaluation, full fluent bilingual grounded generation and adversarial evaluation remain.
-- **Retention limitations:** very low one-time-buyer returner recall at the selected threshold; full subgroup/uncertainty analysis, feature ablation, outlier sensitivity and stronger business-action framing required. Scores do not estimate causal coupon uplift.
-- **Recommendations:** half-basket offline task, description-based identity and popularity fallback are working. SKU normalization, curated category support, online evaluation and full unbounded itemset scalability remain. FP-Growth was slower than Apriori on this bounded local comparison; do not claim otherwise.
-- **Docker:** both images build and the five-service Compose stack ran locally on linux/arm64 (docs/CONTAINERS.md). Open: the linux/amd64 build (CI does it), a fresh-clone test on another machine, and a cloud image that carries or fetches the Chroma index, feature store and embedding model (the API image alone is live but not ready). The API image is 1,993 MB uncompressed and 534 MB compressed; its p95 `/predict` latency was 45.7, 57.8 and 54.4 ms in three local runs, so not reliably under 50 ms.
-- **DVC:** local cache and lock generated, no remote or full dvc repro validation. Chroma's mutable SQLite directory becomes dirty during serving; separate immutable index export from writable runtime state.
-- **Reproducibility:** exact package snapshot recorded, but no portable hash-locked dependency set or pinned embedding revision. Data/source/config hashes record generation-time state; source formatting/documentation changed afterward. Older ingest/feature config hashes differ after removal of an unused mining config key, which does not change those transformations.
+- **CI has never run.** Locally on 2026-11-01:
+  - 273 tests pass with 90% coverage (89% on a clean checkout);
+  - strict mypy reports 0 errors in 31 files, and ruff is clean.
 
-## P2 — next phase / not executed
+  Without a GitHub remote there is no Actions run, branch protection, green pipeline or linux/amd64 image build. The golden-set tool-choice test's pass marks (40–60%) sit far below the measured 97.5%, so it would miss small regressions.
+- **Registry: nothing promoted yet.** Version 1 is a candidate whose gates pass. The project owner must promote it and acknowledge its five fairness flags. The local registry is a SQLite file; CD and the cloud need a shared tracking server.
+- **Decisions waiting for the project owner:**
+  1. **Data minimisation.** Retrain on the 12 necessary features (governance/FEATURE_INVENTORY.md). This changes the API contract and every metric.
+  2. **Fairness.** Choose a mitigation for customers with a thin purchase history; five options with trade-offs are in governance/fairness_audit.md.
+  3. **Business numbers.** The coupon cost (5) and margin (25) behind the threshold are placeholders, not the owner's assumptions.
+  4. **API image size.** Keep the MLflow registry client in the API image (about 46 MB; uncompressed size now 2,064 MB, just over the brief's 2 GB line), or resolve the registry over plain HTTP instead.
+- **Assistant quality.**
+  - **Regex:** 39 of 40 tool paths; 15 of 18 expected sources (Q12, Q14 and Q38 lead with the wrong source; Q16 asks about an unavailable customer).
+  - **Ollama `llama3.2:3b`:** 80% tool choice, 72% expected sources, 4 in-scope refusals, 4.2 s per question (median of the recorded run; an earlier run measured 2.4 s).
+  - **Model-written answers.** They are fluent and in the requested language, but they can contradict the source: a false frozen-returns answer appeared during prompt tuning. The figure check flags such cases but cannot prove correctness.
+  - **OpenAI:** not evaluated (no key).
+  - **Next steps:** improve chunking and reranking, score answer correctness on a new holdout, consider a larger local model.
+- **Retention limitations.**
+  - Low returner recall for customers with a thin purchase history.
+  - No uncertainty intervals for the headline metrics.
+  - No outlier sensitivity analysis.
+  - Scores do not estimate causal coupon uplift.
+- **Recommendations.** The half-basket offline task, description-based identity and popularity fallback work. Still to do: SKU normalization, curated categories and online evaluation. FP-Growth was slower than Apriori on the bounded comparison; do not claim otherwise.
+- **Docker.**
+  - **Not yet done:**
+    - the linux/amd64 build (CI does it);
+    - the fresh-clone test on another machine (section 7.3, Week 11);
+    - a cloud image that carries or fetches the Chroma index, the feature store and the embedding model (today they are mounted);
+    - verifying the registry inside Compose (it needs the `tracking` profile and a promoted model).
+  - **Measured:** the API image is 2,064 MB uncompressed and 553 MB compressed. `/predict` p95 was 49.6 ms in the 2026-11-01 demo and 45.7–57.8 ms in the 2026-10-31 runs.
+- **Monitoring.**
+  - **Drift reference.** Real 2011 traffic drifts from the 2010 training reference, because tenure features grow with time. Decide whether to refresh the reference with recent data or monitor tenure differently.
+  - **Alerts.** No webhook is configured, so alerts reach only the log and the table.
+  - **Statistics.** One process only. KS over-alerts on large samples, and there is no multiple-comparison correction.
+  - **Labels.** Delayed-label backfill is designed (docs/MONITORING.md), not built.
+- **DVC.** There is a local cache and lock file, but no remote and no full `dvc repro` validation. Chroma's mutable SQLite directory becomes dirty during serving.
+- **Reproducibility.** There is no hash-locked dependency set: the API rebuild picked up newer package versions, about 25 MB of its growth. The embedding model's revision is not pinned. Tests raise thousands of numpy deprecation warnings. Most come from a test helper, but the pipeline code itself triggers one at `src/features.py:484`, which a future numpy could turn into an error.
 
-- MLflow model registry aliases, promotion comparison and reviewed rollback.
-- Monitoring log rotation, multi-worker aggregation, multiple-testing-aware drift analysis, alert delivery, delayed-label backfill and performance tracking.
-- SageMaker HPO/spot training/endpoints, AWS IAM/ECR/App Runner deployment, live SLO/load study, cloud cost analysis.
-- Actual CI/CD runs in GitHub, deployment approvals/secrets, container security validation.
-- Complete Law 25/privacy review, documented owner and operational rights/incident procedures.
-- Grocery catalogue ↔ UCI product mapping, or an appropriately governed genuine grocery dataset.
+## P2 — needs accounts, or a later phase
 
-There are no remaining blockers to the demonstrated **local regex/API/Streamlit path** with the generated artifacts. This is not equivalent to a finished capstone or deployable production system.
+- **GitHub.** A remote, CI runs, branch protection (a private repository needs GitHub Pro), and the instructor added as a collaborator.
+- **AWS.**
+  - An OIDC role and an ECR repository.
+  - Deployment on App Runner or Render through CD.
+  - SageMaker training, tuning and the endpoint, run with evidence and torn down (`scripts/sagemaker_jobs.py`).
+  - A cost analysis with real prices.
+- **Weekly retraining runs.** They need `ENABLE_RETRAINING`, and ideally a shared MLflow server and a pull-request token.
+- **Operations at scale.** A live load study against an SLO, alerts delivered to a person, the backfill built, and multi-worker monitoring.
+- **Law 25.** A complete review: a named owner, rights and incident procedures, and retention periods, including for `decision_log`.
+- **Data.** A mapping from a grocery catalogue to UCI products, or an appropriately governed grocery dataset.
+- **Deliverables.** The demo video, the deployment note, and version tags (v0.9, v1.0, and v0.1–v0.3 for deliverables already submitted).
 
+The local path is complete and verified: API, interface, monitoring, approval step, registry candidate and Docker stack. That is not the same as a finished capstone or a deployable production system.

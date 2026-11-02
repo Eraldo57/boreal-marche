@@ -60,6 +60,66 @@ The bullets above record the 2026-09-30 run. On 2026-10-31, after typing fixes, 
 
 ### Re-run on 2026-11-01
 
-- Fixed: a request whose endpoint crashed was missing from the prediction log and the error rate; it is now logged as the 500 the caller receives, and a new test reproduces the crash. 190 tests passed; coverage 90% locally and 89% on a clean checkout (185 passed, 5 skipped); ruff clean; strict mypy 0 errors in 22 files.
+The retention model, rules and index are unchanged from 2026-09-30. Everything below was measured on 2026-11-01.
+
+- **Quality gates.**
+  - Locally, 273 tests pass with 90% coverage.
+  - On a clean checkout (only the files git would commit, no artifacts), 266 pass and 7 integration tests skip, with 89% coverage, above the 80% gate.
+  - ruff is clean, and strict mypy reports 0 errors in 31 files.
+  - CI has still not run, because the repository has no remote.
+- **Crash logging fixed.** A request whose endpoint crashed was missing from the prediction log and the error rate. It is now logged as the 500 the caller receives, and a test reproduces the crash.
+- **Calibration and threshold charts,** drawn from the saved report (`figures/`).
+  - June decision-data Brier: 0.1681 uncalibrated, 0.1578 isotonic (selected), 0.1582 sigmoid.
+  - Training runs now also log both charts to MLflow, with git and data hashes as tags.
+- **Fairness audit** (`fairness_audit.json`).
+  - Data: test snapshot 2011-09-01, 5,233 rows, threshold 0.22. Recomputed test scores matched `test_predictions.parquet` exactly.
+  - Overall: returner recall 81.4%, precision 57.3%, selection rate 60.7%.
+  - No region is flagged. Five groups are strongly flagged, all customers with a thin purchase history: one-time buyers (recall 17.3%), lowest spend quartile (14.2%), second spend quartile (62.7%), tenure under 6 months (69.5%) and tenure 6–12 months (64.9%).
+- **Data-minimisation audit** (`minimisation_audit.json`).
+  - Refitting reproduced the saved model: decision-period PR-AUC 0.7030.
+  - Twelve features are necessary. Thirteen show no reliable contribution.
+  - Removing the thirteen together raised decision-period PR-AUC by 0.0052; the bootstrap interval of the loss is −0.0093 to −0.0012.
+  - This is a recommendation; nothing was removed.
+- **Registry.**
+  - The current model is version 1 of `boreal-retention`, a candidate.
+  - Its gate check on the test snapshot passes: PR-AUC 0.7430 against 0.6711 for the recency heuristic. Five fairness flags await acknowledgement.
+  - It is not promoted, so the API serves `artifacts/` and reports the fallback in `/version`.
+- **Assistant providers.** Measured on the 40 golden questions, a development set rather than an unseen benchmark. OpenAI was not evaluated (no key).
+
+  | | Rules (regex) | Ollama `llama3.2:3b` (native app, Apple GPU) |
+  |---|---|---|
+  | Tool-choice accuracy | 97.5% | 80.0% |
+  | Out-of-scope refusal | 100% | 100% |
+  | Expected source cited | 83.3% | 72.2% |
+  | In-scope refusals | 1 | 4 |
+  | Latency p50 / p95 | 29 / 65 ms | 4,163 / 4,931 ms |
+  | Cost per question | $0 | $0 (local) |
+
+  - **Ollama latency.** The table holds the final run (22:34 UTC), the one in `assistant_ollama_metrics.json`. An earlier run that afternoon, on the same questions, measured 2,386 / 2,711 ms; its file is in the git history. The cause of the difference was not investigated, so local LLM latency here is approximate.
+  - **Rules, re-run on today's code.** Its totals match 2026-09-30. Four product questions now answer "no matching product" from the real catalogue export (the invented catalogue was removed on 2026-10-21), while still choosing the right tool.
+  - **Streamed answers written by Ollama.**
+    - The model wrote 15 of the 18 policy answers, all in the requested language (3 in French), all cited, with no fallbacks.
+    - The figure check flags 7 answers that leave out a figure stated in their main excerpt; some are false alarms when that excerpt was off-topic. It flags none that add a figure.
+    - Answer correctness is not scored.
+  - **Prompt tuning.** An added instruction to "state deadlines exactly" made the model claim that frozen products can be returned "within 30 days"; they cannot be returned at all. The figure check flagged it. On the same 40 questions, 1 answer added a figure with the instruction and 0 without, so the instruction was removed.
+- **Monitoring demonstration** (`monitoring_demo.json`): a fresh local API, with alerts evaluated every 5 s, and two runs of `simulate_traffic`. The file records the second run; its `before` block is the state after the first.
+  - **Real traffic** (first run, without `--shifted`: the `before` block). 120 historical rows (20 single requests, the rest in batches) and 40 real September–November 2011 baskets.
+    - `/predict` p95 was 49.6 ms (green).
+    - The rule fire rate was 85%, against 84% offline coverage.
+    - Input and prediction drift were red, with 61% of the tenure-type values outside the 2010 training range: genuine temporal drift.
+  - **Deliberate shifts** (second run, `--shifted`: the `after` block). 120 rows with recency moved by 365 days, 20 real and 20 unknown-item baskets, and 10 invalid requests. They raised the error rate (7.1%) and the invalid-request rate (17.2%) to yellow.
+  - **Alerts.** The background monitor alerted on all five breached checks without anyone opening the dashboard.
+- **Live checks** (API and interface started for the test).
+  - API smoke test: 16 of 16.
+  - Interface smoke test: 6 of 6, including the live what-if (changing recency changed the probability with no button) and a streamed answer.
+  - A decision was recorded and listed back.
+  - A French answer streamed from Ollama.
+- **Containers** (linux/arm64).
+  - API 2,064 MB uncompressed / 553 MB compressed: +71 MB, about 46 MB of it the registry client. Interface 630 / 179 MB. SageMaker 1,044 / 290 MB.
+  - With the new images, the Compose stack was healthy. `/version` reported the local fallback while the optional MLflow server was off.
+- **SageMaker image, run locally the way SageMaker would** (`sagemaker_local.json`: re-run and recorded on 2026-11-02 with the same image). Nothing ran on AWS.
+  - A full training job reproduced the reported test metrics exactly (PR-AUC 0.7430379) in 18.2 s, including container start. The model file is not byte-identical to `artifacts/`, so the match rests on the metrics; the image has numpy 2.5.4, where `artifacts/` was built with 2.5.3.
+  - A tuning trial printed `validation_pr_auc=0.673018`.
+  - The endpoint answered `/ping`, and `/invocations` scored customer 12347 at 0.711864, as the API does.
 
 See REMAINING_ISSUES.md for the prioritized gaps and RUNBOOK.md for reproduction.

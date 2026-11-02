@@ -1,5 +1,9 @@
-"""Exercise Streamlit widgets against the running real FastAPI backend."""
+"""Exercise Streamlit widgets against the running real FastAPI backend.
 
+The app reads the API address from API_BASE_URL, as it does when served.
+"""
+
+import argparse
 import json
 from datetime import UTC, datetime
 
@@ -10,7 +14,10 @@ from src.contracts import PROJECT_ROOT
 
 
 def main():
-    health = httpx.get("http://127.0.0.1:8501/_stcore/health")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--streamlit-url", default="http://127.0.0.1:8501")
+    args = parser.parse_args()
+    health = httpx.get(f"{args.streamlit_url}/_stcore/health")
     health.raise_for_status()
     app = AppTest.from_file(str(PROJECT_ROOT / "frontend/streamlit_app.py"), default_timeout=60)
     app.run()
