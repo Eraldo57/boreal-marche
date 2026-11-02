@@ -1,20 +1,19 @@
 # ===========================================================================
-# CD — deploy on merge to main + weekly scheduled retraining
+# CD — on every merge to main: OIDC to AWS, build and push the SHA-tagged image,
+# deploy to App Runner, then a smoke test that the deployed version is this commit.
+# Off until the repository variable ENABLE_CLOUD_DEPLOYMENT is "true" (AWS set up).
+# Weekly retraining lives in retrain.yml; it never deploys.
 # ===========================================================================
-name: CD (next phase, explicitly enabled only)
+name: CD
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
-    inputs:
-      retrain:
-        description: "Run retraining pipeline"
-        type: boolean
-        default: false
 
 permissions:
   id-token: write   # OIDC authentication to AWS
-  contents: write    # create branches and PRs for retraining
-  pull-requests: write
+  contents: read
 
 env:
   AWS_REGION: ca-central-1
@@ -26,7 +25,7 @@ jobs:
   # 1. Build, tag, and push Docker image
   # -----------------------------------------------------------------------
   build-and-push:
-    if: vars.ENABLE_CLOUD_DEPLOYMENT == 'true' && !inputs.retrain
+    if: vars.ENABLE_CLOUD_DEPLOYMENT == 'true'
     runs-on: ubuntu-latest
     outputs:
       image_tag: ${{ steps.meta.outputs.tags }}
@@ -73,7 +72,7 @@ jobs:
   # -----------------------------------------------------------------------
   deploy:
     needs: build-and-push
-    if: vars.ENABLE_CLOUD_DEPLOYMENT == 'true' && !inputs.retrain
+    if: vars.ENABLE_CLOUD_DEPLOYMENT == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -112,7 +111,7 @@ jobs:
   # -----------------------------------------------------------------------
   smoke-test:
     needs: deploy
-    if: vars.ENABLE_CLOUD_DEPLOYMENT == 'true' && !inputs.retrain
+    if: vars.ENABLE_CLOUD_DEPLOYMENT == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Wait for deployment to stabilise
@@ -143,68 +142,3 @@ jobs:
           )
           print('✅ Version SHA matches deployed commit')
           "
-
-  # -----------------------------------------------------------------------
-  # 4. Scheduled retraining
-  # -----------------------------------------------------------------------
-  retrain:
-    if: vars.ENABLE_CLOUD_RETRAINING == 'true' && inputs.retrain
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"  # pyproject.toml requires >=3.12
-
-      - name: Install dependencies
-        run: pip install ".[dev]"
-
-      - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Run retraining pipeline
-        env:
-          MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
-        run: python -m scripts.retrain
-
-      - name: Create PR if metrics improved
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          BRANCH="retrain/$(date +%Y-%m-%d)"
-
-          # Check if retrain produced updated artifacts
-          if git diff --quiet; then
-            echo "No model changes — metrics did not pass promotion criteria."
-            exit 0
-          fi
-
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -b "$BRANCH"
-          git add artifacts/ configs/
-          git commit -m "chore: scheduled retrain $(date +%Y-%m-%d)
-
-          Automated weekly retraining. Review metrics before merging.
-          This PR does NOT auto-deploy — a human must approve and merge."
-
-          git push origin "$BRANCH"
-
-          gh pr create \
-            --title "🔄 Scheduled retrain $(date +%Y-%m-%d)" \
-            --body "## Automated Weekly Retraining
-
-          This PR was created by the scheduled retraining pipeline.
-
-          **⚠️ This does NOT auto-deploy.** A human must:
-          1. Review the MLflow experiment comparison
-          2. Verify metrics pass promotion criteria
-          3. Approve and merge
-
-          See the retraining logs in the Actions tab for details." \
-            --base main \
-            --head "$BRANCH"

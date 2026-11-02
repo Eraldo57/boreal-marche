@@ -81,6 +81,24 @@ jobs:
           path: coverage.xml
 
   # -----------------------------------------------------------------------
+  # 3b. Assistant golden set: tool choice and out-of-scope refusal (brief 3.4)
+  # -----------------------------------------------------------------------
+  assistant-tool-choice:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install ".[dev]"
+
+      - name: Golden-set tool choice (rule provider; no API, index or LLM needed)
+        run: python -m pytest tests/test_assistant_eval.py -v
+
+  # -----------------------------------------------------------------------
   # 4. Data-quality assertions (only if processed data exists)
   # -----------------------------------------------------------------------
   data-quality:

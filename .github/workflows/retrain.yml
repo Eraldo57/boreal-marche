@@ -1,0 +1,90 @@
+# ===========================================================================
+# Weekly retraining — opens a pull request with new metrics; never deploys
+# ===========================================================================
+# Re-runs ETL, re-mines the rules and retrains a candidate (logged to MLflow and
+# registered, never promoted). If every promotion gate passes, it opens a pull request
+# holding only reports/retraining/<date>/: metrics, gate report and summary. A human
+# reviews and merges; promoting the model is a separate command (PROMOTION_POLICY.md).
+#
+# Off until the repository variable ENABLE_RETRAINING is "true".
+# Secrets (both optional):
+#   MLFLOW_TRACKING_URI  shared tracking server; without it, runs stay in a runner-local
+#                        SQLite store that is uploaded as an artifact
+#   RETRAIN_PR_TOKEN     fine-grained token, so CI runs on the opened pull request
+#                        (pull requests opened with GITHUB_TOKEN do not trigger workflows)
+# ===========================================================================
+name: Weekly retraining
+
+on:
+  schedule:
+    - cron: "0 7 * * 1"  # Mondays, 07:00 UTC
+  workflow_dispatch:
+    inputs:
+      trials:
+        description: Optuna trials per tunable model family
+        default: "12"
+
+permissions:
+  contents: write        # push the evidence branch
+  pull-requests: write   # open the pull request
+
+concurrency:
+  group: retrain
+  cancel-in-progress: false
+
+jobs:
+  retrain:
+    if: vars.ENABLE_RETRAINING == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install ".[dev]"
+
+      - name: Re-run ETL (download, checksum, clean) and features
+        run: |
+          python -m src.ingest
+          python -m src.features
+
+      - name: Re-mine association rules
+        run: python -m src.rules
+
+      - name: Retrain a candidate (logged to MLflow, registered, not promoted)
+        run: python -m scripts.retrain --skip-etl --trials "${{ inputs.trials || '12' }}"
+
+      - name: Check the promotion gates and write the evidence
+        id: gates
+        run: python -m scripts.retrain_report
+
+      - name: Keep the MLflow store (no tracking server configured)
+        if: always() && env.MLFLOW_TRACKING_URI == ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlflow-store
+          path: |
+            mlflow.db
+            mlruns/
+          if-no-files-found: ignore
+
+      - name: Open a pull request with the new metrics (gates passed)
+        if: steps.gates.outputs.passed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.RETRAIN_PR_TOKEN || secrets.GITHUB_TOKEN }}
+          branch: retrain/${{ github.run_id }}
+          add-paths: reports/retraining/**
+          commit-message: "Weekly retraining candidate: metrics and gate report"
+          title: "Weekly retraining candidate (${{ steps.gates.outputs.date }})"
+          body-path: ${{ steps.gates.outputs.summary }}
+
+      - name: Explain why no pull request was opened (a gate failed)
+        if: steps.gates.outputs.passed != 'true'
+        run: cat "${{ steps.gates.outputs.summary }}" >> "$GITHUB_STEP_SUMMARY"

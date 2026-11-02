@@ -41,7 +41,7 @@ The tolerances (0.01, 0.01 and 2 percentage points) are judgement values for thi
 ## Procedure
 
 1. **A candidate is registered.** This happens at the end of every training run.
-2. **The weekly retraining workflow runs.** It retrains on fresh data and opens a pull request with the new metrics and the gate results. It never deploys and never promotes.
+2. **The weekly retraining workflow runs** (`.github/workflows/retrain.yml`). It re-runs the data pipeline, re-mines the rules and retrains a candidate. Only if every gate passes, it opens a pull request with the new metrics and the gate results (`scripts/retrain_report.py`). It never deploys and never promotes.
 3. **A person reviews.** They read the metrics, the fairness tables and the gate report, then merge or close the pull request.
 4. **The approver promotes the version.**
 
