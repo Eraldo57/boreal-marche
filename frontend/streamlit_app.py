@@ -1,5 +1,6 @@
 """Local demonstration UI. All inference/retrieval and feature lookup go through FastAPI."""
 
+import json
 import os
 
 import httpx
@@ -26,6 +27,27 @@ def api_call(method, endpoint, payload=None):
     except httpx.HTTPError as exc:
         st.error(f"Backend unavailable at {API_BASE}: {exc}. Start FastAPI using the runbook.")
     return None
+
+
+def stream_chat(payload, final):
+    """Yield the answer's words as they arrive from /chat/stream; the closing event fills
+    *final* with the citations, the tool call and who wrote the answer."""
+    try:
+        with httpx.stream("POST", API_BASE + "/chat/stream", json=payload, timeout=180) as response:
+            if response.status_code >= 400:
+                response.read()
+                final["error"] = f"API {response.status_code}: {response.text[:500]}"
+                return
+            for line in response.iter_lines():
+                event = json.loads(line) if line else {}
+                if event.get("type") == "token":
+                    yield event["text"]
+                elif event.get("type") == "fallback":
+                    final["fallback"] = event["reason"]
+                elif event.get("type") == "done":
+                    final.update(event)
+    except httpx.HTTPError as exc:
+        final["error"] = f"Backend unavailable at {API_BASE}: {exc}"
 
 
 st.title("Boréal Marché — Customer Intelligence")
@@ -161,8 +183,10 @@ with recommendation:
 with assistant:
     st.header("Grounded assistant / Assistant avec sources")
     st.caption(
-        "Regex returns source excerpts, which may be English for a French query. "
-        "OpenAI/Ollama are optional tool-routing providers."
+        "Answers stream word by word. With regex, a policy answer quotes the source excerpt, "
+        "which may be English for a French question. With OpenAI or Ollama, the model writes "
+        "the answer from the cited excerpts in the chosen language. Scores, recommendations and "
+        "products always come from the tools, never from a model."
     )
     chat_customer = st.text_input(
         "Demo customer context (only needed for retention)", value="12347"
@@ -171,24 +195,28 @@ with assistant:
         "Question", value="What is the return policy for non-perishable items?"
     )
     if st.button("Ask assistant"):
-        result = api_call(
-            "POST",
-            "/chat",
-            {
-                "message": question,
-                "customer_id": chat_customer or None,
-                "language": language,
-                "provider": provider,
-            },
-        )
-        if result:
-            st.write(result["reply"])
-            st.caption(f"Provider: {result['provider_used']}; refused: {result['refused']}")
-            for citation in result["citations"]:
+        final = {}
+        payload = {
+            "message": question,
+            "customer_id": chat_customer or None,
+            "language": language,
+            "provider": provider,
+        }
+        st.write_stream(stream_chat(payload, final))
+        if "error" in final:
+            st.error(final["error"])
+        if "fallback" in final:
+            st.warning(final["fallback"])
+        if "reply" in final:
+            st.caption(
+                f"Provider: {final['provider_used']}; refused: {final['refused']}; "
+                f"answer written by: {final['answer_written_by']}"
+            )
+            for citation in final["citations"]:
                 with st.expander(citation["source"]):
                     st.write(citation["chunk"])
             with st.expander("Typed tool execution"):
-                st.json(result["tool_calls"])
+                st.json(final["tool_calls"])
 
 with monitoring:
     st.header("Live monitoring")

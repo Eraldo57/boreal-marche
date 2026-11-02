@@ -24,6 +24,7 @@ import logging
 import os
 import re
 from abc import ABC, abstractmethod
+from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -241,6 +242,38 @@ Rules:
 """
 
 
+_ANSWER_PROMPT = """\
+You are Boréal Marché's customer assistant. Answer the customer's question using ONLY the
+policy excerpts provided. If they do not contain the answer, say that you cannot answer
+from the policies and suggest contacting customer service. Never add facts, prices,
+product codes or probabilities that are not in the excerpts. Answer in {language}, in at
+most four sentences, and name the source document you relied on.
+"""
+
+
+def answer_messages(
+    question: str, excerpts: list[dict[str, Any]], language: str
+) -> list[dict[str, str]]:
+    """Chat messages for writing a grounded answer from retrieved policy excerpts."""
+    context = "\n\n".join(f"[{i}] ({e['source']}) {e['text']}" for i, e in enumerate(excerpts, 1))
+    return [
+        {
+            "role": "system",
+            "content": _ANSWER_PROMPT.format(language="French" if language == "fr" else "English"),
+        },
+        {
+            "role": "user",
+            "content": f"Policy excerpts:\n{context}\n\nCustomer question: {question}",
+        },
+    ]
+
+
+def ollama_piece(line: str) -> tuple[str, bool]:
+    """Text and done flag from one line of Ollama's streamed /api/chat response."""
+    data = json.loads(line)
+    return data.get("message", {}).get("content", ""), bool(data.get("done"))
+
+
 def _build_tool_desc(tools: list[ToolDef]) -> str:
     """Format tool descriptions for the system prompt."""
     lines: list[str] = []
@@ -311,6 +344,24 @@ class OpenAIProvider(AssistantProvider):
             result.tool_name = None
         return result
 
+    async def stream_answer(
+        self, question: str, excerpts: list[dict[str, Any]], language: str
+    ) -> AsyncIterator[str]:
+        """Write a grounded policy answer token by token (used only by /chat/stream)."""
+        from openai import AsyncOpenAI
+
+        client = AsyncOpenAI(api_key=self.api_key)
+        stream: Any = await client.chat.completions.create(  # an AsyncStream when stream=True
+            model=self.model,
+            temperature=0,
+            stream=True,
+            messages=answer_messages(question, excerpts, language),  # type: ignore[arg-type]
+        )
+        async for chunk in stream:
+            piece = chunk.choices[0].delta.content if chunk.choices else None
+            if piece:
+                yield piece
+
 
 # ============================================================================
 # 3. OllamaProvider — same approach, local model
@@ -376,6 +427,30 @@ class OllamaProvider(AssistantProvider):
         if result.tool_name in (None, "null", ""):
             result.tool_name = None
         return result
+
+    async def stream_answer(
+        self, question: str, excerpts: list[dict[str, Any]], language: str
+    ) -> AsyncIterator[str]:
+        """Write a grounded policy answer token by token (used only by /chat/stream)."""
+        import httpx
+
+        body = {
+            "model": self.model,
+            "stream": True,
+            "options": {"temperature": 0},
+            "messages": answer_messages(question, excerpts, language),
+        }
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            async with client.stream("POST", f"{self.host}/api/chat", json=body) as resp:
+                resp.raise_for_status()
+                async for line in resp.aiter_lines():
+                    if not line:
+                        continue
+                    piece, done = ollama_piece(line)
+                    if piece:
+                        yield piece
+                    if done:
+                        break
 
 
 # ---------------------------------------------------------------------------

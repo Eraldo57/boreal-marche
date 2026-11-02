@@ -1,13 +1,29 @@
-"""One grounded orchestration path for regex, OpenAI and Ollama providers."""
+"""One grounded orchestration path for regex, OpenAI and Ollama providers.
+
+POST /chat         the complete answer at once (policy answers quote the source text)
+POST /chat/stream  the same answer as newline-delimited JSON events, word by word. For a
+                   policy question with OpenAI or Ollama, the model writes the answer from
+                   the cited excerpts, in the requested language; if it fails, the stream
+                   falls back to the source text. Events: meta, token..., [fallback], done.
+
+Guardrails, retrieval and the typed tools are shared, so both endpoints refuse the same
+questions and cite the same evidence. Scores, recommendations and product data always come
+from the tools as templates: no model writes a probability or a product identifier.
+"""
 
 from __future__ import annotations
 
 import asyncio
+import json
 import os
+import re
 import time
+from collections.abc import AsyncIterator
+from dataclasses import dataclass, field
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Request
+from fastapi.responses import StreamingResponse
 from pydantic import ValidationError
 
 from api.schemas import ChatRequest, ChatResponse, Citation, ToolCall
@@ -18,10 +34,11 @@ from src.rag.guardrails import (
     check_require_citations,
     detect_language,
 )
-from src.rag.providers import RegexProvider, get_provider
+from src.rag.providers import AssistantProvider, RegexProvider, get_provider
 from src.rag.tools import TOOL_REGISTRY
 
 router = APIRouter(tags=["assistant"])
+GENERATION_EXCERPTS = 3  # policy excerpts an LLM may write from (all of them are cited)
 
 
 def _check_guardrails(message: str, customer_id: str | None) -> tuple[bool, str | None]:
@@ -70,17 +87,28 @@ def _generate_regex(message: str, context: str, chunks: list[dict[str, Any]], la
     return intro + str(chunks[0]["text"])
 
 
-@router.post("/chat", response_model=ChatResponse)
-async def chat(req: ChatRequest, request: Request) -> ChatResponse:
+@dataclass
+class _Outcome:
+    """The finished response, plus what a language model may rewrite when streaming."""
+
+    response: ChatResponse
+    question: str = ""
+    excerpts: list[dict[str, Any]] = field(default_factory=list)
+    provider: AssistantProvider | None = None
+
+
+async def _orchestrate(req: ChatRequest, request: Request) -> _Outcome:
     language, provider_name = req.language, req.provider.value
 
-    def refusal(reason: str) -> ChatResponse:
-        return ChatResponse(
-            reply=reason,
-            provider_used=provider_name,
-            refused=True,
-            refusal_reason=reason,
-            language=language,
+    def refusal(reason: str) -> _Outcome:
+        return _Outcome(
+            ChatResponse(
+                reply=reason,
+                provider_used=provider_name,
+                refused=True,
+                refusal_reason=reason,
+                language=language,
+            )
         )
 
     denied, reason = _check_guardrails(req.message, req.customer_id)
@@ -154,6 +182,7 @@ async def chat(req: ChatRequest, request: Request) -> ChatResponse:
         )
     calls = [ToolCall(tool_name=tool.name, arguments=arguments, result=data)]
     citations = []
+    grounded: list[dict[str, Any]] = []
     if tool.name == "policy_search":
         grounded = [c for c in data["chunks"] if c["score"] >= cfg["similarity_floor"]]
         if not grounded:
@@ -212,7 +241,7 @@ async def chat(req: ChatRequest, request: Request) -> ChatResponse:
                 score=1.0,
             )
         ]
-    return ChatResponse(
+    response = ChatResponse(
         reply=reply,
         citations=citations,
         tool_calls=calls,
@@ -222,3 +251,69 @@ async def chat(req: ChatRequest, request: Request) -> ChatResponse:
         token_usage=decision.token_usage,
         cost_usd=0.0 if provider_name == "regex" else None,
     )
+    return _Outcome(response, req.message, grounded[:GENERATION_EXCERPTS], provider)
+
+
+@router.post("/chat", response_model=ChatResponse)
+async def chat(req: ChatRequest, request: Request) -> ChatResponse:
+    return (await _orchestrate(req, request)).response
+
+
+def _line(event: dict[str, Any]) -> str:
+    return json.dumps(event, ensure_ascii=False) + "\n"
+
+
+def _words(text: str) -> list[str]:
+    return re.findall(r"\S+\s*", text)
+
+
+async def _events(outcome: _Outcome) -> AsyncIterator[str]:
+    response = outcome.response
+    tool = response.tool_calls[0].tool_name if response.tool_calls else None
+    yield _line({"type": "meta", "provider": response.provider_used, "tool": tool})
+    reply, written_by, citations = response.reply, "template", response.citations
+    if tool == "policy_search":
+        written_by = "source text"
+    stream_answer = getattr(outcome.provider, "stream_answer", None)
+    generated = False
+    if outcome.excerpts and stream_answer is not None:
+        pieces: list[str] = []
+        try:
+            async for piece in stream_answer(outcome.question, outcome.excerpts, response.language):
+                pieces.append(piece)
+                yield _line({"type": "token", "text": piece})
+            if not "".join(pieces).strip():
+                raise ValueError("the model returned no text")
+            reply, written_by, generated = "".join(pieces).strip(), response.provider_used, True
+            citations = [
+                Citation(source=c["source"], chunk=c["text"], score=c["score"])
+                for c in outcome.excerpts
+            ]
+        except Exception as exc:  # any provider problem: show the grounded source text instead
+            yield _line(
+                {
+                    "type": "fallback",
+                    "reason": f"{type(exc).__name__}: the model could not write the answer; "
+                    "showing the source text",
+                }
+            )
+            if pieces:
+                yield _line({"type": "token", "text": "\n\n"})
+    if not generated:
+        for word in _words(reply):
+            yield _line({"type": "token", "text": word})
+    final = response.model_dump(mode="json")
+    final.update(
+        type="done",
+        reply=reply,
+        answer_written_by=written_by,
+        citations=[c.model_dump() for c in citations],
+    )
+    yield _line(final)
+
+
+@router.post("/chat/stream")
+async def chat_stream(req: ChatRequest, request: Request) -> StreamingResponse:
+    """The /chat answer as newline-delimited JSON events, for word-by-word display."""
+    outcome = await _orchestrate(req, request)
+    return StreamingResponse(_events(outcome), media_type="application/x-ndjson")

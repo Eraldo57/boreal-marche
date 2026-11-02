@@ -79,7 +79,7 @@ app.include_router(decisions.router)
 
 
 def _log_business_request(request: Request, status_code: int, start: float) -> None:
-    if request.url.path in {"/predict", "/predict/batch", "/recommend", "/chat"}:
+    if request.url.path in {"/predict", "/predict/batch", "/recommend", "/chat", "/chat/stream"}:
         record = {
             "timestamp": datetime.now(UTC).isoformat(),
             "path": request.url.path,
