@@ -14,6 +14,7 @@ Boréal Marché is fictional. Public source identifiers and transaction historie
 - Shared assistant scope/privacy checks precede tool routing; policy answers cite retrieved text.
 - Retention tools require matching caller-supplied demo customer context.
 - No coupon dispatch or customer-data mutation exists.
+- **Human approval step.** Section 12.1 attaches disclosure and human-review obligations to decisions based exclusively on automated processing, so the retention model only proposes an action. A named reviewer approves or rejects it with a reason in the Prediction tab, and the decision is stored in the `decision_log` table (`POST` and `GET /decisions`). This is the design consequence the brief asks for. See `governance/decision_register.md`.
 - The durable monitoring log (`prediction_log` database table) omits customer IDs and chat text, but includes prediction feature vectors. In Compose the database port is not published outside the stack's internal network.
 - Interface discloses public-data provenance, the historical demo, and optional external provider use.
 
@@ -24,7 +25,7 @@ These controls are limited: a supplied ID is **not authentication**, regex guard
 | Control | Current gap / next action |
 |---|---|
 | Authentication and authorization | Add authenticated identity, per-customer permissions, rate limits and access audit |
-| Human review | No approval queue, override, dispatch or support-handoff service; design before consequential use |
+| Human review | The approval step exists, but the reviewer's name is declared, not authenticated. There is no customer-facing appeal or correction process, no support handoff, and no retention period yet for `decision_log`, which holds customer IDs |
 | Explanation and correction | Global feature hints are not individual explanations; implement reviewed explanations and correction process |
 | Minimization | All 25 features are inventoried; necessity is not established by predictive use alone |
 | Retention/deletion | No scheduled purge, erasure request workflow, backup/cache/model lineage deletion or proof of deletion |

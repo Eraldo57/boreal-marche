@@ -10,7 +10,7 @@ from __future__ import annotations
 import math
 from datetime import UTC, datetime
 from enum import StrEnum
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -101,6 +101,32 @@ class PredictionResponse(BaseModel):
     top_factors: list[dict[str, Any]] = []
     model_version: str | None = None
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+
+
+class DecisionRequest(StrictModel):
+    """A person's decision on the action the model proposed for one customer."""
+
+    customer_id: str = Field(..., min_length=1, max_length=100)
+    probability: float = Field(..., ge=0.0, le=1.0)
+    threshold: float = Field(..., ge=0.0, le=1.0)
+    model_version: str | None = Field(default=None, max_length=64)
+    proposed_action: Literal["offer_coupon", "no_action"]
+    decision: Literal["approved", "rejected"]
+    reviewer: str = Field(..., min_length=1, max_length=100, pattern=r"\S")
+    reason: str = Field(..., min_length=1, max_length=500, pattern=r"\S")
+
+
+class DecisionRecord(BaseModel):
+    id: int
+    decided_at: datetime
+    customer_id: str
+    probability: float
+    threshold: float
+    model_version: str | None = None
+    proposed_action: str
+    decision: str
+    reviewer: str
+    reason: str
 
 
 class BatchPredictionRequest(StrictModel):

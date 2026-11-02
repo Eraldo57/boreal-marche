@@ -12,7 +12,10 @@ Endpoints:
     POST /predict/batch  batch retention predictions
     POST /recommend      basket recommendations
     POST /chat           grounded bilingual assistant
-    GET  /metrics        monitoring dashboard data
+    GET  /metrics        monitoring dashboard data, with each check's rule
+    GET  /alerts         alerts raised by the background monitor
+    POST /decisions      a person approves or rejects a proposed action
+    GET  /decisions      the decision audit trail
     GET  /docs           auto-generated OpenAPI documentation
 """
 
@@ -30,7 +33,7 @@ import structlog
 from fastapi import FastAPI, HTTPException, Request, Response
 
 from api.lifespan import lifespan
-from api.routers import chat, monitor, predict, recommend
+from api.routers import chat, decisions, monitor, predict, recommend
 from api.schemas import HealthResponse, ReadyResponse, VersionResponse
 from src.contracts import CONTRACT_VERSION, FEATURE_NAMES
 
@@ -72,6 +75,7 @@ app.include_router(predict.router)
 app.include_router(recommend.router)
 app.include_router(chat.router)
 app.include_router(monitor.router)
+app.include_router(decisions.router)
 
 
 def _log_business_request(request: Request, status_code: int, start: float) -> None:

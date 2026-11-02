@@ -28,8 +28,12 @@ def main():
     check("initial render and API readiness")
     click("Load historical customer features")
     assert len(app.number_input) == 25
-    click("Predict")
     assert any(m.label == "Probability of purchase within 90 days" for m in app.metric)
+    before = next(m.value for m in app.metric if m.label.startswith("Probability"))
+    app.number_input[0].set_value(app.number_input[0].value + 365).run()  # what-if: recency
+    check("live what-if update")
+    after = next(m.value for m in app.metric if m.label.startswith("Probability"))
+    assert after != before, "changing recency must update the probability without a button"
     click("Get recommendations")
     click("Ask assistant")
     assert len(app.expander) >= 2

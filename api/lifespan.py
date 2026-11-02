@@ -19,6 +19,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
 
 from api.monitoring import AlertManager, run_alert_loop
+from api.routers.decisions import DecisionLog
 from api.storage import LOG_METADATA, PREDICTION_LOG_TABLE, log_engine
 from src.contracts import (
     ARTIFACTS,
@@ -216,6 +217,7 @@ async def lifespan(app: Any) -> AsyncIterator[None]:
     except SQLAlchemyError as exc:  # alert history unreadable: alert from memory only
         app.state.alerts = AlertManager(None, alert_cfg["channels"], webhook)
         logger.error("alert_log_startup_failed", error=str(exc).splitlines()[0])
+    app.state.decision_log = DecisionLog(app.state.prediction_log.engine)
     interval = float(os.getenv("ALERT_INTERVAL_SECONDS", alert_cfg["interval_seconds"]))
     alert_task = asyncio.create_task(run_alert_loop(app, interval))
     logger.info("startup_complete", errors=app.state.startup_errors)

@@ -55,41 +55,85 @@ with prediction:
     if record:
         contract = api_call("GET", "/feature-contract")
         st.info(
-            f"Historical snapshot: {record['snapshot']}. "
-            "Editing values below is a what-if demonstration."
+            f"Historical snapshot: {record['snapshot']}. What-if: change any value and the "
+            "probability below updates as soon as you leave the field."
         )
-        with st.form("prediction_form"):
-            features = {}
-            columns = st.columns(3)
-            for i, name in enumerate(contract["feature_names"] if contract else record["features"]):
-                with columns[i % 3]:
-                    features[name] = st.number_input(
-                        name,
-                        value=float(record["features"][name]),
-                        key=f"feature_{record['customer_id']}_{name}",
-                    )
-            submitted = st.form_submit_button("Predict", type="primary")
-        if submitted:
-            result = api_call(
+        features = {}
+        columns = st.columns(3)
+        for i, name in enumerate(contract["feature_names"] if contract else record["features"]):
+            with columns[i % 3]:
+                features[name] = st.number_input(
+                    name,
+                    value=float(record["features"][name]),
+                    key=f"feature_{record['customer_id']}_{name}",
+                )
+        # Live: score again whenever the values change, and only then (no duplicate log rows).
+        asked = (record["customer_id"], tuple(features.items()))
+        if st.session_state.get("predicted_for") != asked:
+            fresh = api_call(
                 "POST", "/predict", {"customer_id": record["customer_id"], "features": features}
             )
-            if result:
-                st.metric("Probability of purchase within 90 days", f"{result['probability']:.1%}")
-                st.write(
-                    f"Non-return risk: {result['risk_label']}; "
-                    f"model decision: {result['will_return']}"
+            if fresh:
+                st.session_state["predicted_for"], st.session_state["last_prediction"] = (
+                    asked,
+                    fresh,
                 )
-                st.caption(
-                    f"Assumption-based threshold: {result['threshold']:.3f}; "
-                    f"model {result['model_version']}"
-                )
-                st.caption(
-                    "This is a prediction, not evidence that a coupon changes behavior. "
-                    "No coupon is sent."
-                )
-                if result["top_factors"]:
-                    st.write("Global importance hints (not individual explanations)")
+        result = st.session_state.get("last_prediction")
+        if result and st.session_state.get("predicted_for") == asked:
+            st.metric("Probability of purchase within 90 days", f"{result['probability']:.1%}")
+            st.write(
+                f"Non-return risk: {result['risk_label']}; model decision: {result['will_return']}"
+            )
+            st.caption(
+                f"Assumption-based threshold: {result['threshold']:.3f}; "
+                f"model {result['model_version']}"
+            )
+            if result["top_factors"]:
+                with st.expander("Global importance hints (not individual explanations)"):
                     st.json(result["top_factors"])
+
+            st.subheader("Human review / Révision humaine")
+            proposed = "offer_coupon" if result["will_return"] else "no_action"
+            st.write(
+                f"The model proposes: **{proposed.replace('_', ' ')}**. A person decides; "
+                "nothing is sent to the customer."
+            )
+            st.caption(
+                "Why this step exists: under Québec's Law 25, a decision based only on automated "
+                "processing brings disclosure and human-review obligations, so the model never "
+                "decides alone. The proposal follows the placeholder coupon policy (at or above "
+                "the threshold); it predicts returning, not that a coupon changes behaviour."
+            )
+            with st.form("review_form", clear_on_submit=True):
+                reviewer = st.text_input("Reviewer name")
+                reason = st.text_area("Reason for the decision")
+                decision = st.radio("Decision", ["approved", "rejected"], horizontal=True)
+                if st.form_submit_button("Record decision"):
+                    saved = api_call(
+                        "POST",
+                        "/decisions",
+                        {
+                            "customer_id": result["customer_id"],
+                            "probability": result["probability"],
+                            "threshold": result["threshold"],
+                            "model_version": result["model_version"],
+                            "proposed_action": proposed,
+                            "decision": decision,
+                            "reviewer": reviewer,
+                            "reason": reason,
+                        },
+                    )
+                    if saved:
+                        st.success(
+                            f"Decision {saved['id']} recorded: {saved['decision']} by "
+                            f"{saved['reviewer']}. Nothing was sent to the customer."
+                        )
+            with st.expander("Recent decisions (audit trail)"):
+                recent = api_call("GET", "/decisions?limit=10")
+                if recent:
+                    st.dataframe(pd.DataFrame(recent), hide_index=True)
+                else:
+                    st.write("No decision recorded yet.")
     else:
         st.info("Load a historical record to obtain the complete canonical feature vector.")
 

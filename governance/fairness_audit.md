@@ -92,7 +92,7 @@ None is implemented. Choosing one is a business and ethics decision. In the mean
 3. **Change the objective from "likely to return" to "likely to be persuaded".** This means uplift modelling.
    - *Gain*: coupons would go where they change behaviour, which is also the fairer question to ask.
    - *Cost*: it needs a randomized coupon experiment. This dataset cannot estimate uplift at all.
-4. **Send borderline scores in flagged groups to human review.**
+4. **Send borderline scores in flagged groups to human review.** Every coupon decision already goes through the application's approval step, so a reviewer would only need to be told which proposals are borderline.
    - *Gain*: the gap can be judged case by case.
    - *Cost*: staff time, and reviewers need written guidance so decisions stay consistent.
 5. **Reweight training toward thin-history customers.**

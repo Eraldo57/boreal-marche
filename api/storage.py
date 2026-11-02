@@ -2,8 +2,10 @@
 
 - prediction_log: one row per business request, the source of every monitoring metric.
 - alert_log: every alert raised or resolved by the monitor.
+- decision_log: every human approval or rejection of a proposed action.
 
-None of these tables stores customer identifiers or chat text.
+Only decision_log holds a customer identifier: a reviewed decision is about one customer
+and has to be traceable for that person's rights. No table stores chat text.
 """
 
 from __future__ import annotations
@@ -49,6 +51,21 @@ ALERT_LOG_TABLE = Table(
     Column("rule", String(200), nullable=False),
     Column("detail", String(500), nullable=False),
     Column("delivered_to", JSON, nullable=False),
+)
+
+DECISION_LOG_TABLE = Table(
+    "decision_log",
+    LOG_METADATA,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("decided_at", DateTime(timezone=True), nullable=False),
+    Column("customer_id", String(100), nullable=False),
+    Column("probability", Float, nullable=False),  # what the reviewer saw
+    Column("threshold", Float, nullable=False),
+    Column("model_version", String(64)),
+    Column("proposed_action", String(32), nullable=False),
+    Column("decision", String(16), nullable=False),  # approved or rejected
+    Column("reviewer", String(100), nullable=False),
+    Column("reason", String(500), nullable=False),
 )
 
 
