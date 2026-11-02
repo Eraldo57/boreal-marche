@@ -1,0 +1,339 @@
+{
+  "threshold": 0.22,
+  "overall": {
+    "n": 5233,
+    "returners": 2236,
+    "return_rate": 0.4272883623160711,
+    "recall": 0.813953488372093,
+    "recall_ci95": [
+      0.797290000225706,
+      0.82954003989856
+    ],
+    "precision": 0.5725070776973891,
+    "selection_rate": 0.6074909229887254
+  },
+  "groups": {
+    "region": [
+      {
+        "group": "Other Europe",
+        "n": 396,
+        "returners": 198,
+        "return_rate": 0.5,
+        "recall": 0.8535353535353535,
+        "recall_ci95": [
+          0.797566254373796,
+          0.8960469551925172
+        ],
+        "precision": 0.6190476190476191,
+        "selection_rate": 0.6893939393939394,
+        "recall_gap_pp": 3.9581865163260455,
+        "flagged": false,
+        "evidence": null
+      },
+      {
+        "group": "Rest of world",
+        "n": 36,
+        "returners": 10,
+        "return_rate": 0.2777777777777778,
+        "recall": 0.9,
+        "recall_ci95": [
+          0.5958436145024278,
+          0.9821242504842788
+        ],
+        "precision": 0.45,
+        "selection_rate": 0.5555555555555556,
+        "recall_gap_pp": 8.604651162790699,
+        "flagged": false,
+        "evidence": null
+      },
+      {
+        "group": "United Kingdom",
+        "n": 4775,
+        "returners": 2026,
+        "return_rate": 0.4242931937172775,
+        "recall": 0.8094768015794669,
+        "recall_ci95": [
+          0.7917966057361452,
+          0.8259855896824528
+        ],
+        "precision": 0.5706332637439109,
+        "selection_rate": 0.6018848167539267,
+        "recall_gap_pp": -0.4476686792626139,
+        "flagged": false,
+        "evidence": null
+      },
+      {
+        "group": "Unknown",
+        "n": 26,
+        "returners": 2,
+        "return_rate": 0.07692307692307693,
+        "recall": 1.0,
+        "recall_ci95": [
+          0.34237195288961925,
+          1.0
+        ],
+        "precision": 0.16666666666666666,
+        "selection_rate": 0.46153846153846156,
+        "recall_gap_pp": 18.6046511627907,
+        "flagged": false,
+        "evidence": null
+      }
+    ],
+    "tenure_band": [
+      {
+        "group": "12-18 months",
+        "n": 1583,
+        "returners": 575,
+        "return_rate": 0.36323436512950097,
+        "recall": 0.8278260869565217,
+        "recall_ci95": [
+          0.7948175739904833,
+          0.856483230927477
+        ],
+        "precision": 0.5157096424702059,
+        "selection_rate": 0.5830701200252685,
+        "recall_gap_pp": 1.3872598584428686,
+        "flagged": false,
+        "evidence": null
+      },
+      {
+        "group": "18 months or more",
+        "n": 1726,
+        "returners": 874,
+        "return_rate": 0.5063731170336037,
+        "recall": 0.9359267734553776,
+        "recall_ci95": [
+          0.9177074267856695,
+          0.9503307249720052
+        ],
+        "precision": 0.6145755071374907,
+        "selection_rate": 0.7711471610660486,
+        "recall_gap_pp": 12.197328508328454,
+        "flagged": false,
+        "evidence": null
+      },
+      {
+        "group": "6-12 months",
+        "n": 1220,
+        "returners": 462,
+        "return_rate": 0.37868852459016394,
+        "recall": 0.6493506493506493,
+        "recall_ci95": [
+          0.6047690823738687,
+          0.691468952185518
+        ],
+        "precision": 0.5617977528089888,
+        "selection_rate": 0.4377049180327869,
+        "recall_gap_pp": -16.46028390214437,
+        "flagged": true,
+        "evidence": "strong"
+      },
+      {
+        "group": "under 6 months",
+        "n": 704,
+        "returners": 325,
+        "return_rate": 0.4616477272727273,
+        "recall": 0.6953846153846154,
+        "recall_ci95": [
+          0.6433045541667904,
+          0.7428996243799627
+        ],
+        "precision": 0.578005115089514,
+        "selection_rate": 0.5553977272727273,
+        "recall_gap_pp": -11.856887298747765,
+        "flagged": true,
+        "evidence": "strong"
+      }
+    ],
+    "spend_quartile": [
+      {
+        "group": "Q1 (lowest)",
+        "n": 1309,
+        "returners": 254,
+        "return_rate": 0.19404125286478227,
+        "recall": 0.14173228346456693,
+        "recall_ci95": [
+          0.1041646759299412,
+          0.18997560244251688
+        ],
+        "precision": 0.37894736842105264,
+        "selection_rate": 0.07257448433919023,
+        "recall_gap_pp": -67.22212049075262,
+        "flagged": true,
+        "evidence": "strong"
+      },
+      {
+        "group": "Q2",
+        "n": 1308,
+        "returners": 424,
+        "return_rate": 0.3241590214067278,
+        "recall": 0.6273584905660378,
+        "recall_ci95": [
+          0.5803845713480595,
+          0.6720452998940076
+        ],
+        "precision": 0.4124031007751938,
+        "selection_rate": 0.49311926605504586,
+        "recall_gap_pp": -18.659499780605525,
+        "flagged": true,
+        "evidence": "strong"
+      },
+      {
+        "group": "Q3",
+        "n": 1308,
+        "returners": 594,
+        "return_rate": 0.4541284403669725,
+        "recall": 0.9427609427609428,
+        "recall_ci95": [
+          0.9210784641269667,
+          0.9587532504944314
+        ],
+        "precision": 0.48484848484848486,
+        "selection_rate": 0.8830275229357798,
+        "recall_gap_pp": 12.880745438884977,
+        "flagged": false,
+        "evidence": null
+      },
+      {
+        "group": "Q4 (highest)",
+        "n": 1308,
+        "returners": 964,
+        "return_rate": 0.7370030581039755,
+        "recall": 0.9937759336099585,
+        "recall_ci95": [
+          0.9864875686143253,
+          0.99714446373477
+        ],
+        "precision": 0.7461059190031153,
+        "selection_rate": 0.981651376146789,
+        "recall_gap_pp": 17.98224452378655,
+        "flagged": false,
+        "evidence": null
+      }
+    ],
+    "purchase_history": [
+      {
+        "group": "one-time",
+        "n": 1588,
+        "returners": 318,
+        "return_rate": 0.20025188916876574,
+        "recall": 0.17295597484276728,
+        "recall_ci95": [
+          0.13535504064253795,
+          0.21836430452601702
+        ],
+        "precision": 0.4296875,
+        "selection_rate": 0.08060453400503778,
+        "recall_gap_pp": -64.09975135293257,
+        "flagged": true,
+        "evidence": "strong"
+      },
+      {
+        "group": "repeat",
+        "n": 3645,
+        "returners": 1918,
+        "return_rate": 0.5262002743484225,
+        "recall": 0.9202294056308655,
+        "recall_ci95": [
+          0.9072468931885969,
+          0.9315319114745972
+        ],
+        "precision": 0.578498852835136,
+        "selection_rate": 0.837037037037037,
+        "recall_gap_pp": 10.62759172587725,
+        "flagged": false,
+        "evidence": null
+      }
+    ]
+  },
+  "overlap": {
+    "rows_in_any_flagged_group": 3194,
+    "share_of_rows": 0.6103573476017581,
+    "one_time_buyer_share": {
+      "tenure_band=6-12 months": 0.46967213114754097,
+      "tenure_band=under 6 months": 0.59375,
+      "spend_quartile=Q1 (lowest)": 0.8029029793735676,
+      "spend_quartile=Q2": 0.3256880733944954,
+      "purchase_history=one-time": 1.0
+    }
+  },
+  "mitigation_estimates": [
+    {
+      "dimension": "tenure_band",
+      "group": "6-12 months",
+      "decision_period_n": 1548,
+      "current_threshold": 0.22,
+      "threshold_reaching_overall_minus_5pp": 0.205,
+      "recall_before": 0.804945054945055,
+      "recall_after": 0.8269230769230769,
+      "precision_before": 0.35862913096695226,
+      "precision_after": 0.352046783625731,
+      "selection_rate_before": 0.5277777777777778,
+      "selection_rate_after": 0.5523255813953488
+    },
+    {
+      "dimension": "tenure_band",
+      "group": "under 6 months",
+      "decision_period_n": 675,
+      "current_threshold": 0.22,
+      "threshold_reaching_overall_minus_5pp": 0.185,
+      "recall_before": 0.70042194092827,
+      "recall_after": 0.8945147679324894,
+      "precision_before": 0.4811594202898551,
+      "precision_after": 0.4181459566074951,
+      "selection_rate_before": 0.5111111111111111,
+      "selection_rate_after": 0.7511111111111111
+    },
+    {
+      "dimension": "spend_quartile",
+      "group": "Q1 (lowest)",
+      "decision_period_n": 1230,
+      "current_threshold": 0.22,
+      "threshold_reaching_overall_minus_5pp": 0.11,
+      "recall_before": 0.18382352941176472,
+      "recall_after": 0.9411764705882353,
+      "precision_before": 0.24509803921568626,
+      "precision_after": 0.12391093901258471,
+      "selection_rate_before": 0.08292682926829269,
+      "selection_rate_after": 0.8398373983739837
+    },
+    {
+      "dimension": "spend_quartile",
+      "group": "Q2",
+      "decision_period_n": 1229,
+      "current_threshold": 0.22,
+      "threshold_reaching_overall_minus_5pp": 0.185,
+      "recall_before": 0.6879699248120301,
+      "recall_after": 0.8458646616541353,
+      "precision_before": 0.29093799682034976,
+      "precision_after": 0.2533783783783784,
+      "selection_rate_before": 0.5117982099267697,
+      "selection_rate_after": 0.7225386493083807
+    },
+    {
+      "dimension": "purchase_history",
+      "group": "one-time",
+      "decision_period_n": 1552,
+      "current_threshold": 0.22,
+      "threshold_reaching_overall_minus_5pp": 0.11,
+      "recall_before": 0.23243243243243245,
+      "recall_after": 0.9567567567567568,
+      "precision_before": 0.25595238095238093,
+      "precision_after": 0.13062730627306274,
+      "selection_rate_before": 0.10824742268041238,
+      "selection_rate_after": 0.8730670103092784
+    }
+  ],
+  "executed_at": "2026-11-01T21:11:11.857279+00:00",
+  "test_cutoff": "2011-09-01",
+  "model_sha256": "885fc335660bc6105f735be657492241d1aa996b75a4245afdcd0735bfc5b4b4",
+  "flagged_groups": [
+    "tenure_band=6-12 months",
+    "tenure_band=under 6 months",
+    "spend_quartile=Q1 (lowest)",
+    "spend_quartile=Q2",
+    "purchase_history=one-time"
+  ],
+  "positive_class": "will_return",
+  "caveat": "Proxy groups from behaviour and majority country; no protected attributes."
+}

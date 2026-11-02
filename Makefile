@@ -48,6 +48,10 @@ train: ## Full pipeline: spot-check → tune → calibrate → threshold → sav
 figures: ## Redraw the reliability and threshold figures from the saved retention report
 	$(PYTHON) -m src.plots
 
+.PHONY: fairness
+fairness: ## Subgroup fairness audit of the saved model on the test snapshot
+	$(PYTHON) -m src.fairness
+
 # ---------------------------------------------------------------------------
 # Head B — Recommendations
 # ---------------------------------------------------------------------------
