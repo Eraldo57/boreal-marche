@@ -207,14 +207,48 @@ class DriftMetric(BaseModel):
     alert: bool
 
 
+class Check(BaseModel):
+    """One traffic-light rule: the measured value next to the rule it is judged by."""
+
+    check: str
+    value: float | None = None
+    rule: str  # e.g. "yellow above 0.05, red above 0.10"
+    level: str  # "green", "yellow", "red" or "not_evaluated"
+    detail: str = ""
+
+
 class MonitoringResponse(BaseModel):
     request_count: int
     error_rate: float
     latency_p50_ms: float
     latency_p95_ms: float
     latency_p99_ms: float
-    drift_metrics: list[DriftMetric] = []
-    status: str  # "green", "yellow", "red"
+    drift_metrics: list[DriftMetric] = []  # input drift, per feature
+    status: str  # "green", "yellow", "red": the worst level among the checks
     drift_status: str = "not_evaluated"
     window_description: str = "bounded local request log"
     log_write_failures: int = 0  # rows that could not be written to the prediction_log table
+    requests_by_route: dict[str, int] = {}
+    prediction_drift: list[DriftMetric] = []  # distribution of predicted probabilities
+    data_quality: dict[str, Any] = {}
+    recommendation: dict[str, Any] = {}
+    checks: list[Check] = []
+
+
+class AlertEvent(BaseModel):
+    at: datetime
+    check: str
+    state: str  # "raised" or "resolved"
+    level: str
+    value: float | None = None
+    rule: str
+    detail: str = ""
+    delivered_to: list[str] = []
+
+
+class AlertsResponse(BaseModel):
+    active: list[str]  # checks currently breached
+    alerts: list[AlertEvent]  # newest first
+    channels: list[str]
+    webhook_configured: bool
+    delivery_failures: int

@@ -53,6 +53,12 @@ async def recommend(req: RecommendationRequest, request: Request) -> Recommendat
         strategy=strategy,
         customer_id=req.customer_id,
     )
+    # Logged by the middleware for the rule fire-rate monitor; no item names or IDs.
+    request.state.recommendation = {
+        "strategy": strategy,
+        "basket_size": len(req.basket),
+        "rules_fired": len(firing_rules),
+    }
 
     return RecommendationResponse(
         recommendations=recommendations,

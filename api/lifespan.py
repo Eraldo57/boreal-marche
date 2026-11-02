@@ -2,35 +2,24 @@
 
 from __future__ import annotations
 
+import asyncio
+import contextlib
 import os
 from collections import deque
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
-from pathlib import Path
 from threading import Lock
 from typing import Any
 
 import pandas as pd
 import structlog
-from sqlalchemy import (
-    JSON,
-    Column,
-    DateTime,
-    Float,
-    Integer,
-    MetaData,
-    String,
-    Table,
-    create_engine,
-    func,
-    insert,
-    make_url,
-    select,
-)
+from sqlalchemy import func, insert, select
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
 
+from api.monitoring import AlertManager, run_alert_loop
+from api.storage import LOG_METADATA, PREDICTION_LOG_TABLE, log_engine
 from src.contracts import (
     ARTIFACTS,
     FEATURE_NAMES,
@@ -39,8 +28,11 @@ from src.contracts import (
     PROCESSED,
     PROJECT_ROOT,
 )
+from src.ingest import load_config
 from src.recommend import RecommendationEngine
 from src.registry import CACHE_DIR, load_checked, resolve_champion
+
+__all__ = ["PREDICTION_LOG_TABLE", "PredictionLog", "lifespan"]
 
 logger = structlog.get_logger(__name__)
 _MODEL_PATH = MODEL_PATH
@@ -48,25 +40,6 @@ _META_PATH = METADATA_PATH
 _RULES_PATH = ARTIFACTS / "rules.json"
 _POPULARITY_PATH = ARTIFACTS / "popularity.json"
 DEFAULT_LOG_DATABASE = f"sqlite:///{PROJECT_ROOT / 'data/logs/predictions.db'}"
-
-_LOG_METADATA = MetaData()
-PREDICTION_LOG_TABLE = Table(
-    "prediction_log",
-    _LOG_METADATA,
-    Column("id", Integer, primary_key=True, autoincrement=True),
-    Column("logged_at", DateTime(timezone=True), nullable=False),
-    Column("path", String(64), nullable=False),
-    Column("status_code", Integer, nullable=False),
-    Column("latency_ms", Float),
-    Column("record", JSON, nullable=False),  # the full structured JSON record
-)
-
-
-def _log_engine(database_url: str) -> Engine:
-    url = make_url(database_url)
-    if url.get_backend_name() == "sqlite" and url.database not in (None, "", ":memory:"):
-        Path(url.database).parent.mkdir(parents=True, exist_ok=True)
-    return create_engine(database_url, pool_pre_ping=True)
 
 
 def _log_row(record: dict[str, Any]) -> dict[str, Any]:
@@ -95,8 +68,8 @@ class PredictionLog:
         self.request_count = self.error_count = self.write_failures = 0
         self._engine: Engine | None = None
         if database_url:
-            self._engine = _log_engine(database_url)
-            _LOG_METADATA.create_all(self._engine)
+            self._engine = log_engine(database_url)
+            LOG_METADATA.create_all(self._engine)
             table = PREDICTION_LOG_TABLE
             with self._engine.connect() as conn:
                 self.request_count = conn.scalar(select(func.count()).select_from(table)) or 0
@@ -125,6 +98,11 @@ class PredictionLog:
                 # The request itself succeeded; the lost row is counted and shown in /metrics.
                 self.write_failures += 1
                 logger.error("prediction_log_write_failed", error=str(exc).splitlines()[0])
+
+    @property
+    def engine(self) -> Engine | None:
+        """The log database, shared with the alert log; None when memory-only."""
+        return self._engine
 
     @property
     def entries(self) -> list[dict[str, Any]]:
@@ -223,8 +201,26 @@ async def lifespan(app: Any) -> AsyncIterator[None]:
         app.state.customer_features = None
         app.state.startup_errors["customer_features"] = str(exc)
     ref = ARTIFACTS / "drift_reference.parquet"
+    app.state.prediction_reference = None
     if ref.exists():
         app.state.drift_reference = pd.read_parquet(ref)
+        if app.state.model is not None:
+            # The model's scores on its own training reference: the baseline for prediction drift.
+            reference_rows = app.state.drift_reference[FEATURE_NAMES]
+            app.state.prediction_reference = app.state.model.predict_proba(reference_rows)[:, 1]
+    alert_cfg = load_config()["monitoring"]["alert"]
+    webhook = os.getenv("ALERT_WEBHOOK_URL") or None
+    try:
+        engine = app.state.prediction_log.engine
+        app.state.alerts = AlertManager(engine, alert_cfg["channels"], webhook)
+    except SQLAlchemyError as exc:  # alert history unreadable: alert from memory only
+        app.state.alerts = AlertManager(None, alert_cfg["channels"], webhook)
+        logger.error("alert_log_startup_failed", error=str(exc).splitlines()[0])
+    interval = float(os.getenv("ALERT_INTERVAL_SECONDS", alert_cfg["interval_seconds"]))
+    alert_task = asyncio.create_task(run_alert_loop(app, interval))
     logger.info("startup_complete", errors=app.state.startup_errors)
     yield
+    alert_task.cancel()
+    with contextlib.suppress(asyncio.CancelledError):
+        await alert_task
     logger.info("shutdown")

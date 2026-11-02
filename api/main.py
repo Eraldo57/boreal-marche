@@ -76,15 +76,17 @@ app.include_router(monitor.router)
 
 def _log_business_request(request: Request, status_code: int, start: float) -> None:
     if request.url.path in {"/predict", "/predict/batch", "/recommend", "/chat"}:
-        request.app.state.prediction_log.append(
-            {
-                "timestamp": datetime.now(UTC).isoformat(),
-                "path": request.url.path,
-                "status_code": status_code,
-                "latency_ms": (time.perf_counter() - start) * 1000,
-                "predictions": getattr(request.state, "prediction_records", []),
-            }
-        )
+        record = {
+            "timestamp": datetime.now(UTC).isoformat(),
+            "path": request.url.path,
+            "status_code": status_code,
+            "latency_ms": (time.perf_counter() - start) * 1000,
+            "predictions": getattr(request.state, "prediction_records", []),
+        }
+        recommendation = getattr(request.state, "recommendation", None)
+        if recommendation is not None:
+            record["recommendation"] = recommendation
+        request.app.state.prediction_log.append(record)
 
 
 @app.middleware("http")

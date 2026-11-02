@@ -192,14 +192,14 @@ def test_typed_tools_forbid_unknown_and_coerced_values():
 
 
 def test_drift_is_measured_not_placeholder():
-    from api.routers.monitor import _compute_drift
+    from api.monitoring import input_drift
 
     reference = pd.DataFrame({"x": np.linspace(0, 1, 1000)})
     events = [{"predictions": [{"features": {"x": 5.0}}]} for _ in range(110)]
-    metrics = _compute_drift(events, reference)
+    metrics = input_drift(events, reference)
     assert next(m for m in metrics if m.statistic == "psi").value > 0.2
     assert next(m for m in metrics if m.statistic == "ks_pvalue").alert
-    assert _compute_drift(events, None) == []
+    assert input_drift(events, None) == []
 
 
 @pytest.mark.asyncio

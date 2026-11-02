@@ -3,6 +3,7 @@
 import os
 
 import httpx
+import pandas as pd
 import streamlit as st
 
 st.set_page_config(page_title="Boréal Marché", page_icon="🍁", layout="wide")
@@ -146,16 +147,54 @@ with assistant:
                 st.json(result["tool_calls"])
 
 with monitoring:
-    st.header("Local operational metrics")
+    st.header("Live monitoring")
+    st.caption(
+        "Computed from the prediction_log table (SQLite locally, PostgreSQL in Docker Compose) "
+        "against the training reference. Rules: configs/pipeline.yaml; design: docs/MONITORING.md."
+    )
     if st.button("Refresh metrics"):
         result = api_call("GET", "/metrics")
+        alerts = api_call("GET", "/alerts")
         if result:
-            st.json(result)
-            st.caption(
-                "Every request is stored in the prediction_log database table (SQLite "
-                "locally, PostgreSQL in Docker Compose); PSI/KS require a training reference "
-                "and sufficient prediction traffic. No label backfill or automatic purge yet."
+            show = {"green": st.success, "yellow": st.warning, "red": st.error}
+            show.get(result["status"], st.info)(
+                f"Status: {result['status']} (the worst level among the checks below)"
             )
+            fire_rate = result["recommendation"].get("rule_fire_rate")
+            kpis = st.columns(4)
+            kpis[0].metric("Requests", result["request_count"])
+            kpis[1].metric("Error rate", f"{result['error_rate']:.1%}")
+            kpis[2].metric("p95 latency", f"{result['latency_p95_ms']:.0f} ms")
+            kpis[3].metric("Rule fire rate", "n/a" if fire_rate is None else f"{fire_rate:.0%}")
+            st.subheader("Checks, each with its rule")
+            st.dataframe(pd.DataFrame(result["checks"]), hide_index=True)
+            drift = result["drift_metrics"] + result["prediction_drift"]
+            if drift:
+                st.subheader("Drift against the training reference")
+                table = pd.DataFrame(drift).pivot_table(
+                    index="feature", columns="statistic", values="value"
+                )
+                st.dataframe(table.sort_values("psi", ascending=False))
+            else:
+                st.info(f"Drift not measured yet ({result['drift_status']}).")
+            st.subheader("Data quality and request volume")
+            quality, volume = st.columns(2)
+            quality.json(result["data_quality"])
+            volume.bar_chart(pd.Series(result["requests_by_route"], name="requests"))
+        if alerts:
+            st.subheader("Automated alerts")
+            st.caption(
+                f"Evaluated in the background; delivered to: {', '.join(alerts['channels'])}. "
+                f"Webhook configured: {alerts['webhook_configured']}."
+            )
+            if alerts["alerts"]:
+                st.dataframe(pd.DataFrame(alerts["alerts"]), hide_index=True)
+            else:
+                st.write("No alert raised so far.")
+        st.caption(
+            "True accuracy needs labels that only exist 90 days after each prediction; "
+            "the backfill design is in docs/MONITORING.md."
+        )
 
 with about:
     st.header("Implementation and evidence")

@@ -182,5 +182,17 @@ monitoring:
     reference_window: "training"
     psi_threshold: 0.2   # common rule of thumb for "significant shift", not calibrated here
     ks_threshold: 0.05   # conventional p-value cut-off
+    min_predictions: 100  # with fewer logged predictions, drift is not computed
+  # Traffic-light rules. Judgement values for this demo unless a source is given.
+  thresholds:
+    error_rate_yellow: 0.05
+    error_rate_red: 0.10
+    latency_p95_ms_yellow: 500         # brief Appendix B: above 500 ms is "weak"
+    invalid_request_rate_yellow: 0.05  # share of prediction requests rejected by validation
+    out_of_range_share_yellow: 0.01    # share of a feature's values outside the training range
+    rule_fire_rate_yellow: 0.5         # offline rule-firing coverage was 0.84
+    min_requests: 20                   # with fewer requests, rate checks are not evaluated
   alert:
-    channels: ["log"]  # add "email", "slack" in production
+    # log: structured log line; database: alert_log table; webhook: POST to ALERT_WEBHOOK_URL
+    channels: ["log", "database", "webhook"]
+    interval_seconds: 60
