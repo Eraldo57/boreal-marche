@@ -101,23 +101,15 @@ def test_overlap_counts_rows_and_one_time_share():
     assert overlap["one_time_buyer_share"]["region=B"] == 1.0
 
 
-def test_generated_block_is_replaced_and_hand_written_text_kept(tmp_path):
+def test_markdown_tables_list_every_group_with_its_flag():
     y, p, groups = _synthetic_audit_inputs()
     report = fairness.audit(y, p, 0.5, groups)
     report.update(test_cutoff="2020-01-01", mitigation_estimates=[])
-    report["overlap"] = fairness.flag_overlap(groups, [])
-    doc = tmp_path / "audit.md"
-    stale = "STALE-TABLES"
-    doc.write_text(f"Intro\n{fairness.GENERATED_START}\n{stale}\n{fairness.GENERATED_END}\nOutro\n")
-    for _ in range(2):  # idempotent
-        fairness.write_generated_block(doc, fairness.markdown_tables(report))
-    text = doc.read_text()
-    assert text.startswith("Intro\n") and text.endswith("Outro\n") and stale not in text
-    assert text.count(fairness.GENERATED_START) == 1
-    assert "| B | 200 |" in text
-    doc.write_text("no markers")
-    with pytest.raises(ValueError, match="markers"):
-        fairness.write_generated_block(doc, "x")
+    report["overlap"] = fairness.flag_overlap(groups, [{"dimension": "region", "group": "B"}])
+    tables = fairness.markdown_tables(report)
+    assert "| A | 200 |" in tables and "| B | 200 |" in tables and "| C | 6 |" in tables
+    assert "| strong |" in tables and "| inconclusive (small group) |" in tables
+    assert "200 of 406 rows" in tables
 
 
 @pytest.mark.integration

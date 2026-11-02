@@ -52,6 +52,10 @@ figures: ## Redraw the reliability and threshold figures from the saved retentio
 fairness: ## Subgroup fairness audit of the saved model on the test snapshot
 	$(PYTHON) -m src.fairness
 
+.PHONY: minimisation
+minimisation: ## Drop-column necessity test of every feature on the decision period
+	$(PYTHON) -m src.minimisation
+
 # ---------------------------------------------------------------------------
 # Head B — Recommendations
 # ---------------------------------------------------------------------------
