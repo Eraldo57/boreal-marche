@@ -44,6 +44,10 @@ tune: ## Full chronological pipeline with configured Optuna budget
 train: ## Full pipeline: spot-check → tune → calibrate → threshold → save
 	$(PYTHON) -m src.train
 
+.PHONY: figures
+figures: ## Redraw the reliability and threshold figures from the saved retention report
+	$(PYTHON) -m src.plots
+
 # ---------------------------------------------------------------------------
 # Head B — Recommendations
 # ---------------------------------------------------------------------------

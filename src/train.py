@@ -44,6 +44,7 @@ from sklearn.tree import DecisionTreeClassifier
 
 from src.contracts import ARTIFACTS, CONTRACT_VERSION, FEATURE_NAMES, PROCESSED, PROJECT_ROOT
 from src.ingest import _sha256, load_config
+from src.plots import FIGURES
 
 REPORTS = PROJECT_ROOT / "reports" / "current_run"
 SPLITS = ["train", "validation", "calibration", "decision", "test"]
@@ -413,6 +414,17 @@ def run(*, n_trials: int | None = None, output_dir: Path = ARTIFACTS) -> dict:
             }
         )
         mlflow.log_metrics({k: v for k, v in final_metrics.items() if v is not None})
+        mlflow.set_tags(
+            {
+                "git_commit": metadata["git_commit"],
+                "git_dirty": str(metadata["git_dirty"]),
+                "source_data_sha256": metadata["source_data_sha256"],
+                "feature_sha256": metadata["feature_sha256"],
+                "model_sha256": metadata["model_sha256"],
+            }
+        )
+        for name, draw in FIGURES.items():
+            mlflow.log_figure(draw(report), f"plots/{name}")
         mlflow.log_artifact(str(reports_dir / "retention_metrics.json"))
         mlflow.log_artifact(str(output_dir / "retention_model_metadata.json"))
         mlflow.sklearn.log_model(final, "model", input_example=X.loc[te].head(1))
