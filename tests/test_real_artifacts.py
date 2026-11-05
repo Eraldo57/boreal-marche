@@ -42,3 +42,22 @@ def test_startup_and_predictions_real_artifacts():
         fallback = client.post("/recommend", json={"basket": ["never-seen-item"]}).json()
         assert fallback["strategy"] == "popularity_fallback"
         assert fallback["recommendations"] == recommendation["recommendations"]
+
+
+def test_the_explanation_is_about_this_customer_not_the_average():
+    with TestClient(app) as client:
+        record = client.get("/customers/12347/features").json()["features"]
+        base = client.post("/predict", json={"customer_id": "12347", "features": record}).json()
+        away = {**record, "recency_days": record["recency_days"] + 365}
+        moved = client.post("/predict", json={"customer_id": "12347", "features": away}).json()
+    effects = base["explanation"]
+    assert effects and all(-1 <= e["effect"] <= 1 for e in effects)
+    sizes = [abs(e["effect"]) for e in effects]
+    assert sizes == sorted(sizes, reverse=True)
+    # A customer who has been away for over a year is explained by that absence ...
+    assert moved["explanation"][0]["feature"] == "recency_days"
+    assert moved["explanation"][0]["effect"] < 0
+    # ... while the global importance list is the same for everyone.
+    assert [f["feature"] for f in base["top_factors"]] == [
+        f["feature"] for f in moved["top_factors"]
+    ]

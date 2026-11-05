@@ -1,0 +1,209 @@
+# ============================================================================
+# Boréal Marché — Pipeline Configuration
+# ============================================================================
+# Every magic number lives HERE, not buried in a notebook cell.
+
+data:
+  source_url: "https://archive.ics.uci.edu/ml/machine-learning-databases/00502/online_retail_II.xlsx"
+  archive_url: "https://archive.ics.uci.edu/static/public/502/online+retail+ii.zip"
+  # Measured from the official UCI workbook on 2026-09-30; not a publisher-signed hash.
+  source_sha256: "bcbe73b35f5b7babf197fb0cb983a11f5d9ff929078d4aa53d171b1f2df2e980"
+  raw_filename: "online_retail_II.xlsx"
+  parquet_path: "data/processed/transactions.parquet"
+  manifest_path: "data/processed/manifest.json"
+  seed: 42
+
+  # Boréal Marché re-skinning
+  reskin:
+    company_name: "Boréal Marché"
+    country_filter: null  # null = keep all countries
+    description_language: "mixed"  # original dataset is English
+
+labelling:
+  # Observation window: all transactions BEFORE this date
+  cutoff_date: "2011-09-01"
+  # Label window: 90 days AFTER cutoff
+  label_window_days: 90
+  # Target: did the customer place at least one order in the label window?
+  target_column: "will_return"
+  # Labels mature before the next stage's cutoff. Customers may recur across
+  # snapshots: this evaluates forecasting known customers, not unseen people.
+  snapshots:
+    train: ["2010-06-01", "2010-09-01"]
+    validation: ["2010-12-01"]
+    calibration: ["2011-03-01"]
+    decision: ["2011-06-01"]
+    test: ["2011-09-01"]
+
+cleaning:
+  rules:
+    - name: "remove_invalid_schema"
+      description: "Reject missing dates/IDs/SKUs and non-finite numeric values"
+    - name: "remove_zero_quantity"
+      description: "Drop zero quantity; preserve negative returns and C invoices"
+    - name: "remove_non_positive_price"
+      description: "Drop rows where Price <= 0"
+    - name: "remove_null_customer"
+      description: "Drop rows where Customer ID is null"
+    - name: "remove_service_skus"
+      description: "Drop non-product SKUs (POST, DOT, BANK, M, etc.)"
+    - name: "canonicalise_descriptions"
+      description: "Lowercase, strip whitespace, collapse runs"
+    - name: "cap_extreme_values"
+      # Caps are judgement values, not derived from a distribution analysis.
+      description: "Fixed sensitivity caps; preserve invoice presence and sign"
+      max_abs_quantity: 10000
+      max_unit_price: 1000
+    - name: "flag_events"
+      description: "Separate cancellations/returns from positive purchases"
+
+features:
+  # At least 25 documented features covering RFM, basket shape,
+  # category mix, behavioural signals and geography.
+  groups:
+    rfm:
+      - recency_days
+      - frequency
+      - monetary_total
+      - monetary_mean
+      - monetary_std
+    cadence:
+      - days_since_first_purchase
+      - avg_days_between_orders
+      - std_days_between_orders
+      - is_one_time_buyer
+    basket_shape:
+      - avg_basket_size
+      - avg_basket_value
+      - max_basket_value
+      - avg_unique_items_per_basket
+      - single_item_basket_ratio
+    category_mix:
+      - top_category_share
+      - n_unique_categories
+      - category_entropy
+    behavioural:
+      - has_ever_cancelled
+      - cancellation_rate
+      - return_rate
+      - weekend_purchase_ratio
+      - morning_purchase_ratio
+    geography:
+      - country_code
+      - is_domestic
+      - n_countries
+
+  missingness_policy: "structural zeros; remaining missing values imputed on training only"
+
+modelling:
+  primary_metric: "average_precision"  # PR-AUC
+  secondary_metrics:
+    - "roc_auc"
+    - "brier_score_loss"
+    - "recall_at_top_decile"
+    - "fit_time"
+  evaluation: "chronological_snapshots"
+
+  spot_check_families:
+    - LogisticRegression
+    - RidgeClassifier
+    - DecisionTreeClassifier
+    - RandomForestClassifier
+    - GradientBoostingClassifier
+    - HistGradientBoostingClassifier
+    - KNeighborsClassifier
+    - LinearSVC
+
+  baselines:
+    - DummyClassifier_stratified
+    - business_heuristic_recency
+
+  tuning:
+    engine: optuna
+    n_trials: 12  # local milestone budget per tunable family; increase for final study
+    direction: maximize
+    pruning: false  # single chronological validation score; no fake intermediate pruning
+
+  calibration:
+    methods: ["isotonic", "sigmoid"]
+
+  threshold:
+    cost_assumptions:
+      # PLACEHOLDERS: not from the capstone brief and not derivable from the workbook
+      # (revenue only, in GBP). The brief's coupon is 15% off; 15% of the median
+      # purchase invoice (GBP 304.50) is about GBP 45.68. Margin has no data source.
+      cost_coupon: 5.0        # cost of sending a retention coupon
+      margin_retained: 25.0   # average margin from a retained customer
+      cost_false_negative: 0  # missed customer — no coupon sent
+
+rules:
+  algorithm_demo: "apriori"
+  algorithm_prod: "fpgrowth"
+  min_support_sweep: [0.005, 0.01, 0.02, 0.03, 0.05]
+  min_confidence: 0.1
+  min_confidence_sweep: [0.1, 0.3, 0.5]
+  min_lift: 1.2
+  max_itemset_length: 3  # bound combinatorial growth; identical Apriori/FP-Growth protocol
+  train_end: "2011-06-01"
+  validation_end: "2011-09-01"
+  test_end: "2011-12-01"
+  identity: "canonical_description"
+  max_rules: 5000
+  top_k_recommendations: 5
+
+assistant:
+  providers: ["regex", "openai", "ollama"]
+  default_provider: "regex"
+  embedding_model: "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+  similarity_floor: 0.25  # below this the assistant declines; judgement value
+  # Between the floor and this value a passage is shown with a caution that it may not answer.
+  # No single cutoff separates answerable from undocumented questions (see
+  # reports/current_run/retrieval_floor.json): at 0.45, 46 of 60 answerable questions are
+  # confident and 4 of 24 undocumented ones are. A judgement value chosen from that sweep.
+  confident_score: 0.45
+  max_chunks_per_query: 5
+  chunk_size: 420  # chars, to reduce truncation at encoder's 128 token limit
+  chunk_overlap: 64
+
+  openai:
+    model: "gpt-4o-mini"
+    # Standard-tier list price, USD per million tokens. Read from OpenAI's pricing page on
+    # 2026-11-02 (https://developers.openai.com/api/docs/pricing); prices change, so
+    # re-check before quoting a cost. Used only by scripts/evaluate_assistant.py.
+    usd_per_million_tokens:
+      input: 0.15
+      output: 0.60
+  ollama:
+    model: "llama3.2:3b"  # newest Llama that fits a laptop (2.02 GB); llama3.3/llama4 are 42/67 GB
+    host: "http://localhost:11434"
+
+registry:
+  # MLflow model registry. The API serves the version the alias points to; see
+  # governance/PROMOTION_POLICY.md for how a version gets there.
+  model_name: "boreal-retention"
+  alias: "champion"
+  promotion:
+    # Judgement tolerances for this project, not derived from data.
+    max_pr_auc_drop: 0.01               # candidate PR-AUC may be at most this much lower
+    max_brier_increase: 0.01            # candidate Brier score may be at most this much higher
+    max_fairness_gap_widening_pp: 2.0   # an existing fairness flag may not widen by more
+
+monitoring:
+  drift:
+    reference_window: "training"
+    psi_threshold: 0.2   # common rule of thumb for "significant shift", not calibrated here
+    ks_threshold: 0.05   # conventional p-value cut-off
+    min_predictions: 100  # with fewer logged predictions, drift is not computed
+  # Traffic-light rules. Judgement values for this demo unless a source is given.
+  thresholds:
+    error_rate_yellow: 0.05
+    error_rate_red: 0.10
+    latency_p95_ms_yellow: 500         # brief Appendix B: above 500 ms is "weak"
+    invalid_request_rate_yellow: 0.05  # share of prediction requests rejected by validation
+    out_of_range_share_yellow: 0.01    # share of a feature's values outside the training range
+    rule_fire_rate_yellow: 0.5         # offline rule-firing coverage was 0.84
+    min_requests: 20                   # with fewer requests, rate checks are not evaluated
+  alert:
+    # log: structured log line; database: alert_log table; webhook: POST to ALERT_WEBHOOK_URL
+    channels: ["log", "database", "webhook"]
+    interval_seconds: 60

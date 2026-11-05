@@ -1,0 +1,45 @@
+/Users/runner/work/crossbow/crossbow/arrow/cpp/src/arrow/util/cpu_info.cc:239: IOError: sysctlbyname failed for 'hw.l1dcachesize'. Detail: [errno 1] Operation not permitted
+/Users/runner/work/crossbow/crossbow/arrow/cpp/src/arrow/util/cpu_info.cc:239: IOError: sysctlbyname failed for 'hw.l2cachesize'. Detail: [errno 1] Operation not permitted
+/Users/runner/work/crossbow/crossbow/arrow/cpp/src/arrow/util/cpu_info.cc:239: IOError: sysctlbyname failed for 'hw.l3cachesize'. Detail: [errno 1] Operation not permitted
+/Users/runner/work/crossbow/crossbow/arrow/cpp/src/arrow/util/cpu_info.cc:239: IOError: sysctlbyname failed for 'hw.optional.neon'. Detail: [errno 1] Operation not permitted
+{
+  "path": "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/reports/current_run/retention_diagnostics.json",
+  "model": {
+    "pr_auc": 0.7596308206529796,
+    "roc_auc": 0.7863253832246079,
+    "brier_score": 0.19398294852850284,
+    "tp": 1843,
+    "fp": 1391,
+    "fn": 393,
+    "tn": 1606,
+    "precision": 0.569882498453927,
+    "recall": 0.8242397137745975,
+    "selection_rate": 0.6180011465698452
+  },
+  "ci95": {
+    "pr_auc": [
+      0.7424860736897132,
+      0.7749412533937028
+    ],
+    "roc_auc": [
+      0.7749314994819917,
+      0.7982659671006174
+    ],
+    "brier_score": [
+      0.18754691306152085,
+      0.1998139409342247
+    ],
+    "recall": [
+      0.8080099148448182,
+      0.839967478771467
+    ],
+    "precision": [
+      0.5526624375222229,
+      0.586078566368916
+    ],
+    "ap_difference": [
+      0.07078207547676402,
+      0.104865021648921
+    ]
+  }
+}

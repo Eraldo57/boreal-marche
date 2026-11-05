@@ -1,0 +1,63 @@
+/Users/runner/work/crossbow/crossbow/arrow/cpp/src/arrow/util/cpu_info.cc:239: IOError: sysctlbyname failed for 'hw.l1dcachesize'. Detail: [errno 1] Operation not permitted
+/Users/runner/work/crossbow/crossbow/arrow/cpp/src/arrow/util/cpu_info.cc:239: IOError: sysctlbyname failed for 'hw.l2cachesize'. Detail: [errno 1] Operation not permitted
+/Users/runner/work/crossbow/crossbow/arrow/cpp/src/arrow/util/cpu_info.cc:239: IOError: sysctlbyname failed for 'hw.l3cachesize'. Detail: [errno 1] Operation not permitted
+/Users/runner/work/crossbow/crossbow/arrow/cpp/src/arrow/util/cpu_info.cc:239: IOError: sysctlbyname failed for 'hw.optional.neon'. Detail: [errno 1] Operation not permitted
+[train] validation DummyClassifier_stratified: AP=0.3345
+[train] validation business_heuristic_recency: AP=0.5116
+[train] validation LogisticRegression: AP=0.6694
+[train] validation RidgeClassifier: AP=0.6059
+[train] validation DecisionTreeClassifier: AP=0.5946
+[train] validation RandomForestClassifier: AP=0.6730
+[train] validation GradientBoostingClassifier: AP=0.6623
+/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/context.py:134: UserWarning: Could not find the number of physical cores for the following reason:
+invalid literal for int() with base 10: ''
+Returning the number of logical cores instead. You can silence this warning by setting LOKY_MAX_CPU_COUNT to the number of cores you want to use.
+  warnings.warn(
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/context.py", line 264, in _count_physical_cores
+    cpu_count_physical = _count_physical_cores_darwin()
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/context.py", line 420, in _count_physical_cores_darwin
+    return int(cpu_info)
+           ^^^^^^^^^^^^^
+[train] validation HistGradientBoostingClassifier: AP=0.6534
+[train] validation KNeighborsClassifier: AP=0.6135
+[train] validation LinearSVC: AP=0.6598
+[I 2026-11-05 16:10:23,479] A new study created in memory with name: no-name-a58d5559-4c7e-4675-8897-e1f1f515f51c
+[I 2026-11-05 16:10:24,243] Trial 0 finished with value: 0.6713378339348497 and parameters: {'n_estimators': 156, 'max_depth': 12, 'min_samples_leaf': 19}. Best is trial 0 with value: 0.6713378339348497.
+[I 2026-11-05 16:10:24,907] Trial 1 finished with value: 0.6737858486870049 and parameters: {'n_estimators': 190, 'max_depth': 5, 'min_samples_leaf': 5}. Best is trial 1 with value: 0.6737858486870049.
+[I 2026-11-05 16:10:25,466] Trial 2 finished with value: 0.6698705512097727 and parameters: {'n_estimators': 108, 'max_depth': 11, 'min_samples_leaf': 16}. Best is trial 1 with value: 0.6737858486870049.
+[I 2026-11-05 16:10:26,065] Trial 3 finished with value: 0.673214730860878 and parameters: {'n_estimators': 206, 'max_depth': 4, 'min_samples_leaf': 25}. Best is trial 1 with value: 0.6737858486870049.
+[I 2026-11-05 16:10:26,851] Trial 4 finished with value: 0.6759671049458035 and parameters: {'n_estimators': 225, 'max_depth': 5, 'min_samples_leaf': 6}. Best is trial 4 with value: 0.6759671049458035.
+[I 2026-11-05 16:10:26,981] Trial 5 pruned. 
+[I 2026-11-05 16:10:27,662] Trial 6 finished with value: 0.6764117917510012 and parameters: {'n_estimators': 165, 'max_depth': 6, 'min_samples_leaf': 16}. Best is trial 6 with value: 0.6764117917510012.
+[I 2026-11-05 16:10:28,145] Trial 7 finished with value: 0.6754682520592363 and parameters: {'n_estimators': 121, 'max_depth': 6, 'min_samples_leaf': 10}. Best is trial 6 with value: 0.6764117917510012.
+[I 2026-11-05 16:10:28,355] Trial 8 pruned. 
+[I 2026-11-05 16:10:28,564] Trial 9 pruned. 
+[I 2026-11-05 16:10:29,572] Trial 10 finished with value: 0.6771799933802631 and parameters: {'n_estimators': 243, 'max_depth': 8, 'min_samples_leaf': 25}. Best is trial 10 with value: 0.6771799933802631.
+[I 2026-11-05 16:10:29,808] Trial 11 pruned. 
+[I 2026-11-05 16:10:29,809] A new study created in memory with name: no-name-b7a44976-d837-4404-a9c8-863a41add577
+[I 2026-11-05 16:10:29,840] Trial 0 finished with value: 0.6636879388204318 and parameters: {'C': 0.04082331665966554}. Best is trial 0 with value: 0.6636879388204318.
+[I 2026-11-05 16:10:29,871] Trial 1 finished with value: 0.6697394701945019 and parameters: {'C': 12.275826710862326}. Best is trial 1 with value: 0.6697394701945019.
+[I 2026-11-05 16:10:29,900] Trial 2 finished with value: 0.669492115402651 and parameters: {'C': 1.4071095169064511}. Best is trial 1 with value: 0.6697394701945019.
+[I 2026-11-05 16:10:29,929] Trial 3 finished with value: 0.6689564414478959 and parameters: {'C': 0.37570597138026457}. Best is trial 1 with value: 0.6697394701945019.
+[I 2026-11-05 16:10:29,941] Trial 4 pruned. 
+[I 2026-11-05 16:10:29,953] Trial 5 pruned. 
+[I 2026-11-05 16:10:29,965] Trial 6 pruned. 
+[I 2026-11-05 16:10:29,993] Trial 7 finished with value: 0.6697120356127985 and parameters: {'C': 5.314343038625021}. Best is trial 1 with value: 0.6697394701945019.
+[I 2026-11-05 16:10:30,005] Trial 8 pruned. 
+[I 2026-11-05 16:10:30,017] Trial 9 pruned. 
+[I 2026-11-05 16:10:30,046] Trial 10 finished with value: 0.6697445467562048 and parameters: {'C': 14.907888012947872}. Best is trial 10 with value: 0.6697445467562048.
+[I 2026-11-05 16:10:30,080] Trial 11 finished with value: 0.6697429091814115 and parameters: {'C': 13.302768407132174}. Best is trial 10 with value: 0.6697445467562048.
+{
+  "selected_model": "RandomForestClassifier",
+  "calibration": "sigmoid",
+  "test": {
+    "pr_auc": 0.7596308206529796,
+    "roc_auc": 0.7863253832246079,
+    "brier_score": 0.19398294852850284,
+    "recall_top_decile": 0.21556350626118068,
+    "fit_time_s": 0.7012122918386012,
+    "assumed_test_utility": 29905.0
+  }
+}
+[train] registered version 2 as a candidate (not promoted)

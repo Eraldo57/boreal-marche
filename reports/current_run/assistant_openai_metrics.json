@@ -1,0 +1,1410 @@
+{
+  "executed_at": "2026-11-03T01:41:48.324327+00:00",
+  "provider": "openai",
+  "golden_count": 40,
+  "category_counts": {
+    "policy": 15,
+    "tool_call": 10,
+    "out_of_scope": 8,
+    "french": 7
+  },
+  "tool_choice_accuracy_all": 0.95,
+  "tool_choice_accuracy_in_scope": 0.9375,
+  "out_of_scope_refusal_rate": 1.0,
+  "in_scope_refusal_count": 1,
+  "expected_source_accuracy": 0.7777777777777778,
+  "policy_extract_grounding_proxy": 1.0,
+  "latency_p50_ms": 1014.7617494221777,
+  "latency_p95_ms": 1335.7489160494877,
+  "cost_usd_per_query": 6.232125e-05,
+  "cost_usd_per_streamed_answer": 0.00021971666666666665,
+  "streamed_generation": {
+    "policy_questions": 18,
+    "written_by_model": 18,
+    "fallbacks": 0,
+    "language_match_rate": 1.0,
+    "french_written": 4,
+    "all_written_answers_cited": true,
+    "answers_adding_figures": [],
+    "answers_omitting_top_source_figures": [
+      1,
+      2,
+      3,
+      5,
+      8,
+      14,
+      15,
+      34,
+      35
+    ],
+    "seconds_p50": 2.3228035209467635,
+    "questions": [
+      {
+        "id": 1,
+        "language": "en",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "30",
+            "7"
+          ]
+        },
+        "token_usage": {
+          "prompt_tokens": 384,
+          "completion_tokens": 40
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 675,
+          "completion_tokens": 86
+        },
+        "seconds": 2.246864709071815,
+        "reply": "Perishable products cannot be physically returned due to food-safety regulations. If a perishable product arrives in unsatisfactory condition, such as being spoiled or past its expiry date, you may request a refund or replacement within 48 hours of delivery by including at least one photo showing the issue. However, returns for reasons of taste or preference are not eligible for a refund or exchange. This information is sourced from the return policy document."
+      },
+      {
+        "id": 2,
+        "language": "en",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "4",
+            "48"
+          ]
+        },
+        "token_usage": {
+          "prompt_tokens": 384,
+          "completion_tokens": 40
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 414,
+          "completion_tokens": 72
+        },
+        "seconds": 2.4204439579043537,
+        "reply": "For orders within Montreal, standard delivery is dispatched the same business day if confirmed before 14 h (Eastern) and the next business day if confirmed after 14 h. Additionally, express delivery is available for same-day delivery for orders placed and paid before 11 h Eastern. Please refer to the delivery policy for more details. (Source: delivery_policy.md)"
+      },
+      {
+        "id": 3,
+        "language": "en",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "48"
+          ]
+        },
+        "token_usage": {
+          "prompt_tokens": 387,
+          "completion_tokens": 43
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 821,
+          "completion_tokens": 67
+        },
+        "seconds": 2.0939964160788804,
+        "reply": "Yes, we do ship frozen products, but they are only available for Zones 1 and 2. Frozen items are shipped in insulated containers with dry ice, ensuring they remain frozen during transit. The cold chain is maintained by using dry ice in the packaging. For more details, please refer to the delivery policy (delivery_policy.md)."
+      },
+      {
+        "id": 4,
+        "language": "en",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "token_usage": {
+          "prompt_tokens": 383,
+          "completion_tokens": 39
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 823,
+          "completion_tokens": 37
+        },
+        "seconds": 1.7497732499614358,
+        "reply": "I cannot answer that question from the policies provided. I suggest contacting customer service for specific information regarding allergens in bakery products. The source document I relied on is the allergen_policy.md."
+      },
+      {
+        "id": 5,
+        "language": "en",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "60"
+          ]
+        },
+        "token_usage": {
+          "prompt_tokens": 386,
+          "completion_tokens": 42
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 755,
+          "completion_tokens": 117
+        },
+        "seconds": 2.8788972501643,
+        "reply": "You can earn loyalty points with Boréal Marché by spending money on purchases, as members earn **1 point per $1 spent** (before taxes, after discounts). Additionally, certain product categories offer bonus points, such as **2 points per $1** for Cuisine Boréal prepared meals and **1.5 points per $1** for organic products. New members receive **200 bonus points** upon placing their first order of $50 or more, and there are also bonuses for birthdays, referrals, and product reviews. For more details, please refer to the loyalty terms document."
+      },
+      {
+        "id": 6,
+        "language": "en",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "token_usage": {
+          "prompt_tokens": 385,
+          "completion_tokens": 41
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 312,
+          "completion_tokens": 43
+        },
+        "seconds": 1.8409877081867307,
+        "reply": "Yes, items that arrive damaged are eligible for a full refund or replacement. You need to report the issue within 48 hours and provide a photo. For more details, you can refer to the return policy document."
+      },
+      {
+        "id": 7,
+        "language": "en",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "token_usage": {
+          "prompt_tokens": 386,
+          "completion_tokens": 42
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 911,
+          "completion_tokens": 156
+        },
+        "seconds": 2.835152250016108,
+        "reply": "Boréal Marché collects various categories of personal information, including identity (full name, date of birth, language preference), contact (email address, phone number, mailing address), payment (tokenized credit/debit card number, billing address), transaction (order history, items purchased), delivery (shipping address, delivery instructions), behavioral data (pages viewed, search queries), device and technical information (IP address, browser type), loyalty program details (points balance, tier status), communications (support tickets, chat transcripts), and AI-derived data (retention probability score, customer segment). This information is used for purposes such as account creation, order fulfillment, delivery logistics, and customer service. For more details, you may refer to the privacy notice. \n\n(Source: privacy_notice_en.md)"
+      },
+      {
+        "id": 8,
+        "language": "en",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "72"
+          ]
+        },
+        "token_usage": {
+          "prompt_tokens": 382,
+          "completion_tokens": 38
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 328,
+          "completion_tokens": 42
+        },
+        "seconds": 1.6889510829932988,
+        "reply": "I cannot answer that from the policies. I suggest contacting customer service for assistance with canceling an existing order. The information provided does not specify the cancellation process for existing orders. Source document: return_policy.md."
+      },
+      {
+        "id": 9,
+        "language": "en",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "token_usage": {
+          "prompt_tokens": 383,
+          "completion_tokens": 39
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 758,
+          "completion_tokens": 144
+        },
+        "seconds": 2.5444258330389857,
+        "reply": "The loyalty program has three tiers based on cumulative spending in a rolling 12-month period:\n\n1. 🌱 Pousse (Seedling): $0 – $499 with a base earning rate.\n2. 🌲 Sapin (Fir): $500 – $1,499 with a 1.25× earning multiplier, free standard shipping on orders over $50, and early access to seasonal products.\n3. ❄️ Étoile (Star): $1,500+ with a 1.5× earning multiplier, free express shipping on all orders, dedicated support line, an annual 10% birthday coupon, and an invitation to tasting events.\n\nThis information is sourced from the loyalty_terms.md document."
+      },
+      {
+        "id": 10,
+        "language": "en",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "token_usage": {
+          "prompt_tokens": 386,
+          "completion_tokens": 42
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 679,
+          "completion_tokens": 83
+        },
+        "seconds": 2.4302267502062023,
+        "reply": "Yes, we offer free shipping, and the minimum order amount for free shipping varies by zone. For example, the free-shipping threshold is $75.00 for Zone 1, $100.00 for Zone 2, $150.00 for Zone 3, and $200.00 for Zone 4. Please refer to the shipping fees section for more details. (Source: delivery_policy.md)"
+      },
+      {
+        "id": 12,
+        "language": "en",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "token_usage": {
+          "prompt_tokens": 385,
+          "completion_tokens": 41
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 219,
+          "completion_tokens": 38
+        },
+        "seconds": 2.2506491248495877,
+        "reply": "I cannot answer your question from the policies provided. I suggest contacting customer service for assistance with deleting your account and all your data. The source document I relied on is the loyalty_terms.md."
+      },
+      {
+        "id": 13,
+        "language": "en",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "token_usage": {
+          "prompt_tokens": 386,
+          "completion_tokens": 42
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 525,
+          "completion_tokens": 65
+        },
+        "seconds": 2.1048162090592086,
+        "reply": "If an order is returned, the points earned on that order are deducted from your balance. If you redeemed points on an order that is later returned, the points will be restored, and the refund will be reduced by the discount amount. This information is from the \"Returns and Cancellations\" section of the loyalty terms."
+      },
+      {
+        "id": 14,
+        "language": "en",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "30",
+            "7"
+          ]
+        },
+        "token_usage": {
+          "prompt_tokens": 380,
+          "completion_tokens": 36
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 835,
+          "completion_tokens": 24
+        },
+        "seconds": 1.7386262090876698,
+        "reply": "I cannot answer that from the policies. I suggest contacting customer service for more information regarding the recyclability of delivery boxes."
+      },
+      {
+        "id": 15,
+        "language": "en",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "11",
+            "14"
+          ]
+        },
+        "token_usage": {
+          "prompt_tokens": 386,
+          "completion_tokens": 42
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 416,
+          "completion_tokens": 69
+        },
+        "seconds": 2.3813112501520663,
+        "reply": "Yes, you can pick up your order in store using the Click-and-Collect option. Free pickup is available at our Montréal warehouse and our Québec City depot, with orders ready within 4 hours of confirmation. Uncollected orders are held for 48 hours and then cancelled with a full refund. This information is from the delivery policy document."
+      },
+      {
+        "id": 34,
+        "language": "fr",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "fr",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "14"
+          ]
+        },
+        "token_usage": {
+          "prompt_tokens": 386,
+          "completion_tokens": 40
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 731,
+          "completion_tokens": 97
+        },
+        "seconds": 2.3569590419065207,
+        "reply": "Selon notre politique, les produits périssables, y compris les produits congelés, ne peuvent pas être retournés physiquement en raison des réglementations de sécurité alimentaire. Si un produit périssable arrive dans un état insatisfaisant, vous pouvez demander un remboursement ou un remplacement dans les 48 heures suivant la livraison, sans avoir à retourner l'article. Pour plus d'informations, je vous recommande de contacter notre service client. Source : [1] (return_policy.md)."
+      },
+      {
+        "id": 35,
+        "language": "fr",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "fr",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "4",
+            "48"
+          ]
+        },
+        "token_usage": {
+          "prompt_tokens": 384,
+          "completion_tokens": 40
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 414,
+          "completion_tokens": 91
+        },
+        "seconds": 2.4808712918311357,
+        "reply": "La livraison standard à Montréal prend généralement un jour ouvrable si la commande est confirmée avant 14 h. Pour les commandes confirmées après 14 h, elles sont expédiées le jour ouvrable suivant. Si vous optez pour la livraison express et que votre commande est passée avant 11 h, la livraison peut être le même jour. Pour plus de détails, je vous recommande de contacter le service client. (Source : delivery_policy.md)"
+      },
+      {
+        "id": 38,
+        "language": "fr",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "fr",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "token_usage": {
+          "prompt_tokens": 385,
+          "completion_tokens": 41
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 362,
+          "completion_tokens": 85
+        },
+        "seconds": 2.288647999987006,
+        "reply": "Pour supprimer votre compte de fidélité, vous devez contacter fidelite@borealmarche.ca. Veuillez noter que tous les points non échangés seront perdus lors de la fermeture de votre compte. En ce qui concerne vos données personnelles, je ne peux pas répondre à cette question à partir des politiques. Je vous suggère de contacter le service client pour plus d'informations. (Source : loyalty_terms.md)"
+      },
+      {
+        "id": 40,
+        "language": "fr",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "fr",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "token_usage": {
+          "prompt_tokens": 387,
+          "completion_tokens": 43
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 827,
+          "completion_tokens": 112
+        },
+        "seconds": 2.4020224169362336,
+        "reply": "Tous les produits de Boréal Marché doivent déclarer la présence des allergènes prioritaires, qui incluent le lait, les œufs, le blé et le soja. Les produits de boulangerie peuvent donc contenir ces allergènes. Cependant, nous ne pouvons pas certifier qu'un produit manipulé dans notre entrepôt est exempt de contamination croisée avec d'autres allergènes. Pour plus d'informations, je vous recommande de consulter les étiquettes physiques des produits ou de contacter le service client. (Source : allergen_policy.md)"
+      }
+    ]
+  },
+  "multilingual_smoke": {
+    "query_fr": "Quel est le délai pour retourner un produit non périssable ?",
+    "hits": [
+      {
+        "text": "## 3. Perishable Products\n\n### 3.1 General rule\n\nDue to food-safety regulations, **perishable products cannot be physically\nreturned**. This includes all items tagged as \"refrigerated\" or \"frozen,\" fresh\nproduce, bakery items, and any item with an expiration date within 14 days of\ndelivery.\n\n### 3.2 Quality issues\n\nIf a perishable product arrives in unsatisfactory condition (spoiled, past its\nexpiry date, incorrect temperature, wrong item), you may request a refund or\nreplacement:\n\n- Submit a request **within 48 hours** of delivery.\n- Include **at least one photo** showing the issue.\n- A refund or replacement is issued without requiring the item to be returned.\n\n### 3.3 Taste or preference\n\nPerishable items returned for reasons of taste or preference (\"I didn't like\nit,\" \"I changed my mind\") are **not eligible for a refund or exchange**. We\nencourage customers to review product descriptions, ingredients, and reviews\nbefore purchasing.",
+        "source": "return_policy.md",
+        "score": 0.6441214680671692,
+        "language": "en",
+        "chunk_index": 2
+      },
+      {
+        "text": "## 2. Non-Perishable Products\n\n### 2.1 Eligibility\n\nNon-perishable products (canned goods, dry goods, household items, cleaning\nsupplies, personal care) may be returned if:\n\n- The return request is made **within 30 days** of delivery.\n- The item is **unopened and in its original packaging**.\n- The item is **not a final-sale or clearance item** (marked \"Vente finale\" on the\n  product page).\n\n### 2.2 Process\n\n1. Log in to your Boréal Marché account and navigate to \"Order History.\"\n2. Select the order and click \"Request a return.\"\n3. Choose the items you wish to return and provide a reason.\n4. Print the prepaid return label that is emailed to you.\n5. Ship the item(s) within 7 days.\n\nOnce we receive and inspect the returned items, a refund is processed to the\noriginal payment method within 5 business days.\n\n### 2.3 Return shipping cost\n\nFor non-perishable returns, the return shipping cost is borne by the customer\nunless the return is due to a Boréal Marché error (wrong item shipped, item\ndefective on arrival). A flat return shipping fee of $7.95 is deducted from the\nrefund.",
+        "source": "return_policy.md",
+        "score": 0.6055312156677246,
+        "language": "en",
+        "chunk_index": 1
+      },
+      {
+        "text": "## 4. Damaged or Defective Items\n\nItems that arrive damaged (broken packaging, crushed, leaking) or defective are\neligible for a full refund or replacement regardless of whether they are\nperishable or non-perishable. Report the issue within 48 hours with a photo.",
+        "source": "return_policy.md",
+        "score": 0.5198442339897156,
+        "language": "en",
+        "chunk_index": 3
+      },
+      {
+        "text": "## 5. Wrong Item Received\n\nIf you receive an item you did not order, contact us within 48 hours. We will\narrange for the wrong item to be picked up at no cost and send the correct item\nor issue a full refund.",
+        "source": "return_policy.md",
+        "score": 0.4865150451660156,
+        "language": "en",
+        "chunk_index": 4
+      },
+      {
+        "text": "## 7. Subscription Orders\n\nCustomers subscribed to recurring deliveries (Boréal Box) may cancel individual\nupcoming deliveries up to 72 hours before the scheduled dispatch date. Deliveries\nalready dispatched follow the standard return rules above.\n\nTo cancel a subscription entirely, go to \"My Account\" → \"Subscriptions\" →\n\"Cancel.\" Active loyalty points earned through the subscription are retained.",
+        "source": "return_policy.md",
+        "score": 0.4540749788284302,
+        "language": "en",
+        "chunk_index": 6
+      }
+    ],
+    "english_return_policy_retrieved": true
+  },
+  "limitations": [
+    "Golden set is a development regression set, not an unseen evaluation set",
+    "Extractive grounding proxy does not measure answer relevance or completeness",
+    "/chat policy answers quote the source text, which may be English for a French question; with OpenAI or Ollama, /chat/stream has the model write the answer (streamed_generation); this script does not score their correctness (scripts/score_answers.py does)",
+    "OpenAI and Ollama results are absent unless explicitly executed with --provider",
+    "Local providers cost nothing per query. OpenAI's cost is its measured tokens at the list price in configs/pipeline.yaml: per_query is the routing call; per_streamed_answer adds the call that writes the answer"
+  ],
+  "questions": [
+    {
+      "id": 1,
+      "category": "policy",
+      "language": "en",
+      "expected_tool": "policy_search",
+      "actual_tool": "policy_search",
+      "tool_correct": true,
+      "expected_source": "return_policy.md",
+      "sources": [
+        "return_policy.md"
+      ],
+      "source_correct": true,
+      "refused": false,
+      "http_status": 200,
+      "latency_ms": 1499.0222919732332,
+      "provider_latency_ms": 1431.6004998981953,
+      "policy_excerpt_in_reply": true,
+      "cost_usd": null,
+      "token_usage": {
+        "prompt_tokens": 384,
+        "completion_tokens": 40
+      },
+      "reply": "Based on our documents: ## 2. Non-Perishable Products\n\n### 2.1 Eligibility\n\nNon-perishable products (canned goods, dry goods, household items, cleaning\nsupplies, personal care) may be returned if:\n\n- The return request is made **within 30 days** of delivery.\n- The item is **unopened and in its original packaging**.\n- The item is **not a final-sale or clearance item** (marked \"Vente finale\" on the\n  product page).\n\n### 2.2 Process\n\n1. Log in to your Boréal Marché account and navigate to \"Order History.\"\n2. Select the order and click \"Request a return.\"\n3. Choose the items you wish to return and provide a reason.\n4. Print the prepaid return label that is emailed to you.\n5. Ship the item(s) within 7 days.\n\nOnce we receive and inspect the returned items, a refund is processed to the\noriginal payment method within 5 business days.\n\n### 2.3 Return shipping cost\n\nFor non-perishable returns, the return shipping cost is borne by the customer\nunless the return is due to a Boréal Marché error (wrong item shipped, item\ndefective on arrival). A flat return shipping fee of $7.95 is deducted from the\nrefund."
+    },
+    {
+      "id": 2,
+      "category": "policy",
+      "language": "en",
+      "expected_tool": "policy_search",
+      "actual_tool": "policy_search",
+      "tool_correct": true,
+      "expected_source": "delivery_policy.md",
+      "sources": [
+        "delivery_policy.md"
+      ],
+      "source_correct": true,
+      "refused": false,
+      "http_status": 200,
+      "latency_ms": 1052.4639170616865,
+      "provider_latency_ms": 996.2512080091983,
+      "policy_excerpt_in_reply": true,
+      "cost_usd": null,
+      "token_usage": {
+        "prompt_tokens": 384,
+        "completion_tokens": 40
+      },
+      "reply": "Based on our documents: ## 2. Delivery Windows\n\n### 2.1 Standard Delivery\n\nStandard delivery is available for all orders. Delivery windows are assigned\nbased on the zone and the time the order is confirmed:\n\n- **Orders confirmed before 14 h (Eastern)** are dispatched the same business day.\n- **Orders confirmed after 14 h** are dispatched the next business day.\n- Saturday orders are dispatched on Monday.\n- Statutory holidays (federal and provincial) are non-dispatch days.\n\nCustomers receive an email with a tracking number once the order is dispatched.\nA two-hour delivery window is communicated by SMS on the morning of the delivery\nday.\n\n### 2.2 Express Delivery\n\nExpress delivery is available in Zones 1 and 2 for an additional fee. In Zone 1,\nsame-day delivery is offered for orders placed and paid before 11 h Eastern. In\nZone 2, express orders are delivered next business day.\n\nExpress delivery is not available for orders exceeding 30 kg total weight or for\norders containing oversized items (items marked \"LTL\" in the catalogue).\n\n### 2.3 Click-and-Collect\n\nFree pickup is available at our Montréal warehouse (4300 rue Saint-Ambroise,\nsuite 200) and our Québec City depot (1150 boulevard Charest Ouest). Orders are\nready within 4 hours of confirmation. Uncollected orders are held for 48 hours\nand then cancelled with a full refund."
+    },
+    {
+      "id": 3,
+      "category": "policy",
+      "language": "en",
+      "expected_tool": "policy_search",
+      "actual_tool": "policy_search",
+      "tool_correct": true,
+      "expected_source": "delivery_policy.md",
+      "sources": [
+        "delivery_policy.md"
+      ],
+      "source_correct": true,
+      "refused": false,
+      "http_status": 200,
+      "latency_ms": 1057.1000829804689,
+      "provider_latency_ms": 999.6627499349415,
+      "policy_excerpt_in_reply": true,
+      "cost_usd": null,
+      "token_usage": {
+        "prompt_tokens": 387,
+        "completion_tokens": 43
+      },
+      "reply": "Based on our documents: ## 4. Cold-Chain and Temperature-Sensitive Products\n\n### 4.1 Refrigerated items\n\nProducts tagged as \"refrigerated\" (dairy, deli meats, fresh juices, prepared\nmeals) are shipped in insulated packaging with gel ice packs rated for the\ntransit duration of the delivery zone. The packaging maintains a temperature\nbetween 0 °C and 4 °C for up to 48 hours.\n\n### 4.2 Frozen items\n\nProducts tagged as \"frozen\" (frozen fruits, ice cream, frozen meals) are shipped\nin insulated containers with dry ice. Frozen shipments are only available for\nZones 1 and 2. Orders containing frozen items that are shipped to Zone 3 or\nZone 4 will have those items removed and refunded. The customer is notified by\nemail before dispatch.\n\n### 4.3 Ambient items\n\nProducts that do not require temperature control (canned goods, dry pasta,\nsnacks, cleaning supplies) are shipped in standard cardboard boxes.\n\n### 4.4 Mixed Orders\n\nAn order can contain refrigerated, frozen, and ambient items. The order is\npacked in separate containers per temperature class. All containers ship together\nin one delivery."
+    },
+    {
+      "id": 4,
+      "category": "policy",
+      "language": "en",
+      "expected_tool": "policy_search",
+      "actual_tool": "policy_search",
+      "tool_correct": true,
+      "expected_source": "allergen_policy.md",
+      "sources": [
+        "allergen_policy.md"
+      ],
+      "source_correct": true,
+      "refused": false,
+      "http_status": 200,
+      "latency_ms": 1050.2464591991156,
+      "provider_latency_ms": 995.9271249826998,
+      "policy_excerpt_in_reply": true,
+      "cost_usd": null,
+      "token_usage": {
+        "prompt_tokens": 383,
+        "completion_tokens": 39
+      },
+      "reply": "Based on our documents: ## 2. Priority Allergens\n\nHealth Canada identifies the following priority allergens. All Boréal Marché\nproducts must declare the presence of these allergens on the product page and\non the physical label:\n\n1. Peanuts\n2. Tree nuts (almonds, Brazil nuts, cashews, hazelnuts, macadamia nuts, pecans,\n   pine nuts, pistachios, walnuts)\n3. Sesame seeds\n4. Milk\n5. Eggs\n6. Fish (all species)\n7. Crustaceans and shellfish\n8. Soy\n9. Wheat and triticale\n10. Mustard\n11. Sulphites (at 10 ppm or more)\n12. Gluten sources (wheat, rye, barley, oats — unless certified gluten-free)"
+    },
+    {
+      "id": 5,
+      "category": "policy",
+      "language": "en",
+      "expected_tool": "policy_search",
+      "actual_tool": "policy_search",
+      "tool_correct": true,
+      "expected_source": "loyalty_terms.md",
+      "sources": [
+        "loyalty_terms.md"
+      ],
+      "source_correct": true,
+      "refused": false,
+      "http_status": 200,
+      "latency_ms": 1135.4514171835035,
+      "provider_latency_ms": 1077.0570838358253,
+      "policy_excerpt_in_reply": true,
+      "cost_usd": null,
+      "token_usage": {
+        "prompt_tokens": 386,
+        "completion_tokens": 42
+      },
+      "reply": "Based on our documents: ## 2. Earning Points\n\n### 2.1 Base earning rate\n\nMembers earn **1 point per $1 spent** (before taxes, after discounts). Shipping\nfees do not earn points.\n\n### 2.2 Bonus categories\n\nCertain product categories earn bonus points:\n\n| Category | Earning rate |\n|----------|-------------|\n| Cuisine Boréal (prepared meals) | 2× (2 points per $1) |\n| Organic products (tagged 🍃) | 1.5× (1.5 points per $1) |\n| Boréal Box subscription | 2× (2 points per $1) |\n| Wine and spirits | 1× (standard rate) |\n| Gift cards | 0× (no points) |\n\n### 2.3 Welcome bonus\n\nNew members receive **200 bonus points** upon placing their first order of $50 or\nmore.\n\n### 2.4 Birthday bonus\n\nMembers who have provided their date of birth receive **100 bonus points** on\ntheir birthday month, credited on the first day of the month. The birthday\nbonus must be redeemed within 60 days.\n\n### 2.5 Referral bonus\n\nWhen a member refers a new customer using their unique referral code, both the\nreferring member and the new customer receive **150 bonus points** after the new\ncustomer's first order of $50 or more is delivered.\n\n### 2.6 Review bonus\n\nMembers earn **10 points** for each product review (text review of at least 50\ncharacters), up to a maximum of 10 reviews per calendar month."
+    },
+    {
+      "id": 6,
+      "category": "policy",
+      "language": "en",
+      "expected_tool": "policy_search",
+      "actual_tool": "policy_search",
+      "tool_correct": true,
+      "expected_source": "return_policy.md",
+      "sources": [
+        "return_policy.md"
+      ],
+      "source_correct": true,
+      "refused": false,
+      "http_status": 200,
+      "latency_ms": 1430.2264170255512,
+      "provider_latency_ms": 1374.5000830385834,
+      "policy_excerpt_in_reply": true,
+      "cost_usd": null,
+      "token_usage": {
+        "prompt_tokens": 385,
+        "completion_tokens": 41
+      },
+      "reply": "Based on our documents: ## 5. Wrong Item Received\n\nIf you receive an item you did not order, contact us within 48 hours. We will\narrange for the wrong item to be picked up at no cost and send the correct item\nor issue a full refund."
+    },
+    {
+      "id": 7,
+      "category": "policy",
+      "language": "en",
+      "expected_tool": "policy_search",
+      "actual_tool": "policy_search",
+      "tool_correct": true,
+      "expected_source": "privacy_notice_en.md",
+      "sources": [
+        "privacy_notice_fr.md"
+      ],
+      "source_correct": false,
+      "refused": false,
+      "http_status": 200,
+      "latency_ms": 1323.5639999620616,
+      "provider_latency_ms": 1267.722374992445,
+      "policy_excerpt_in_reply": true,
+      "cost_usd": null,
+      "token_usage": {
+        "prompt_tokens": 386,
+        "completion_tokens": 42
+      },
+      "reply": "Based on our documents: ## 2. Renseignements personnels que nous recueillons\n\n| Catégorie | Exemples | Finalité |\n|-----------|----------|----------|\n| Identité | Nom complet, date de naissance, préférence linguistique | Création de compte, produits à accès restreint, bonus d'anniversaire |\n| Coordonnées | Adresse courriel, numéro de téléphone, adresse postale | Communication de commande, livraison, récupération de compte |\n| Paiement | Numéro de carte de crédit/débit (jeton), adresse de facturation | Traitement des paiements (nous ne conservons jamais le numéro complet de la carte) |\n| Transaction | Historique de commandes, articles achetés, montants, dates | Exécution des commandes, retours, programme de fidélité |\n| Livraison | Adresse d'expédition, instructions de livraison, code de sonnette | Logistique de livraison |\n| Comportemental | Pages consultées, requêtes de recherche, articles ajoutés au panier | Personnalisation du site, recommandations |\n| Appareil et technique | Adresse IP, type de navigateur, système d'exploitation, témoins | Fonctionnement du site, sécurité, analytique |\n| Fidélité | Solde de points, statut de palier, codes de parrainage | Administration du programme de fidélité |\n| Communications | Demandes de soutien, transcriptions de clavardage, correspondance | Service à la clientèle, amélioration de la qualité |\n| Données dérivées par l'IA | Score de probabilité de rétention, segment de clientèle | Promotions ciblées, analytique d'affaires |"
+    },
+    {
+      "id": 8,
+      "category": "policy",
+      "language": "en",
+      "expected_tool": "policy_search",
+      "actual_tool": "policy_search",
+      "tool_correct": true,
+      "expected_source": "return_policy.md",
+      "sources": [
+        "return_policy.md"
+      ],
+      "source_correct": true,
+      "refused": false,
+      "http_status": 200,
+      "latency_ms": 1068.3622919023037,
+      "provider_latency_ms": 1017.6613328512758,
+      "policy_excerpt_in_reply": true,
+      "cost_usd": null,
+      "token_usage": {
+        "prompt_tokens": 382,
+        "completion_tokens": 38
+      },
+      "reply": "Based on our documents: ## 7. Subscription Orders\n\nCustomers subscribed to recurring deliveries (Boréal Box) may cancel individual\nupcoming deliveries up to 72 hours before the scheduled dispatch date. Deliveries\nalready dispatched follow the standard return rules above.\n\nTo cancel a subscription entirely, go to \"My Account\" → \"Subscriptions\" →\n\"Cancel.\" Active loyalty points earned through the subscription are retained."
+    },
+    {
+      "id": 9,
+      "category": "policy",
+      "language": "en",
+      "expected_tool": "policy_search",
+      "actual_tool": "policy_search",
+      "tool_correct": true,
+      "expected_source": "loyalty_terms.md",
+      "sources": [
+        "loyalty_terms.md"
+      ],
+      "source_correct": true,
+      "refused": false,
+      "http_status": 200,
+      "latency_ms": 977.3760419338942,
+      "provider_latency_ms": 928.8729170802981,
+      "policy_excerpt_in_reply": true,
+      "cost_usd": null,
+      "token_usage": {
+        "prompt_tokens": 383,
+        "completion_tokens": 39
+      },
+      "reply": "Based on our documents: ## 3. Tiers\n\nThe program has three tiers based on cumulative spending in a rolling 12-month\nperiod:\n\n| Tier | Annual spend | Perks |\n|------|-------------|-------|\n| 🌱 Pousse (Seedling) | $0 – $499 | Base earning rate |\n| 🌲 Sapin (Fir) | $500 – $1,499 | 1.25× earning multiplier; free standard shipping on orders over $50; early access to seasonal products |\n| ❄️ Étoile (Star) | $1,500+ | 1.5× earning multiplier; free express shipping on all orders; dedicated support line; annual 10% birthday coupon; invitation to tasting events |\n\nTier status is evaluated on the first day of each month. If a member's rolling\n12-month spend drops below a tier's threshold, they are moved to the appropriate\nlower tier. A one-month grace period applies."
+    },
+    {
+      "id": 10,
+      "category": "policy",
+      "language": "en",
+      "expected_tool": "policy_search",
+      "actual_tool": "policy_search",
+      "tool_correct": true,
+      "expected_source": "delivery_policy.md",
+      "sources": [
+        "delivery_policy.md"
+      ],
+      "source_correct": true,
+      "refused": false,
+      "http_status": 200,
+      "latency_ms": 1118.1804998777807,
+      "provider_latency_ms": 1070.6279159057885,
+      "policy_excerpt_in_reply": true,
+      "cost_usd": null,
+      "token_usage": {
+        "prompt_tokens": 386,
+        "completion_tokens": 42
+      },
+      "reply": "Based on our documents: ## 3. Shipping Fees\n\n| Zone | Standard fee | Express fee | Free-shipping threshold |\n|------|-------------|-------------|------------------------|\n| Zone 1 | $6.95 | $12.95 | $75.00 |\n| Zone 2 | $9.95 | $17.95 | $100.00 |\n| Zone 3 | $14.95 | $24.95 | $150.00 |\n| Zone 4 | $19.95 | $34.95 | $200.00 |\n\nShipping fees are calculated per order, not per item. The free-shipping threshold\napplies to the subtotal before taxes. Promotional codes that reduce the subtotal\nmay cause shipping fees to apply even if the original subtotal exceeded the\nthreshold."
+    },
+    {
+      "id": 11,
+      "category": "policy",
+      "language": "en",
+      "expected_tool": "product_lookup",
+      "actual_tool": "policy_search",
+      "tool_correct": false,
+      "expected_source": null,
+      "sources": [
+        "allergen_policy.md"
+      ],
+      "source_correct": null,
+      "refused": false,
+      "http_status": 200,
+      "latency_ms": 1125.514040933922,
+      "provider_latency_ms": 1072.1452499274164,
+      "policy_excerpt_in_reply": true,
+      "cost_usd": null,
+      "token_usage": {
+        "prompt_tokens": 384,
+        "completion_tokens": 40
+      },
+      "reply": "Based on our documents: ## 6. Special Diets\n\nBoréal Marché provides informational tags to help customers following special\ndiets:\n\n| Tag | Meaning |\n|-----|---------|\n| 🌿 Vegan | Contains no animal-derived ingredients; may be produced in a facility that processes animal products |\n| 🥛 Lactose-free | No lactose; may still contain milk proteins |\n| 🌾 Gluten-free | Certified gluten-free (< 20 ppm) by a recognised body |\n| 🥜 Peanut-free | Does not contain peanuts; may contain tree nuts |\n| ☪ Halal | Halal-certified by a recognised Canadian certification body |\n| ✡ Kosher | Kosher-certified (COR, MK, or OU) |\n| 🍃 Organic | Certified organic under the Canada Organic Regime |\n\nThese tags are informational only and do not replace the ingredient list or\nallergen declarations. Customers with severe allergies should always contact\nthe manufacturer directly for confirmation."
+    },
+    {
+      "id": 12,
+      "category": "policy",
+      "language": "en",
+      "expected_tool": "policy_search",
+      "actual_tool": "policy_search",
+      "tool_correct": true,
+      "expected_source": "privacy_notice_en.md",
+      "sources": [
+        "loyalty_terms.md"
+      ],
+      "source_correct": false,
+      "refused": false,
+      "http_status": 200,
+      "latency_ms": 961.6135419346392,
+      "provider_latency_ms": 901.6439581755549,
+      "policy_excerpt_in_reply": true,
+      "cost_usd": null,
+      "token_usage": {
+        "prompt_tokens": 385,
+        "completion_tokens": 41
+      },
+      "reply": "Based on our documents: ## 6. Account Rules\n\n- Points are non-transferable between accounts.\n- Points have no cash value and cannot be exchanged for cash.\n- A member may hold only one loyalty account. Duplicate accounts will be merged;\n  the point balances are combined but duplicate bonus credits are removed.\n- Boréal Marché reserves the right to cancel points earned through fraudulent\n  activity (e.g., fake reviews, self-referrals, returning items after redeeming\n  points on the same order)."
+    },
+    {
+      "id": 13,
+      "category": "policy",
+      "language": "en",
+      "expected_tool": "policy_search",
+      "actual_tool": "policy_search",
+      "tool_correct": true,
+      "expected_source": "loyalty_terms.md",
+      "sources": [
+        "loyalty_terms.md"
+      ],
+      "source_correct": true,
+      "refused": false,
+      "http_status": 200,
+      "latency_ms": 1330.7764159981161,
+      "provider_latency_ms": 1289.380625123158,
+      "policy_excerpt_in_reply": true,
+      "cost_usd": null,
+      "token_usage": {
+        "prompt_tokens": 386,
+        "completion_tokens": 42
+      },
+      "reply": "Based on our documents: ## 4. Redeeming Points\n\n### 4.1 Discount redemption\n\nPoints can be redeemed for a discount on an order at checkout:\n\n| Points | Discount |\n|--------|----------|\n| 500 | $5.00 |\n| 1,000 | $10.00 |\n| 2,500 | $25.00 |\n| 5,000 | $55.00 |\n\nRedemption is available in increments of 500 points. Points and dollar discounts\ncannot be combined on the same order with other promotional codes unless the\npromotion explicitly allows it.\n\n### 4.2 Exclusive products\n\nFrom time to time, Boréal Marché offers exclusive products redeemable only with\npoints (e.g., limited-edition gift baskets, branded merchandise). These products\nare listed under \"Boutique Étoiles\" on the website.\n\n### 4.3 Charitable donations\n\nMembers can convert points into donations to partnered food banks:\n\n- 500 points = $5 donation to Moisson Montréal\n- 500 points = $5 donation to Banques alimentaires du Québec"
+    },
+    {
+      "id": 14,
+      "category": "policy",
+      "language": "en",
+      "expected_tool": "policy_search",
+      "actual_tool": "policy_search",
+      "tool_correct": true,
+      "expected_source": "delivery_policy.md",
+      "sources": [
+        "return_policy.md"
+      ],
+      "source_correct": false,
+      "refused": false,
+      "http_status": 200,
+      "latency_ms": 985.7934159226716,
+      "provider_latency_ms": 933.4254160057753,
+      "policy_excerpt_in_reply": true,
+      "cost_usd": null,
+      "token_usage": {
+        "prompt_tokens": 380,
+        "completion_tokens": 36
+      },
+      "reply": "Based on our documents: ## 2. Non-Perishable Products\n\n### 2.1 Eligibility\n\nNon-perishable products (canned goods, dry goods, household items, cleaning\nsupplies, personal care) may be returned if:\n\n- The return request is made **within 30 days** of delivery.\n- The item is **unopened and in its original packaging**.\n- The item is **not a final-sale or clearance item** (marked \"Vente finale\" on the\n  product page).\n\n### 2.2 Process\n\n1. Log in to your Boréal Marché account and navigate to \"Order History.\"\n2. Select the order and click \"Request a return.\"\n3. Choose the items you wish to return and provide a reason.\n4. Print the prepaid return label that is emailed to you.\n5. Ship the item(s) within 7 days.\n\nOnce we receive and inspect the returned items, a refund is processed to the\noriginal payment method within 5 business days.\n\n### 2.3 Return shipping cost\n\nFor non-perishable returns, the return shipping cost is borne by the customer\nunless the return is due to a Boréal Marché error (wrong item shipped, item\ndefective on arrival). A flat return shipping fee of $7.95 is deducted from the\nrefund."
+    },
+    {
+      "id": 15,
+      "category": "policy",
+      "language": "en",
+      "expected_tool": "policy_search",
+      "actual_tool": "policy_search",
+      "tool_correct": true,
+      "expected_source": "delivery_policy.md",
+      "sources": [
+        "delivery_policy.md"
+      ],
+      "source_correct": true,
+      "refused": false,
+      "http_status": 200,
+      "latency_ms": 1228.7983749993145,
+      "provider_latency_ms": 1175.7952079642564,
+      "policy_excerpt_in_reply": true,
+      "cost_usd": null,
+      "token_usage": {
+        "prompt_tokens": 386,
+        "completion_tokens": 42
+      },
+      "reply": "Based on our documents: ## 2. Delivery Windows\n\n### 2.1 Standard Delivery\n\nStandard delivery is available for all orders. Delivery windows are assigned\nbased on the zone and the time the order is confirmed:\n\n- **Orders confirmed before 14 h (Eastern)** are dispatched the same business day.\n- **Orders confirmed after 14 h** are dispatched the next business day.\n- Saturday orders are dispatched on Monday.\n- Statutory holidays (federal and provincial) are non-dispatch days.\n\nCustomers receive an email with a tracking number once the order is dispatched.\nA two-hour delivery window is communicated by SMS on the morning of the delivery\nday.\n\n### 2.2 Express Delivery\n\nExpress delivery is available in Zones 1 and 2 for an additional fee. In Zone 1,\nsame-day delivery is offered for orders placed and paid before 11 h Eastern. In\nZone 2, express orders are delivered next business day.\n\nExpress delivery is not available for orders exceeding 30 kg total weight or for\norders containing oversized items (items marked \"LTL\" in the catalogue).\n\n### 2.3 Click-and-Collect\n\nFree pickup is available at our Montréal warehouse (4300 rue Saint-Ambroise,\nsuite 200) and our Québec City depot (1150 boulevard Charest Ouest). Orders are\nready within 4 hours of confirmation. Uncollected orders are held for 48 hours\nand then cancelled with a full refund."
+    },
+    {
+      "id": 16,
+      "category": "tool_call",
+      "language": "en",
+      "expected_tool": "retention_score",
+      "actual_tool": null,
+      "tool_correct": false,
+      "expected_source": null,
+      "sources": [],
+      "source_correct": null,
+      "refused": true,
+      "http_status": 200,
+      "latency_ms": 908.6052500642836,
+      "provider_latency_ms": null,
+      "policy_excerpt_in_reply": null,
+      "cost_usd": null,
+      "token_usage": null,
+      "reply": "The requested data is unavailable; no score or result was invented. / Données indisponibles."
+    },
+    {
+      "id": 17,
+      "category": "tool_call",
+      "language": "en",
+      "expected_tool": "retention_score",
+      "actual_tool": "retention_score",
+      "tool_correct": true,
+      "expected_source": null,
+      "sources": [],
+      "source_correct": null,
+      "refused": false,
+      "http_status": 200,
+      "latency_ms": 871.2437499780208,
+      "provider_latency_ms": 787.9018341191113,
+      "policy_excerpt_in_reply": null,
+      "cost_usd": null,
+      "token_usage": {
+        "prompt_tokens": 382,
+        "completion_tokens": 27
+      },
+      "reply": "Probability of purchase within 90 days: 47.1%. Non-return risk: medium. Historical public-data demo / démonstration historique."
+    },
+    {
+      "id": 18,
+      "category": "tool_call",
+      "language": "en",
+      "expected_tool": "recommendations",
+      "actual_tool": "recommendations",
+      "tool_correct": true,
+      "expected_source": null,
+      "sources": [],
+      "source_correct": null,
+      "refused": false,
+      "http_status": 200,
+      "latency_ms": 1271.6167909093201,
+      "provider_latency_ms": 1239.6100000478327,
+      "policy_excerpt_in_reply": null,
+      "cost_usd": null,
+      "token_usage": {
+        "prompt_tokens": 389,
+        "completion_tokens": 36
+      },
+      "reply": "Suggestions from UCI transaction history: white hanging heart t-light holder, regency cakestand 3 tier, assorted colour bird ornament, jumbo bag red retrospot, strawberry ceramic trinket box (popularity_fallback)"
+    },
+    {
+      "id": 19,
+      "category": "tool_call",
+      "language": "en",
+      "expected_tool": "recommendations",
+      "actual_tool": "recommendations",
+      "tool_correct": true,
+      "expected_source": null,
+      "sources": [],
+      "source_correct": null,
+      "refused": false,
+      "http_status": 200,
+      "latency_ms": 1306.7790830973536,
+      "provider_latency_ms": 1276.1438749730587,
+      "policy_excerpt_in_reply": null,
+      "cost_usd": null,
+      "token_usage": {
+        "prompt_tokens": 385,
+        "completion_tokens": 36
+      },
+      "reply": "Suggestions from UCI transaction history: white hanging heart t-light holder, regency cakestand 3 tier, assorted colour bird ornament, jumbo bag red retrospot, strawberry ceramic trinket box (popularity_fallback)"
+    },
+    {
+      "id": 20,
+      "category": "tool_call",
+      "language": "en",
+      "expected_tool": "retention_score",
+      "actual_tool": "retention_score",
+      "tool_correct": true,
+      "expected_source": null,
+      "sources": [],
+      "source_correct": null,
+      "refused": false,
+      "http_status": 200,
+      "latency_ms": 896.4275829494,
+      "provider_latency_ms": 808.4503749851137,
+      "policy_excerpt_in_reply": null,
+      "cost_usd": null,
+      "token_usage": {
+        "prompt_tokens": 386,
+        "completion_tokens": 29
+      },
+      "reply": "Probability of purchase within 90 days: 98.2%. Non-return risk: low. Historical public-data demo / démonstration historique."
+    },
+    {
+      "id": 21,
+      "category": "tool_call",
+      "language": "en",
+      "expected_tool": "product_lookup",
+      "actual_tool": "product_lookup",
+      "tool_correct": true,
+      "expected_source": null,
+      "sources": [
+        "artifacts/product_catalogue.csv"
+      ],
+      "source_correct": null,
+      "refused": false,
+      "http_status": 200,
+      "latency_ms": 971.1610411759466,
+      "provider_latency_ms": 922.9461660142988,
+      "policy_excerpt_in_reply": null,
+      "cost_usd": null,
+      "token_usage": {
+        "prompt_tokens": 381,
+        "completion_tokens": 34
+      },
+      "reply": "Boréal Marché catalogue (export of UCI purchases, median unit price in GBP): no product matches all of (organic, maple, syrup); closest items: 72023F — red organic candle in glass: £1.25"
+    },
+    {
+      "id": 22,
+      "category": "tool_call",
+      "language": "en",
+      "expected_tool": "recommendations",
+      "actual_tool": "recommendations",
+      "tool_correct": true,
+      "expected_source": null,
+      "sources": [],
+      "source_correct": null,
+      "refused": false,
+      "http_status": 200,
+      "latency_ms": 1059.8014169372618,
+      "provider_latency_ms": 1033.1295828800648,
+      "policy_excerpt_in_reply": null,
+      "cost_usd": null,
+      "token_usage": {
+        "prompt_tokens": 395,
+        "completion_tokens": 45
+      },
+      "reply": "Suggestions from UCI transaction history: jumbo bag pink polkadot, jumbo bag baroque black white, jumbo shopper vintage red paisley, jumbo storage bag suki, jumbo bag spaceboy design (rule_based)"
+    },
+    {
+      "id": 23,
+      "category": "tool_call",
+      "language": "en",
+      "expected_tool": "retention_score",
+      "actual_tool": "retention_score",
+      "tool_correct": true,
+      "expected_source": null,
+      "sources": [],
+      "source_correct": null,
+      "refused": false,
+      "http_status": 200,
+      "latency_ms": 1000.0640829093754,
+      "provider_latency_ms": 910.1639590226114,
+      "policy_excerpt_in_reply": null,
+      "cost_usd": null,
+      "token_usage": {
+        "prompt_tokens": 385,
+        "completion_tokens": 27
+      },
+      "reply": "Probability of purchase within 90 days: 100.0%. Non-return risk: low. Historical public-data demo / démonstration historique."
+    },
+    {
+      "id": 24,
+      "category": "tool_call",
+      "language": "en",
+      "expected_tool": "product_lookup",
+      "actual_tool": "product_lookup",
+      "tool_correct": true,
+      "expected_source": null,
+      "sources": [
+        "artifacts/product_catalogue.csv"
+      ],
+      "source_correct": null,
+      "refused": false,
+      "http_status": 200,
+      "latency_ms": 1066.65866705589,
+      "provider_latency_ms": 1021.1768331937492,
+      "policy_excerpt_in_reply": null,
+      "cost_usd": null,
+      "token_usage": {
+        "prompt_tokens": 382,
+        "completion_tokens": 34
+      },
+      "reply": "Boréal Marché catalogue (export of UCI purchases, median unit price in GBP): no product matches all of (vegan, cheese); closest items: 22496 — set of 2 round tins dutch cheese: £2.95; 85144 — jardin etched glass cheese dish: £7.25; 85215 — assorted cheese fridge magnets: £0.65"
+    },
+    {
+      "id": 25,
+      "category": "tool_call",
+      "language": "en",
+      "expected_tool": "recommendations",
+      "actual_tool": "recommendations",
+      "tool_correct": true,
+      "expected_source": null,
+      "sources": [],
+      "source_correct": null,
+      "refused": false,
+      "http_status": 200,
+      "latency_ms": 1029.45941593498,
+      "provider_latency_ms": 988.0209160037339,
+      "policy_excerpt_in_reply": null,
+      "cost_usd": null,
+      "token_usage": {
+        "prompt_tokens": 385,
+        "completion_tokens": 36
+      },
+      "reply": "Suggestions from UCI transaction history: white hanging heart t-light holder, regency cakestand 3 tier, assorted colour bird ornament, jumbo bag red retrospot, strawberry ceramic trinket box (popularity_fallback)"
+    },
+    {
+      "id": 26,
+      "category": "out_of_scope",
+      "language": "en",
+      "expected_tool": null,
+      "actual_tool": null,
+      "tool_correct": true,
+      "expected_source": null,
+      "sources": [],
+      "source_correct": null,
+      "refused": true,
+      "http_status": 200,
+      "latency_ms": 3.349917009472847,
+      "provider_latency_ms": null,
+      "policy_excerpt_in_reply": null,
+      "cost_usd": null,
+      "token_usage": null,
+      "reply": "This request is outside my scope. I'm the Boréal Marché assistant — I can help with delivery, returns, allergens, loyalty points, product questions, and our privacy policy. For anything outside that, please contact the appropriate service. / Je suis l'assistant Boréal Marché — je peux vous aider avec la livraison, les retours, les allergènes, les points de fidélité, les questions sur les produits et notre politique de confidentialité."
+    },
+    {
+      "id": 27,
+      "category": "out_of_scope",
+      "language": "en",
+      "expected_tool": null,
+      "actual_tool": null,
+      "tool_correct": true,
+      "expected_source": null,
+      "sources": [],
+      "source_correct": null,
+      "refused": true,
+      "http_status": 200,
+      "latency_ms": 3.102957969531417,
+      "provider_latency_ms": null,
+      "policy_excerpt_in_reply": null,
+      "cost_usd": null,
+      "token_usage": null,
+      "reply": "This request is outside my scope. I'm the Boréal Marché assistant — I can help with delivery, returns, allergens, loyalty points, product questions, and our privacy policy. For anything outside that, please contact the appropriate service. / Je suis l'assistant Boréal Marché — je peux vous aider avec la livraison, les retours, les allergènes, les points de fidélité, les questions sur les produits et notre politique de confidentialité."
+    },
+    {
+      "id": 28,
+      "category": "out_of_scope",
+      "language": "en",
+      "expected_tool": null,
+      "actual_tool": null,
+      "tool_correct": true,
+      "expected_source": null,
+      "sources": [],
+      "source_correct": null,
+      "refused": true,
+      "http_status": 200,
+      "latency_ms": 3.9455839432775974,
+      "provider_latency_ms": null,
+      "policy_excerpt_in_reply": null,
+      "cost_usd": null,
+      "token_usage": null,
+      "reply": "This request is outside my scope. I'm the Boréal Marché assistant — I can help with delivery, returns, allergens, loyalty points, product questions, and our privacy policy. For anything outside that, please contact the appropriate service. / Je suis l'assistant Boréal Marché — je peux vous aider avec la livraison, les retours, les allergènes, les points de fidélité, les questions sur les produits et notre politique de confidentialité."
+    },
+    {
+      "id": 29,
+      "category": "out_of_scope",
+      "language": "en",
+      "expected_tool": null,
+      "actual_tool": null,
+      "tool_correct": true,
+      "expected_source": null,
+      "sources": [],
+      "source_correct": null,
+      "refused": true,
+      "http_status": 200,
+      "latency_ms": 2.312582917511463,
+      "provider_latency_ms": null,
+      "policy_excerpt_in_reply": null,
+      "cost_usd": null,
+      "token_usage": null,
+      "reply": "This request is outside my scope. I'm the Boréal Marché assistant — I can help with delivery, returns, allergens, loyalty points, product questions, and our privacy policy. For anything outside that, please contact the appropriate service. / Je suis l'assistant Boréal Marché — je peux vous aider avec la livraison, les retours, les allergènes, les points de fidélité, les questions sur les produits et notre politique de confidentialité."
+    },
+    {
+      "id": 30,
+      "category": "out_of_scope",
+      "language": "en",
+      "expected_tool": null,
+      "actual_tool": null,
+      "tool_correct": true,
+      "expected_source": null,
+      "sources": [],
+      "source_correct": null,
+      "refused": true,
+      "http_status": 200,
+      "latency_ms": 1.7643750179558992,
+      "provider_latency_ms": null,
+      "policy_excerpt_in_reply": null,
+      "cost_usd": null,
+      "token_usage": null,
+      "reply": "This request is outside my scope. I'm the Boréal Marché assistant — I can help with delivery, returns, allergens, loyalty points, product questions, and our privacy policy. For anything outside that, please contact the appropriate service. / Je suis l'assistant Boréal Marché — je peux vous aider avec la livraison, les retours, les allergènes, les points de fidélité, les questions sur les produits et notre politique de confidentialité."
+    },
+    {
+      "id": 31,
+      "category": "out_of_scope",
+      "language": "en",
+      "expected_tool": null,
+      "actual_tool": null,
+      "tool_correct": true,
+      "expected_source": null,
+      "sources": [],
+      "source_correct": null,
+      "refused": true,
+      "http_status": 200,
+      "latency_ms": 1.8718750216066837,
+      "provider_latency_ms": null,
+      "policy_excerpt_in_reply": null,
+      "cost_usd": null,
+      "token_usage": null,
+      "reply": "This request is outside my scope. I'm the Boréal Marché assistant — I can help with delivery, returns, allergens, loyalty points, product questions, and our privacy policy. For anything outside that, please contact the appropriate service. / Je suis l'assistant Boréal Marché — je peux vous aider avec la livraison, les retours, les allergènes, les points de fidélité, les questions sur les produits et notre politique de confidentialité."
+    },
+    {
+      "id": 32,
+      "category": "out_of_scope",
+      "language": "en",
+      "expected_tool": null,
+      "actual_tool": null,
+      "tool_correct": true,
+      "expected_source": null,
+      "sources": [],
+      "source_correct": null,
+      "refused": true,
+      "http_status": 200,
+      "latency_ms": 1.603791955858469,
+      "provider_latency_ms": null,
+      "policy_excerpt_in_reply": null,
+      "cost_usd": null,
+      "token_usage": null,
+      "reply": "This request is outside my scope. I'm the Boréal Marché assistant — I can help with delivery, returns, allergens, loyalty points, product questions, and our privacy policy. For anything outside that, please contact the appropriate service. / Je suis l'assistant Boréal Marché — je peux vous aider avec la livraison, les retours, les allergènes, les points de fidélité, les questions sur les produits et notre politique de confidentialité."
+    },
+    {
+      "id": 33,
+      "category": "out_of_scope",
+      "language": "en",
+      "expected_tool": null,
+      "actual_tool": null,
+      "tool_correct": true,
+      "expected_source": null,
+      "sources": [],
+      "source_correct": null,
+      "refused": true,
+      "http_status": 200,
+      "latency_ms": 1.9276251550763845,
+      "provider_latency_ms": null,
+      "policy_excerpt_in_reply": null,
+      "cost_usd": null,
+      "token_usage": null,
+      "reply": "This request is outside my scope. I'm the Boréal Marché assistant — I can help with delivery, returns, allergens, loyalty points, product questions, and our privacy policy. For anything outside that, please contact the appropriate service. / Je suis l'assistant Boréal Marché — je peux vous aider avec la livraison, les retours, les allergènes, les points de fidélité, les questions sur les produits et notre politique de confidentialité."
+    },
+    {
+      "id": 34,
+      "category": "french",
+      "language": "fr",
+      "expected_tool": "policy_search",
+      "actual_tool": "policy_search",
+      "tool_correct": true,
+      "expected_source": "return_policy.md",
+      "sources": [
+        "return_policy.md"
+      ],
+      "source_correct": true,
+      "refused": false,
+      "http_status": 200,
+      "latency_ms": 905.6179590988904,
+      "provider_latency_ms": 843.924666987732,
+      "policy_excerpt_in_reply": true,
+      "cost_usd": null,
+      "token_usage": {
+        "prompt_tokens": 386,
+        "completion_tokens": 40
+      },
+      "reply": "D'après nos documents (extrait dans la langue source) : ## 3. Perishable Products\n\n### 3.1 General rule\n\nDue to food-safety regulations, **perishable products cannot be physically\nreturned**. This includes all items tagged as \"refrigerated\" or \"frozen,\" fresh\nproduce, bakery items, and any item with an expiration date within 14 days of\ndelivery.\n\n### 3.2 Quality issues\n\nIf a perishable product arrives in unsatisfactory condition (spoiled, past its\nexpiry date, incorrect temperature, wrong item), you may request a refund or\nreplacement:\n\n- Submit a request **within 48 hours** of delivery.\n- Include **at least one photo** showing the issue.\n- A refund or replacement is issued without requiring the item to be returned.\n\n### 3.3 Taste or preference\n\nPerishable items returned for reasons of taste or preference (\"I didn't like\nit,\" \"I changed my mind\") are **not eligible for a refund or exchange**. We\nencourage customers to review product descriptions, ingredients, and reviews\nbefore purchasing."
+    },
+    {
+      "id": 35,
+      "category": "french",
+      "language": "fr",
+      "expected_tool": "policy_search",
+      "actual_tool": "policy_search",
+      "tool_correct": true,
+      "expected_source": "delivery_policy.md",
+      "sources": [
+        "delivery_policy.md"
+      ],
+      "source_correct": true,
+      "refused": false,
+      "http_status": 200,
+      "latency_ms": 1225.2454590052366,
+      "provider_latency_ms": 1159.5235830172896,
+      "policy_excerpt_in_reply": true,
+      "cost_usd": null,
+      "token_usage": {
+        "prompt_tokens": 384,
+        "completion_tokens": 40
+      },
+      "reply": "D'après nos documents (extrait dans la langue source) : ## 2. Delivery Windows\n\n### 2.1 Standard Delivery\n\nStandard delivery is available for all orders. Delivery windows are assigned\nbased on the zone and the time the order is confirmed:\n\n- **Orders confirmed before 14 h (Eastern)** are dispatched the same business day.\n- **Orders confirmed after 14 h** are dispatched the next business day.\n- Saturday orders are dispatched on Monday.\n- Statutory holidays (federal and provincial) are non-dispatch days.\n\nCustomers receive an email with a tracking number once the order is dispatched.\nA two-hour delivery window is communicated by SMS on the morning of the delivery\nday.\n\n### 2.2 Express Delivery\n\nExpress delivery is available in Zones 1 and 2 for an additional fee. In Zone 1,\nsame-day delivery is offered for orders placed and paid before 11 h Eastern. In\nZone 2, express orders are delivered next business day.\n\nExpress delivery is not available for orders exceeding 30 kg total weight or for\norders containing oversized items (items marked \"LTL\" in the catalogue).\n\n### 2.3 Click-and-Collect\n\nFree pickup is available at our Montréal warehouse (4300 rue Saint-Ambroise,\nsuite 200) and our Québec City depot (1150 boulevard Charest Ouest). Orders are\nready within 4 hours of confirmation. Uncollected orders are held for 48 hours\nand then cancelled with a full refund."
+    },
+    {
+      "id": 36,
+      "category": "french",
+      "language": "fr",
+      "expected_tool": "retention_score",
+      "actual_tool": "retention_score",
+      "tool_correct": true,
+      "expected_source": null,
+      "sources": [],
+      "source_correct": null,
+      "refused": false,
+      "http_status": 200,
+      "latency_ms": 815.8067499753088,
+      "provider_latency_ms": 736.8618750479072,
+      "policy_excerpt_in_reply": null,
+      "cost_usd": null,
+      "token_usage": {
+        "prompt_tokens": 388,
+        "completion_tokens": 27
+      },
+      "reply": "Probabilité d'achat dans les 90 jours : 47.1%. Risque de non-retour : medium. Historical public-data demo / démonstration historique."
+    },
+    {
+      "id": 37,
+      "category": "french",
+      "language": "fr",
+      "expected_tool": "recommendations",
+      "actual_tool": "recommendations",
+      "tool_correct": true,
+      "expected_source": null,
+      "sources": [],
+      "source_correct": null,
+      "refused": false,
+      "http_status": 200,
+      "latency_ms": 946.2794167920947,
+      "provider_latency_ms": 913.2198328152299,
+      "policy_excerpt_in_reply": null,
+      "cost_usd": null,
+      "token_usage": {
+        "prompt_tokens": 386,
+        "completion_tokens": 36
+      },
+      "reply": "Suggestions issues des transactions UCI : white hanging heart t-light holder, regency cakestand 3 tier, assorted colour bird ornament, jumbo bag red retrospot, strawberry ceramic trinket box (popularity_fallback)"
+    },
+    {
+      "id": 38,
+      "category": "french",
+      "language": "fr",
+      "expected_tool": "policy_search",
+      "actual_tool": "policy_search",
+      "tool_correct": true,
+      "expected_source": "privacy_notice_fr.md",
+      "sources": [
+        "loyalty_terms.md"
+      ],
+      "source_correct": false,
+      "refused": false,
+      "http_status": 200,
+      "latency_ms": 1294.582000002265,
+      "provider_latency_ms": 1229.9257919657975,
+      "policy_excerpt_in_reply": true,
+      "cost_usd": null,
+      "token_usage": {
+        "prompt_tokens": 385,
+        "completion_tokens": 41
+      },
+      "reply": "D'après nos documents (extrait dans la langue source) : ## 6. Account Rules\n\n- Points are non-transferable between accounts.\n- Points have no cash value and cannot be exchanged for cash.\n- A member may hold only one loyalty account. Duplicate accounts will be merged;\n  the point balances are combined but duplicate bonus credits are removed.\n- Boréal Marché reserves the right to cancel points earned through fraudulent\n  activity (e.g., fake reviews, self-referrals, returning items after redeeming\n  points on the same order)."
+    },
+    {
+      "id": 39,
+      "category": "french",
+      "language": "fr",
+      "expected_tool": "product_lookup",
+      "actual_tool": "product_lookup",
+      "tool_correct": true,
+      "expected_source": null,
+      "sources": [
+        "artifacts/product_catalogue.csv"
+      ],
+      "source_correct": null,
+      "refused": false,
+      "http_status": 200,
+      "latency_ms": 927.7203748933971,
+      "provider_latency_ms": 887.4108330346644,
+      "policy_excerpt_in_reply": null,
+      "cost_usd": null,
+      "token_usage": {
+        "prompt_tokens": 382,
+        "completion_tokens": 33
+      },
+      "reply": "Catalogue Boréal Marché (export des achats UCI, prix unitaire médian en GBP) : aucun produit ne contient tous ces mots (sans, gluten) ; articles les plus proches : 21637 — assorted sanskrit mini notebook: £1.25"
+    },
+    {
+      "id": 40,
+      "category": "french",
+      "language": "fr",
+      "expected_tool": "policy_search",
+      "actual_tool": "policy_search",
+      "tool_correct": true,
+      "expected_source": "allergen_policy.md",
+      "sources": [
+        "allergen_policy.md"
+      ],
+      "source_correct": true,
+      "refused": false,
+      "http_status": 200,
+      "latency_ms": 1121.2549589108676,
+      "provider_latency_ms": 1067.6633750554174,
+      "policy_excerpt_in_reply": true,
+      "cost_usd": null,
+      "token_usage": {
+        "prompt_tokens": 387,
+        "completion_tokens": 43
+      },
+      "reply": "D'après nos documents (extrait dans la langue source) : ## 2. Priority Allergens\n\nHealth Canada identifies the following priority allergens. All Boréal Marché\nproducts must declare the presence of these allergens on the product page and\non the physical label:\n\n1. Peanuts\n2. Tree nuts (almonds, Brazil nuts, cashews, hazelnuts, macadamia nuts, pecans,\n   pine nuts, pistachios, walnuts)\n3. Sesame seeds\n4. Milk\n5. Eggs\n6. Fish (all species)\n7. Crustaceans and shellfish\n8. Soy\n9. Wheat and triticale\n10. Mustard\n11. Sulphites (at 10 ppm or more)\n12. Gluten sources (wheat, rye, barley, oats — unless certified gluten-free)"
+    }
+  ]
+}

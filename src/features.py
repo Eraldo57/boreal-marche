@@ -38,7 +38,7 @@ import numpy as np
 import pandas as pd
 import yaml
 
-from src.contracts import CONTRACT_VERSION, FEATURE_NAMES
+from src.contracts import CONTRACT_VERSION, ENGINEERED_FEATURE_NAMES, FEATURE_NAMES
 from src.ingest import _sha256
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -392,11 +392,11 @@ def build_features(
     X = rfm.join(cadence).join(basket).join(cat_mix).join(behav).join(geo)
 
     # Ensure all expected features are present
-    missing_cols = set(FEATURE_NAMES) - set(X.columns)
+    missing_cols = set(ENGINEERED_FEATURE_NAMES) - set(X.columns)
     if missing_cols:
         raise ValueError(f"Missing feature columns: {missing_cols}")
 
-    X = X[FEATURE_NAMES]
+    X = X[ENGINEERED_FEATURE_NAMES]
 
     # No learned imputation here. The training Pipeline owns medians/scaling.
     X = X.replace([np.inf, -np.inf], np.nan).astype(float)
@@ -428,15 +428,17 @@ def save_features(
     latest = snapshots["cutoff"].max()
     latest_x = X.loc[snapshots["cutoff"].eq(latest)].copy()
     latest_x.index = snapshots.loc[latest_x.index, "customer_id"].astype(str)
-    latest_x.to_parquet(out_dir / "customer_features.parquet")
+    latest_x[FEATURE_NAMES].to_parquet(out_dir / "customer_features.parquet")
 
     # Also save feature metadata
     meta = {
-        "feature_names": FEATURE_NAMES,
+        "feature_names": ENGINEERED_FEATURE_NAMES,
+        "model_feature_names": FEATURE_NAMES,
         "contract_version": CONTRACT_VERSION,
         "country_map": country_map,
         "unknown_country_code": -1,
-        "n_features": len(FEATURE_NAMES),
+        "n_features": len(ENGINEERED_FEATURE_NAMES),
+        "n_model_features": len(FEATURE_NAMES),
         "n_customers": len(X),
         "positive_rate": float(y.mean()),
         "cutoff_date": cfg["labelling"]["cutoff_date"],
@@ -467,7 +469,7 @@ def run() -> tuple[pd.DataFrame, pd.Series]:
     full_df = load_transactions(cfg)
 
     configured_features = [f for group in cfg["features"]["groups"].values() for f in group]
-    if configured_features != FEATURE_NAMES:
+    if configured_features != ENGINEERED_FEATURE_NAMES:
         raise ValueError("pipeline.yaml feature groups differ from canonical contract")
     cutoffs = cfg["labelling"]["snapshots"]
     first = min(cutoffs["train"])

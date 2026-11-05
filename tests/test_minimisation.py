@@ -15,7 +15,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 
 from src import minimisation
-from src.contracts import METADATA_PATH, PROCESSED
+from src.contracts import FEATURE_NAMES, METADATA_PATH, PROCESSED
 
 SPLITS = ["train", "validation", "calibration", "decision"]
 
@@ -69,5 +69,5 @@ def test_committed_minimisation_report_matches_the_saved_model():
     committed = json.loads((minimisation.REPORTS / "minimisation_audit.json").read_text())
     metadata = json.loads(METADATA_PATH.read_text())
     assert committed["model_sha256"] == metadata["model_sha256"], "re-run src.minimisation"
-    assert len(committed["features"]) == 25
+    assert {row["feature"] for row in committed["features"]} == set(FEATURE_NAMES)
     assert committed["note"].startswith("Recommendation only")

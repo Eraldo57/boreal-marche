@@ -28,6 +28,12 @@ def isolated_prediction_log(monkeypatch: pytest.MonkeyPatch, tmp_path: Any) -> N
 
 
 @pytest.fixture(autouse=True)
+def no_dotenv(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Tests never read the developer's .env, so a real OPENAI_API_KEY cannot reach them."""
+    monkeypatch.setenv("BOREAL_NO_DOTENV", "1")
+
+
+@pytest.fixture(autouse=True)
 def local_model_source(monkeypatch: pytest.MonkeyPatch) -> None:
     """Tests never read the developer's MLflow registry; registry tests opt back in.
 
@@ -42,7 +48,7 @@ def local_model_source(monkeypatch: pytest.MonkeyPatch) -> None:
 @pytest.fixture
 def sample_features() -> dict[str, float]:
     """A plausible feature vector for one customer."""
-    return {
+    all_features = {
         "recency_days": 15.0,
         "frequency": 8.0,
         "monetary_total": 1250.0,
@@ -69,6 +75,7 @@ def sample_features() -> dict[str, float]:
         "is_domestic": 1.0,
         "n_countries": 1.0,
     }
+    return {name: all_features[name] for name in FEATURE_ORDER}
 
 
 @pytest.fixture

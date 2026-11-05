@@ -1,3 +1,10 @@
+> 2026-11-05 rebuild: both native arm64 and linux/amd64 API/frontend images built successfully.
+> `docker image inspect` reports native API 555,106,585 bytes, frontend 179,446,621; amd64 API
+> 597,881,773 bytes, frontend 186,556,469. These are the daemon-reported Size field, not a registry
+> transfer measurement. Local stack passed readiness/HTTP/widget checks; amd64 loaded model 0.3.0
+> and ran real 12-feature inference. Logs: reports/current_run/logs/completion_*.
+> Older size/timing measurements below refer to previous builds.
+
 # Containers: design, sizes and how to run them
 
 The brief (§3.6, Containers) asks for a multi-stage Dockerfile with a digest-pinned base image,

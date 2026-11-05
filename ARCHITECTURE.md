@@ -3,30 +3,60 @@
 Updated 2026-11-01. This supersedes earlier planned architecture descriptions.
 
 ```mermaid
-flowchart LR
-  U[UCI workbook] --> I[Checksum + cleaning]
-  I --> T[Purchase / return event ledger]
-  T --> F[25 features at historical cutoffs]
-  F --> A[Temporal selection + calibration + threshold]
-  A --> G[MLflow registry: candidate versions]
-  G --> P[Gated human promotion: champion alias]
-  A --> M[Local model + metadata, the fallback]
-  T --> B[Sparse baskets + FP-Growth]
-  B --> R[Rules + popularity]
-  T --> C[Product catalogue export]
-  D[Authored policy documents] --> E[Multilingual embeddings + Chroma]
-  P --> API[FastAPI]
+flowchart TB
+  subgraph data[Data]
+    U[UCI workbook]
+    I[Checksum + cleaning]
+    T[Purchase / return event ledger]
+  end
+  subgraph headA[Head A: retention]
+    F[25 engineered; 12 model inputs]
+    A[Temporal selection + calibration + threshold]
+    G[MLflow registry: candidate versions]
+    P[Gated human promotion: champion alias]
+    M[Local model + metadata, the fallback]
+  end
+  subgraph headB[Head B: recommendations]
+    B[Sparse baskets + FP-Growth]
+    R[Rules + popularity]
+  end
+  subgraph headC[Head C: assistant]
+    D[Authored policy documents]
+    E[Multilingual embeddings + Chroma]
+    C[Product catalogue export]
+    L[Regex, OpenAI or Ollama provider]
+  end
+  subgraph serving[Serving]
+    API[FastAPI]
+    UI[Streamlit]
+  end
+  subgraph ops[Operations]
+    DB[Prediction, alert and decision logs]
+    MON[Monitor: checks + automated alerts]
+  end
+  U --> I
+  I --> T
+  T --> F
+  F --> A
+  A --> G
+  G --> P
+  A --> M
+  T --> B
+  B --> R
+  T --> C
+  D --> E
+  P --> API
   M --> API
   R --> API
   C --> API
   E --> API
-  L[Regex, OpenAI or Ollama provider] --> API
-  API --> DB[Prediction, alert and decision logs]
-  DB --> MON[Monitor: checks + automated alerts]
-  API --> UI[Streamlit]
+  L --> API
+  API --> DB
+  DB --> MON
+  API --> UI
 ```
 
-The assistant does not train on UCI transactions. Its typed retention/recommendation tools call the same API routes, in-process via ASGI, while policy search queries Chroma and product lookup reads the catalogue exported from UCI purchases. Online retrieval embeds each question; **online does perform query embedding**, but never model training or rule mining.
+The assistant does not train on UCI transactions. Its typed retention/recommendation tools call the same API routes, in-process via ASGI, while policy search queries Chroma (small titled chunks are matched, and the whole policy section each came from is returned) and product lookup reads the catalogue exported from UCI purchases. Online retrieval embeds each question; **online does perform query embedding**, but never model training or rule mining.
 
 ## Offline contracts
 

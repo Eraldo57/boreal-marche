@@ -1,0 +1,456 @@
+........................................................................ [ 64%]
+.............F.F.......................                                  [100%]
+=================================== FAILURES ===================================
+________________ test_run_produces_artifacts_on_synthetic_data _________________
+
+self = Index(['recency_days', 'frequency', 'monetary_mean', 'monetary_std',
+       'avg_days_between_orders', 'std_days_betwe...   'top_category_share', 'n_unique_categories', 'morning_purchase_ratio',
+       'country_code'],
+      dtype='object')
+key = 'is_domestic'
+
+    def get_loc(self, key):
+        """
+        Get integer location, slice or boolean mask for requested label.
+    
+        Parameters
+        ----------
+        key : label
+    
+        Returns
+        -------
+        int if unique index, slice if monotonic index, else mask
+    
+        Examples
+        --------
+        >>> unique_index = pd.Index(list('abc'))
+        >>> unique_index.get_loc('b')
+        1
+    
+        >>> monotonic_index = pd.Index(list('abbc'))
+        >>> monotonic_index.get_loc('b')
+        slice(1, 3, None)
+    
+        >>> non_monotonic_index = pd.Index(list('abcb'))
+        >>> non_monotonic_index.get_loc('b')
+        array([False,  True, False,  True])
+        """
+        casted_key = self._maybe_cast_indexer(key)
+        try:
+>           return self._engine.get_loc(casted_key)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py:3812: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+pandas/_libs/index.pyx:167: in pandas._libs.index.IndexEngine.get_loc
+    ???
+pandas/_libs/index.pyx:196: in pandas._libs.index.IndexEngine.get_loc
+    ???
+pandas/_libs/hashtable_class_helper.pxi:7088: in pandas._libs.hashtable.PyObjectHashTable.get_item
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   KeyError: 'is_domestic'
+
+pandas/_libs/hashtable_class_helper.pxi:7096: KeyError
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = PosixPath('/private/var/folders/8s/7s8khgg10jbg7dd1bz37trz80000gn/T/pytest-of-eraldoibrushi/pytest-139/test_run_produces_artifacts_on0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x12165fd70>
+
+    def test_run_produces_artifacts_on_synthetic_data(tmp_path, monkeypatch):
+        processed = tmp_path / "processed"
+        processed.mkdir()
+        _synthetic_inputs(processed)
+        monkeypatch.setattr(train, "PROCESSED", processed)
+        monkeypatch.setenv("MLFLOW_TRACKING_URI", f"sqlite:///{tmp_path / 'mlflow.db'}")
+        monkeypatch.chdir(tmp_path)  # MLflow writes its artifact store relative to cwd
+        output = tmp_path / "out"
+    
+>       metadata = train.run(n_trials=1, output_dir=output)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/tests/test_train_run.py:72: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/src/train.py:445: in run
+    "error_analysis": error_analysis(
+/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/src/train.py:213: in error_analysis
+    for val in sorted(X[col].unique()):
+                      ^^^^^^
+/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/pandas/core/frame.py:4113: in __getitem__
+    indexer = self.columns.get_loc(key)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Index(['recency_days', 'frequency', 'monetary_mean', 'monetary_std',
+       'avg_days_between_orders', 'std_days_betwe...   'top_category_share', 'n_unique_categories', 'morning_purchase_ratio',
+       'country_code'],
+      dtype='object')
+key = 'is_domestic'
+
+    def get_loc(self, key):
+        """
+        Get integer location, slice or boolean mask for requested label.
+    
+        Parameters
+        ----------
+        key : label
+    
+        Returns
+        -------
+        int if unique index, slice if monotonic index, else mask
+    
+        Examples
+        --------
+        >>> unique_index = pd.Index(list('abc'))
+        >>> unique_index.get_loc('b')
+        1
+    
+        >>> monotonic_index = pd.Index(list('abbc'))
+        >>> monotonic_index.get_loc('b')
+        slice(1, 3, None)
+    
+        >>> non_monotonic_index = pd.Index(list('abcb'))
+        >>> non_monotonic_index.get_loc('b')
+        array([False,  True, False,  True])
+        """
+        casted_key = self._maybe_cast_indexer(key)
+        try:
+            return self._engine.get_loc(casted_key)
+        except KeyError as err:
+            if isinstance(casted_key, slice) or (
+                isinstance(casted_key, abc.Iterable)
+                and any(isinstance(x, slice) for x in casted_key)
+            ):
+                raise InvalidIndexError(key)
+>           raise KeyError(key) from err
+E           KeyError: 'is_domestic'
+
+/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py:3819: KeyError
+----------------------------- Captured stdout call -----------------------------
+[train] validation DummyClassifier_stratified: AP=0.5062
+[train] validation business_heuristic_recency: AP=0.3202
+[train] validation LogisticRegression: AP=0.8083
+[train] validation RidgeClassifier: AP=0.8118
+[train] validation DecisionTreeClassifier: AP=0.5052
+[train] validation RandomForestClassifier: AP=0.6967
+[train] validation GradientBoostingClassifier: AP=0.7127
+[train] validation HistGradientBoostingClassifier: AP=0.6538
+[train] validation KNeighborsClassifier: AP=0.7381
+[train] validation LinearSVC: AP=0.8126
+----------------------------- Captured stderr call -----------------------------
+2026/11/05 16:10:56 INFO mlflow.store.db.utils: Creating initial MLflow database tables...
+2026/11/05 16:10:56 INFO mlflow.store.db.utils: Updating database tables
+INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 451aebb31d03, add metric step
+INFO  [alembic.runtime.migration] Running upgrade 451aebb31d03 -> 90e64c465722, migrate user column to tags
+INFO  [alembic.runtime.migration] Running upgrade 90e64c465722 -> 181f10493468, allow nulls for metric values
+INFO  [alembic.runtime.migration] Running upgrade 181f10493468 -> df50e92ffc5e, Add Experiment Tags Table
+INFO  [alembic.runtime.migration] Running upgrade df50e92ffc5e -> 7ac759974ad8, Update run tags with larger limit
+INFO  [alembic.runtime.migration] Running upgrade 7ac759974ad8 -> 89d4b8295536, create latest metrics table
+INFO  [89d4b8295536_create_latest_metrics_table_py] Migration complete!
+INFO  [alembic.runtime.migration] Running upgrade 89d4b8295536 -> 2b4d017a5e9b, add model registry tables to db
+INFO  [2b4d017a5e9b_add_model_registry_tables_to_db_py] Adding registered_models and model_versions tables to database.
+INFO  [2b4d017a5e9b_add_model_registry_tables_to_db_py] Migration complete!
+INFO  [alembic.runtime.migration] Running upgrade 2b4d017a5e9b -> cfd24bdc0731, Update run status constraint with killed
+INFO  [alembic.runtime.migration] Running upgrade cfd24bdc0731 -> 0a8213491aaa, drop_duplicate_killed_constraint
+INFO  [alembic.runtime.migration] Running upgrade 0a8213491aaa -> 728d730b5ebd, add registered model tags table
+INFO  [alembic.runtime.migration] Running upgrade 728d730b5ebd -> 27a6a02d2cf1, add model version tags table
+INFO  [alembic.runtime.migration] Running upgrade 27a6a02d2cf1 -> 84291f40a231, add run_link to model_version
+INFO  [alembic.runtime.migration] Running upgrade 84291f40a231 -> a8c4a736bde6, allow nulls for run_id
+INFO  [alembic.runtime.migration] Running upgrade a8c4a736bde6 -> 39d1c3be5f05, add_is_nan_constraint_for_metrics_tables_if_necessary
+INFO  [alembic.runtime.migration] Running upgrade 39d1c3be5f05 -> c48cb773bb87, reset_default_value_for_is_nan_in_metrics_table_for_mysql
+INFO  [alembic.runtime.migration] Running upgrade c48cb773bb87 -> bd07f7e963c5, create index on run_uuid
+INFO  [alembic.runtime.migration] Running upgrade bd07f7e963c5 -> 0c779009ac13, add deleted_time field to runs table
+INFO  [alembic.runtime.migration] Running upgrade 0c779009ac13 -> cc1f77228345, change param value length to 500
+INFO  [alembic.runtime.migration] Running upgrade cc1f77228345 -> 97727af70f4d, Add creation_time and last_update_time to experiments table
+INFO  [alembic.runtime.migration] Running upgrade 97727af70f4d -> 3500859a5d39, Add Model Aliases table
+INFO  [alembic.runtime.migration] Running upgrade 3500859a5d39 -> 7f2a7d5fae7d, add datasets inputs input_tags tables
+INFO  [alembic.runtime.migration] Running upgrade 7f2a7d5fae7d -> 2d6e25af4d3e, increase max param val length from 500 to 8000
+INFO  [alembic.runtime.migration] Running upgrade 2d6e25af4d3e -> acf3f17fdcc7, add storage location field to model versions
+INFO  [alembic.runtime.migration] Running upgrade acf3f17fdcc7 -> 867495a8f9d4, add trace tables
+INFO  [alembic.runtime.migration] Running upgrade 867495a8f9d4 -> 5b0e9adcef9c, add cascade deletion to trace tables foreign keys
+INFO  [alembic.runtime.migration] Running upgrade 5b0e9adcef9c -> 4465047574b1, increase max dataset schema size
+INFO  [alembic.runtime.migration] Running upgrade 4465047574b1 -> f5a4f2784254, increase run tag value limit to 8000
+INFO  [alembic.runtime.migration] Running upgrade f5a4f2784254 -> 0584bdc529eb, add cascading deletion to datasets from experiments
+INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+2026/11/05 16:10:56 INFO mlflow.tracking.fluent: Experiment with name 'boreal-marche-temporal' does not exist. Creating a new experiment.
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/context.py", line 264, in _count_physical_cores
+    cpu_count_physical = _count_physical_cores_darwin()
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/context.py", line 420, in _count_physical_cores_darwin
+    return int(cpu_info)
+           ^^^^^^^^^^^^^
+[I 2026-11-05 16:10:56,649] A new study created in memory with name: no-name-13b72580-1dff-4a98-b113-e34445e6820c
+[I 2026-11-05 16:10:56,667] Trial 0 finished with value: 0.804039292609682 and parameters: {'C': 0.04082331665966554}. Best is trial 0 with value: 0.804039292609682.
+[I 2026-11-05 16:10:56,668] A new study created in memory with name: no-name-f1bd194c-e457-49dd-b365-9a6b9976eb2a
+[I 2026-11-05 16:10:56,860] Trial 0 finished with value: 0.7113187079079522 and parameters: {'n_estimators': 125, 'max_depth': 5, 'learning_rate': 0.10790061933340458}. Best is trial 0 with value: 0.7113187079079522.
+------------------------------ Captured log call -------------------------------
+INFO     mlflow.store.db.utils:utils.py:103 Creating initial MLflow database tables...
+INFO     mlflow.store.db.utils:utils.py:221 Updating database tables
+INFO     mlflow.tracking.fluent:fluent.py:161 Experiment with name 'boreal-marche-temporal' does not exist. Creating a new experiment.
+INFO     optuna.storages._in_memory:_in_memory.py:87 A new study created in memory with name: no-name-13b72580-1dff-4a98-b113-e34445e6820c
+INFO     optuna.study.study:study.py:1187 Trial 0 finished with value: 0.804039292609682 and parameters: {'C': 0.04082331665966554}. Best is trial 0 with value: 0.804039292609682.
+INFO     optuna.storages._in_memory:_in_memory.py:87 A new study created in memory with name: no-name-f1bd194c-e457-49dd-b365-9a6b9976eb2a
+INFO     optuna.study.study:study.py:1187 Trial 0 finished with value: 0.7113187079079522 and parameters: {'n_estimators': 125, 'max_depth': 5, 'learning_rate': 0.10790061933340458}. Best is trial 0 with value: 0.7113187079079522.
+__________________ test_script_mode_full_run_without_registry __________________
+
+self = Index(['recency_days', 'frequency', 'monetary_mean', 'monetary_std',
+       'avg_days_between_orders', 'std_days_betwe...   'top_category_share', 'n_unique_categories', 'morning_purchase_ratio',
+       'country_code'],
+      dtype='object')
+key = 'is_domestic'
+
+    def get_loc(self, key):
+        """
+        Get integer location, slice or boolean mask for requested label.
+    
+        Parameters
+        ----------
+        key : label
+    
+        Returns
+        -------
+        int if unique index, slice if monotonic index, else mask
+    
+        Examples
+        --------
+        >>> unique_index = pd.Index(list('abc'))
+        >>> unique_index.get_loc('b')
+        1
+    
+        >>> monotonic_index = pd.Index(list('abbc'))
+        >>> monotonic_index.get_loc('b')
+        slice(1, 3, None)
+    
+        >>> non_monotonic_index = pd.Index(list('abcb'))
+        >>> non_monotonic_index.get_loc('b')
+        array([False,  True, False,  True])
+        """
+        casted_key = self._maybe_cast_indexer(key)
+        try:
+>           return self._engine.get_loc(casted_key)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py:3812: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+pandas/_libs/index.pyx:167: in pandas._libs.index.IndexEngine.get_loc
+    ???
+pandas/_libs/index.pyx:196: in pandas._libs.index.IndexEngine.get_loc
+    ???
+pandas/_libs/hashtable_class_helper.pxi:7088: in pandas._libs.hashtable.PyObjectHashTable.get_item
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   KeyError: 'is_domestic'
+
+pandas/_libs/hashtable_class_helper.pxi:7096: KeyError
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = PosixPath('/private/var/folders/8s/7s8khgg10jbg7dd1bz37trz80000gn/T/pytest-of-eraldoibrushi/pytest-139/test_script_mode_full_run_with0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1239e36b0>
+
+    def test_script_mode_full_run_without_registry(tmp_path, monkeypatch):
+        channel, model_dir = tmp_path / "train", tmp_path / "model"
+        channel.mkdir()
+        _synthetic_inputs(channel)
+        monkeypatch.setenv("MLFLOW_TRACKING_URI", f"sqlite:///{tmp_path / 'mlflow.db'}")
+        monkeypatch.chdir(tmp_path)
+        args = ["--train-dir", str(channel), "--model-dir", str(model_dir), "--trials", "0"]
+        monkeypatch.setattr("sys.argv", ["train", *args, "--no-register"])
+        monkeypatch.setattr(train, "register_run", lambda *a: pytest.fail("must not register"))
+>       train.main()
+
+/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/tests/test_train_run.py:109: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/src/train.py:581: in main
+    run(
+/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/src/train.py:445: in run
+    "error_analysis": error_analysis(
+/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/src/train.py:213: in error_analysis
+    for val in sorted(X[col].unique()):
+                      ^^^^^^
+/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/pandas/core/frame.py:4113: in __getitem__
+    indexer = self.columns.get_loc(key)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Index(['recency_days', 'frequency', 'monetary_mean', 'monetary_std',
+       'avg_days_between_orders', 'std_days_betwe...   'top_category_share', 'n_unique_categories', 'morning_purchase_ratio',
+       'country_code'],
+      dtype='object')
+key = 'is_domestic'
+
+    def get_loc(self, key):
+        """
+        Get integer location, slice or boolean mask for requested label.
+    
+        Parameters
+        ----------
+        key : label
+    
+        Returns
+        -------
+        int if unique index, slice if monotonic index, else mask
+    
+        Examples
+        --------
+        >>> unique_index = pd.Index(list('abc'))
+        >>> unique_index.get_loc('b')
+        1
+    
+        >>> monotonic_index = pd.Index(list('abbc'))
+        >>> monotonic_index.get_loc('b')
+        slice(1, 3, None)
+    
+        >>> non_monotonic_index = pd.Index(list('abcb'))
+        >>> non_monotonic_index.get_loc('b')
+        array([False,  True, False,  True])
+        """
+        casted_key = self._maybe_cast_indexer(key)
+        try:
+            return self._engine.get_loc(casted_key)
+        except KeyError as err:
+            if isinstance(casted_key, slice) or (
+                isinstance(casted_key, abc.Iterable)
+                and any(isinstance(x, slice) for x in casted_key)
+            ):
+                raise InvalidIndexError(key)
+>           raise KeyError(key) from err
+E           KeyError: 'is_domestic'
+
+/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py:3819: KeyError
+----------------------------- Captured stdout call -----------------------------
+[train] validation DummyClassifier_stratified: AP=0.5062
+[train] validation business_heuristic_recency: AP=0.3202
+[train] validation LogisticRegression: AP=0.8083
+[train] validation RidgeClassifier: AP=0.8118
+[train] validation DecisionTreeClassifier: AP=0.5052
+[train] validation RandomForestClassifier: AP=0.6967
+[train] validation GradientBoostingClassifier: AP=0.7127
+[train] validation HistGradientBoostingClassifier: AP=0.6538
+[train] validation KNeighborsClassifier: AP=0.7381
+[train] validation LinearSVC: AP=0.8126
+----------------------------- Captured stderr call -----------------------------
+2026/11/05 16:10:57 INFO mlflow.store.db.utils: Creating initial MLflow database tables...
+2026/11/05 16:10:57 INFO mlflow.store.db.utils: Updating database tables
+INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 451aebb31d03, add metric step
+INFO  [alembic.runtime.migration] Running upgrade 451aebb31d03 -> 90e64c465722, migrate user column to tags
+INFO  [alembic.runtime.migration] Running upgrade 90e64c465722 -> 181f10493468, allow nulls for metric values
+INFO  [alembic.runtime.migration] Running upgrade 181f10493468 -> df50e92ffc5e, Add Experiment Tags Table
+INFO  [alembic.runtime.migration] Running upgrade df50e92ffc5e -> 7ac759974ad8, Update run tags with larger limit
+INFO  [alembic.runtime.migration] Running upgrade 7ac759974ad8 -> 89d4b8295536, create latest metrics table
+INFO  [89d4b8295536_create_latest_metrics_table_py] Migration complete!
+INFO  [alembic.runtime.migration] Running upgrade 89d4b8295536 -> 2b4d017a5e9b, add model registry tables to db
+INFO  [2b4d017a5e9b_add_model_registry_tables_to_db_py] Adding registered_models and model_versions tables to database.
+INFO  [2b4d017a5e9b_add_model_registry_tables_to_db_py] Migration complete!
+INFO  [alembic.runtime.migration] Running upgrade 2b4d017a5e9b -> cfd24bdc0731, Update run status constraint with killed
+INFO  [alembic.runtime.migration] Running upgrade cfd24bdc0731 -> 0a8213491aaa, drop_duplicate_killed_constraint
+INFO  [alembic.runtime.migration] Running upgrade 0a8213491aaa -> 728d730b5ebd, add registered model tags table
+INFO  [alembic.runtime.migration] Running upgrade 728d730b5ebd -> 27a6a02d2cf1, add model version tags table
+INFO  [alembic.runtime.migration] Running upgrade 27a6a02d2cf1 -> 84291f40a231, add run_link to model_version
+INFO  [alembic.runtime.migration] Running upgrade 84291f40a231 -> a8c4a736bde6, allow nulls for run_id
+INFO  [alembic.runtime.migration] Running upgrade a8c4a736bde6 -> 39d1c3be5f05, add_is_nan_constraint_for_metrics_tables_if_necessary
+INFO  [alembic.runtime.migration] Running upgrade 39d1c3be5f05 -> c48cb773bb87, reset_default_value_for_is_nan_in_metrics_table_for_mysql
+INFO  [alembic.runtime.migration] Running upgrade c48cb773bb87 -> bd07f7e963c5, create index on run_uuid
+INFO  [alembic.runtime.migration] Running upgrade bd07f7e963c5 -> 0c779009ac13, add deleted_time field to runs table
+INFO  [alembic.runtime.migration] Running upgrade 0c779009ac13 -> cc1f77228345, change param value length to 500
+INFO  [alembic.runtime.migration] Running upgrade cc1f77228345 -> 97727af70f4d, Add creation_time and last_update_time to experiments table
+INFO  [alembic.runtime.migration] Running upgrade 97727af70f4d -> 3500859a5d39, Add Model Aliases table
+INFO  [alembic.runtime.migration] Running upgrade 3500859a5d39 -> 7f2a7d5fae7d, add datasets inputs input_tags tables
+INFO  [alembic.runtime.migration] Running upgrade 7f2a7d5fae7d -> 2d6e25af4d3e, increase max param val length from 500 to 8000
+INFO  [alembic.runtime.migration] Running upgrade 2d6e25af4d3e -> acf3f17fdcc7, add storage location field to model versions
+INFO  [alembic.runtime.migration] Running upgrade acf3f17fdcc7 -> 867495a8f9d4, add trace tables
+INFO  [alembic.runtime.migration] Running upgrade 867495a8f9d4 -> 5b0e9adcef9c, add cascade deletion to trace tables foreign keys
+INFO  [alembic.runtime.migration] Running upgrade 5b0e9adcef9c -> 4465047574b1, increase max dataset schema size
+INFO  [alembic.runtime.migration] Running upgrade 4465047574b1 -> f5a4f2784254, increase run tag value limit to 8000
+INFO  [alembic.runtime.migration] Running upgrade f5a4f2784254 -> 0584bdc529eb, add cascading deletion to datasets from experiments
+INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+2026/11/05 16:10:57 INFO mlflow.tracking.fluent: Experiment with name 'boreal-marche-temporal' does not exist. Creating a new experiment.
+------------------------------ Captured log call -------------------------------
+INFO     mlflow.store.db.utils:utils.py:103 Creating initial MLflow database tables...
+INFO     mlflow.store.db.utils:utils.py:221 Updating database tables
+INFO     mlflow.tracking.fluent:fluent.py:161 Experiment with name 'boreal-marche-temporal' does not exist. Creating a new experiment.
+=============================== warnings summary ===============================
+.venv/lib/python3.12/site-packages/mlflow/utils/pydantic_utils.py:33
+tests/test_registry.py::test_registering_creates_a_candidate_and_moves_no_alias
+tests/test_registry.py::test_registering_creates_a_candidate_and_moves_no_alias
+tests/test_registry.py::test_registering_creates_a_candidate_and_moves_no_alias
+tests/test_registry.py::test_registering_creates_a_candidate_and_moves_no_alias
+  /Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/mlflow/utils/pydantic_utils.py:33: PydanticDeprecatedSince212: Using `@model_validator` with mode='after' on a classmethod is deprecated. Instead, use an instance method. See the documentation at https://docs.pydantic.dev/2.13/concepts/validators/#model-after-validator. Deprecated in Pydantic V2.12 to be removed in V3.0.
+    return pydantic_model_validator(mode=mode)(func)
+
+.venv/lib/python3.12/site-packages/mlflow/gateway/config.py:454
+  /Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/mlflow/gateway/config.py:454: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class Route(ConfigModel):
+
+tests/test_ingest_features_run.py: 5784 warnings
+  /Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/tests/test_ingest_features_run.py:45: DeprecationWarning: The 'generic' unit for NumPy timedelta is deprecated, and will raise an error in the future. This includes implicit conversion of bare integers (e.g. `+ 1`). Please use a specific unit instead.
+    stamp = start + pd.Timedelta(days=int(rng.integers(0, span_days)), hours=10)
+
+tests/test_ingest_features_run.py: 11 warnings
+  /Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/src/features.py:486: DeprecationWarning: The 'generic' unit for NumPy timedelta is deprecated, and will raise an error in the future. This includes implicit conversion of bare integers (e.g. `+ 1`). Please use a specific unit instead.
+    end = pd.Timestamp(cutoff) + pd.Timedelta(days=window)
+
+tests/test_pipeline.py::test_temporal_partitions_require_mature_labels
+  /Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/tests/test_pipeline.py:107: DeprecationWarning: The 'generic' unit for NumPy timedelta is deprecated, and will raise an error in the future. This includes implicit conversion of bare integers (e.g. `+ 1`). Please use a specific unit instead.
+    snapshots["label_end"] = pd.to_datetime(snapshots["cutoff"]) + pd.Timedelta(days=90)
+
+tests/test_pipeline.py::test_sparse_matrix_and_no_future_mining
+  /Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/src/rules.py:48: FutureWarning: Allowing arbitrary scalar fill_value in SparseDtype is deprecated. In a future version, the fill_value must be a valid value for the SparseDtype.subtype.
+    return pd.DataFrame.sparse.from_spmatrix(matrix, columns=encoder.columns_), report
+
+tests/test_sagemaker.py: 5 warnings
+tests/test_train_run.py: 20 warnings
+  /Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/tests/test_train_run.py:29: DeprecationWarning: The 'generic' unit for NumPy timedelta is deprecated, and will raise an error in the future. This includes implicit conversion of bare integers (e.g. `+ 1`). Please use a specific unit instead.
+    cutoff = pd.Timestamp("2020-01-01") + pd.Timedelta(days=100 * position)
+
+tests/test_sagemaker.py: 750 warnings
+tests/test_train_run.py: 3000 warnings
+  /Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/tests/test_train_run.py:42: DeprecationWarning: The 'generic' unit for NumPy timedelta is deprecated, and will raise an error in the future. This includes implicit conversion of bare integers (e.g. `+ 1`). Please use a specific unit instead.
+    "label_end": (cutoff + pd.Timedelta(days=90)).strftime("%Y-%m-%d"),
+
+tests/test_train_run.py::test_run_produces_artifacts_on_synthetic_data
+  /Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/context.py:134: UserWarning: Could not find the number of physical cores for the following reason:
+  invalid literal for int() with base 10: ''
+  Returning the number of logical cores instead. You can silence this warning by setting LOKY_MAX_CPU_COUNT to the number of cores you want to use.
+    warnings.warn(
+
+tests/test_registry.py::test_registering_creates_a_candidate_and_moves_no_alias
+tests/test_registry.py::test_promotion_requires_a_named_approver_and_a_reason
+tests/test_registry.py::test_full_lifecycle_promote_refuse_promote_rollback
+tests/test_registry.py::test_full_lifecycle_promote_refuse_promote_rollback
+tests/test_registry.py::test_full_lifecycle_promote_refuse_promote_rollback
+tests/test_registry.py::test_rollback_without_a_previous_champion_is_refused
+tests/test_registry.py::test_api_serves_the_champion_and_falls_back_to_local_files
+tests/test_registry.py::test_resolution_works_in_a_fresh_process_without_mlflow_settings
+tests/test_registry.py::test_api_skips_the_registry_when_told_to
+  /Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/mlflow/models/model.py:365: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    self.utc_time_created = str(utc_time_created or datetime.utcnow())
+
+tests/test_registry.py::test_registering_creates_a_candidate_and_moves_no_alias
+  /Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/mlflow/types/chat.py:162: PydanticDeprecatedSince20: `min_items` is deprecated and will be removed, use `min_length` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    stop: Optional[list[str]] = Field(None, min_items=1)
+
+tests/test_registry.py::test_registering_creates_a_candidate_and_moves_no_alias
+  /Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/mlflow/types/chat.py:216: PydanticDeprecatedSince20: `min_items` is deprecated and will be removed, use `min_length` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    messages: list[ChatMessage] = Field(..., min_items=1)
+
+tests/test_registry.py::test_registering_creates_a_candidate_and_moves_no_alias
+  /Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/mlflow/types/chat.py:217: PydanticDeprecatedSince20: `min_items` is deprecated and will be removed, use `min_length` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    tools: Optional[list[ChatTool]] = Field(None, min_items=1)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_train_run.py::test_run_produces_artifacts_on_synthetic_data
+FAILED tests/test_train_run.py::test_script_mode_full_run_without_registry - ...
+2 failed, 109 passed, 1 deselected, 9591 warnings in 22.88s

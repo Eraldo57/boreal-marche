@@ -1,0 +1,381 @@
+[2m2026-11-03T01:41:58.181895Z[0m [[33m[1mwarning  [0m] [1mregistry_unavailable_using_local_model[0m [36mreason[0m=[35m'MlflowException: Registered model alias champion not found.'[0m
+[2m2026-11-03T01:42:02.421672Z[0m [[32m[1minfo     [0m] [1mstartup_complete              [0m [36merrors[0m=[35m{}[0m
+[2m2026-11-03T01:42:30.901573Z[0m [[32m[1minfo     [0m] [1mrecommendation_served         [0m [36mbasket_size[0m=[35m2[0m [36mcustomer_id[0m=[35mNone[0m [36mn_recommendations[0m=[35m5[0m [36mstrategy[0m=[35mpopularity_fallback[0m
+[2m2026-11-03T01:42:32.259313Z[0m [[32m[1minfo     [0m] [1mrecommendation_served         [0m [36mbasket_size[0m=[35m1[0m [36mcustomer_id[0m=[35mNone[0m [36mn_recommendations[0m=[35m5[0m [36mstrategy[0m=[35mpopularity_fallback[0m
+[2m2026-11-03T01:42:36.652156Z[0m [[32m[1minfo     [0m] [1mrecommendation_served         [0m [36mbasket_size[0m=[35m2[0m [36mcustomer_id[0m=[35mNone[0m [36mn_recommendations[0m=[35m5[0m [36mstrategy[0m=[35mrule_based[0m
+[2m2026-11-03T01:42:40.660398Z[0m [[32m[1minfo     [0m] [1mrecommendation_served         [0m [36mbasket_size[0m=[35m2[0m [36mcustomer_id[0m=[35mNone[0m [36mn_recommendations[0m=[35m5[0m [36mstrategy[0m=[35mpopularity_fallback[0m
+[2m2026-11-03T01:42:46.662049Z[0m [[32m[1minfo     [0m] [1mrecommendation_served         [0m [36mbasket_size[0m=[35m2[0m [36mcustomer_id[0m=[35mNone[0m [36mn_recommendations[0m=[35m5[0m [36mstrategy[0m=[35mpopularity_fallback[0m
+[2m2026-11-03T01:43:02.437947Z[0m [[33m[1mwarning  [0m] [1mmonitoring_alert              [0m [36mat[0m=[35m2026-11-03T01:43:02.437673Z[0m [36mcheck[0m=[35mrule_fire_rate[0m [36mdetail[0m=[35m[0m [36mrule[0m=[35m'yellow below 0.5 (from 20 non-empty baskets)'[0m [36mstate[0m=[35mraised[0m [36mvalue[0m=[35m0.2[0m
+[2m2026-11-03T01:44:11.930253Z[0m [[32m[1minfo     [0m] [1mshutdown                      [0m
+{
+  "executed_at": "2026-11-03T01:44:11.991942+00:00",
+  "provider": "ollama",
+  "golden_count": 40,
+  "category_counts": {
+    "policy": 15,
+    "tool_call": 10,
+    "out_of_scope": 8,
+    "french": 7
+  },
+  "tool_choice_accuracy_all": 0.925,
+  "tool_choice_accuracy_in_scope": 0.90625,
+  "out_of_scope_refusal_rate": 1.0,
+  "in_scope_refusal_count": 2,
+  "expected_source_accuracy": 0.7777777777777778,
+  "policy_extract_grounding_proxy": 1.0,
+  "latency_p50_ms": 1369.5887918584049,
+  "latency_p95_ms": 1793.3325728285126,
+  "cost_usd_per_query": 0.0,
+  "cost_usd_per_streamed_answer": null,
+  "streamed_generation": {
+    "policy_questions": 18,
+    "written_by_model": 18,
+    "fallbacks": 0,
+    "language_match_rate": 1.0,
+    "french_written": 4,
+    "all_written_answers_cited": true,
+    "answers_adding_figures": [],
+    "answers_omitting_top_source_figures": [
+      1,
+      2,
+      3,
+      5,
+      6,
+      8,
+      9,
+      14,
+      15,
+      34,
+      35
+    ],
+    "seconds_p50": 4.503495354088955,
+    "questions": [
+      {
+        "id": 1,
+        "language": "en",
+        "answer_written_by": "ollama",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "30",
+            "7"
+          ]
+        },
+        "token_usage": null,
+        "generation_token_usage": null,
+        "seconds": 4.051723666954786,
+        "reply": "I cannot answer that question based on the provided policy excerpts. According to section 2.1 of the Return Policy, non-perishable products are eligible for returns, but there is no mention of perishable items. I recommend contacting customer service for more information on your return policy for perishable items. (Source: return_policy.md)"
+      },
+      {
+        "id": 2,
+        "language": "en",
+        "answer_written_by": "ollama",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "11",
+            "4",
+            "48"
+          ]
+        },
+        "token_usage": null,
+        "generation_token_usage": null,
+        "seconds": 4.637359624961391,
+        "reply": "According to the policy, for orders confirmed before 14 h (Eastern), standard delivery is dispatched the same business day. However, I do not have information on how long it takes for orders within Montreal to be delivered after confirmation. I recommend contacting customer service for more specific information.\n\nSource document: [1] (delivery_policy.md)"
+      },
+      {
+        "id": 3,
+        "language": "en",
+        "answer_written_by": "ollama",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "48"
+          ]
+        },
+        "token_usage": null,
+        "generation_token_usage": null,
+        "seconds": 4.252846666844562,
+        "reply": "According to our policy, we do ship frozen products (Section 4.2). Frozen shipments are only available for Zones 1 and 2. The cold chain is maintained using insulated containers with dry ice.\n\nSource document: [4.2 Frozen items](delivery_policy.md)"
+      },
+      {
+        "id": 4,
+        "language": "en",
+        "answer_written_by": "ollama",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "token_usage": null,
+        "generation_token_usage": null,
+        "seconds": 3.40113616688177,
+        "reply": "I cannot answer that from the policies and suggest contacting customer service. \n\nSource document: [1] (allergen_policy.md)"
+      },
+      {
+        "id": 5,
+        "language": "en",
+        "answer_written_by": "ollama",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "60"
+          ]
+        },
+        "token_usage": null,
+        "generation_token_usage": null,
+        "seconds": 5.059682792052627,
+        "reply": "According to our policy, members can earn loyalty points by spending money on eligible products. The base earning rate is 1 point per $1 spent (before taxes, after discounts). Additionally, certain product categories offer bonus points, such as Cuisine Bor\u00e9al, Organic products, and Bor\u00e9al Box subscription.\n\nSource: Loyalty Terms (Section 2)"
+      },
+      {
+        "id": 6,
+        "language": "en",
+        "answer_written_by": "ollama",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "48"
+          ]
+        },
+        "token_usage": null,
+        "generation_token_usage": null,
+        "seconds": 3.6304050420876592,
+        "reply": "I cannot answer that from the policies. You may want to contact our customer service team for assistance with your concern about a damaged order. \n\nSource document: [1] (return_policy.md)"
+      },
+      {
+        "id": 7,
+        "language": "en",
+        "answer_written_by": "ollama",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "token_usage": null,
+        "generation_token_usage": null,
+        "seconds": 5.278087374987081,
+        "reply": "According to our privacy notice, we collect the following personal data about you:\n\n* Identit\u00e9 (name, date of birth, preferred language)\n* Coordonn\u00e9s (email address, phone number, postal address)\n* Paiement (credit/debit card number or token, billing address)\n\nSource document: [1] (privacy_notice_fr.md)"
+      },
+      {
+        "id": 8,
+        "language": "en",
+        "answer_written_by": "ollama",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "72"
+          ]
+        },
+        "token_usage": null,
+        "generation_token_usage": null,
+        "seconds": 3.540053583215922,
+        "reply": "I cannot answer that from the policies. You can contact customer service for assistance with cancelling an existing order. \n\nSource document: [1] (return_policy.md)"
+      },
+      {
+        "id": 9,
+        "language": "en",
+        "answer_written_by": "ollama",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "10"
+          ]
+        },
+        "token_usage": null,
+        "generation_token_usage": null,
+        "seconds": 4.374714125180617,
+        "reply": "According to our policy, there are three tiers in the loyalty program:\n\n1. Pousse (Seedling) - $0 \u2013 $499\n2. Sapin (Fir) - $500 \u2013 $1,499\n3. \u00c9toile (Star) - $1,500+\n\nSource: Loyalty Terms (loyalty_terms.md)"
+      },
+      {
+        "id": 10,
+        "language": "en",
+        "answer_written_by": "ollama",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "token_usage": null,
+        "generation_token_usage": null,
+        "seconds": 4.632276582997292,
+        "reply": "According to our delivery policy, we do not have a specific \"free-shipping\" option, but rather zones with different thresholds. The minimum order amount for free shipping varies by zone: $75.00 in Zone 1, $100.00 in Zone 2, $150.00 in Zone 3, and $200.00 in Zone 4.\n\nSource document: [1] (delivery_policy.md)"
+      },
+      {
+        "id": 12,
+        "language": "en",
+        "answer_written_by": "ollama",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "token_usage": null,
+        "generation_token_usage": null,
+        "seconds": 3.5873677500057966,
+        "reply": "I cannot answer that from the policies. You may want to contact our customer service for assistance with deleting your account and removing your data. \n\nSource document: [1] (loyalty_terms.md) - Account Rules section"
+      },
+      {
+        "id": 13,
+        "language": "en",
+        "answer_written_by": "ollama",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "token_usage": null,
+        "generation_token_usage": null,
+        "seconds": 3.6476662079803646,
+        "reply": "I cannot answer that from the policies. You may want to contact our customer service for more information. \n\nSource document: [1] (loyalty_terms.md)"
+      },
+      {
+        "id": 14,
+        "language": "en",
+        "answer_written_by": "ollama",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "30",
+            "7"
+          ]
+        },
+        "token_usage": null,
+        "generation_token_usage": null,
+        "seconds": 3.8499943329952657,
+        "reply": "I couldn't find any information in our policies regarding the recyclability of delivery boxes. I recommend contacting our customer service for more information on this topic. \n\nSource document: Return Policy (return_policy.md)"
+      },
+      {
+        "id": 15,
+        "language": "en",
+        "answer_written_by": "ollama",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "11",
+            "14",
+            "4",
+            "48"
+          ]
+        },
+        "token_usage": null,
+        "generation_token_usage": null,
+        "seconds": 4.652402209118009,
+        "reply": "I cannot answer that question from the provided policy excerpts. According to section [2.3 Click-and-Collect](delivery_policy.md#23-click-and-collect), free pickup is available at our Montr\u00e9al warehouse and Qu\u00e9bec City depot, but it does not mention picking up orders in store.\n\nI suggest contacting customer service for more information on this topic."
+      },
+      {
+        "id": 34,
+        "language": "fr",
+        "answer_written_by": "ollama",
+        "fell_back": false,
+        "reply_language": "fr",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "14"
+          ]
+        },
+        "token_usage": null,
+        "generation_token_usage": null,
+        "seconds": 6.103592790896073,
+        "reply": "Selon notre politique de retour, les produits congel\u00e9s ne peuvent pas \u00eatre renvoy\u00e9s physiquement en raison des r\u00e9glementations de s\u00e9curit\u00e9 alimentaire. Cependant, si un produit congel\u00e9 arrive dans un \u00e9tat insatisfaisant (d\u00e9gag\u00e9, \u00e0 expiration, mauvaise temp\u00e9rature, mauvais article), vous pouvez demander un remboursement ou une remise : \n\n- Soumettez une demande **dans les 48 heures** de livraison.\n- Incluez au moins une photo montrant le probl\u00e8me.\n\nSource : [1] (return_policy.md)"
+      },
+      {
+        "id": 35,
+        "language": "fr",
+        "answer_written_by": "ollama",
+        "fell_back": false,
+        "reply_language": "fr",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "11",
+            "4",
+            "48"
+          ]
+        },
+        "token_usage": null,
+        "generation_token_usage": null,
+        "seconds": 5.156825999962166,
+        "reply": "Selon notre politique de livraison, les d\u00e9lais de livraison \u00e0 Montr\u00e9al sont les suivants : les commandes confirm\u00e9es avant 14 h sont exp\u00e9di\u00e9es le m\u00eame jour ou le lendemain, et les commandes confirm\u00e9es apr\u00e8s 14 h sont exp\u00e9di\u00e9es le lendemain. Il est important de noter que samedi, les commandes sont exp\u00e9di\u00e9es lundi.\n\nSource : [1] (delivery_policy.md)"
+      },
+      {
+        "id": 38,
+        "language": "fr",
+        "answer_written_by": "ollama",
+        "fell_back": false,
+        "reply_language": "fr",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "token_usage": null,
+        "generation_token_usage": null,
+        "seconds": 4.941743749892339,
+        "reply": "Selon la politique [1] (loyalty_terms.md), si vous souhaitez supprimer votre compte et vos donn\u00e9es personnelles, vous devez contacter le service client de Bor\u00e9al March\u00e9. Il n'est pas possible d'effectuer cette action directement via notre site ou application. Veuillez nous contacter pour obtenir plus d'informations sur les proc\u00e9dures \u00e0 suivre.\n\nSource : [1] (loyalty_terms.md)"
+      },
+      {
+        "id": 40,
+        "language": "fr",
+        "answer_written_by": "ollama",
+        "fell_back": false,
+        "reply_language": "fr",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "token_usage": null,
+        "generation_token_usage": null,
+        "seconds": 6.137773334048688,
+        "reply": "Selon notre politique sur les allerg\u00e8nes, nos produits de boulangerie doivent d\u00e9clarer la pr\u00e9sence des allerg\u00e8nes suivants : noix (y compris les amandes, les noix de coco, etc.), graines de s\u00e9same, lait, \u0153ufs, poissons, crustac\u00e9s et mollusques, soja, c\u00e9r\u00e9ales du bl\u00e9, orge, avene, levure de soja, levure de ma\u00efs, levure de seigle, levure d'orge, noix de macadamia, etc. (voir [1] Allergen Policy).\n\nSource : Politique sur les allerg\u00e8nes (allergen_policy.md)"
+      }
+    ]
+  },
+  "limitations": [
+    "Golden set is a development regression set, not an unseen evaluation set",
+    "Extractive grounding proxy does not measure answer relevance or completeness",
+    "/chat policy answers quote the source text, which may be English for a French question; with OpenAI or Ollama, /chat/stream has the model write the answer (streamed_generation); this script does not score their correctness (scripts/score_answers.py does)",
+    "OpenAI and Ollama results are absent unless explicitly executed with --provider",
+    "Local providers cost nothing per query. OpenAI's cost is its measured tokens at the list price in configs/pipeline.yaml: per_query is the routing call; per_streamed_answer adds the call that writes the answer"
+  ]
+}

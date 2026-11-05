@@ -17,6 +17,7 @@ from fastapi import APIRouter, HTTPException, Request
 from api.schemas import (
     BatchPredictionRequest,
     BatchPredictionResponse,
+    FeatureEffect,
     PredictionRequest,
     PredictionResponse,
 )
@@ -70,12 +71,48 @@ def _top_factors(
         return []
 
 
+TOP_EFFECTS = 5
+MIN_EFFECT = 0.0005  # smaller moves (0.05 percentage points) are not worth telling a customer
+
+
+def _score_with_effects(
+    model: Any, row: pd.DataFrame, names: list[str], typical: dict[str, float] | None
+) -> tuple[float, list[FeatureEffect]]:
+    """Score one customer and explain the score from the same single prediction call.
+
+    The call scores the customer once, then once more per feature with that feature set to
+    its typical value. A feature's effect is the probability with the customer's value minus
+    the probability with the typical one: how much this customer's own value of it moves the
+    score. Features are correlated (orders, spend), so the effects do not add up to the gap
+    between this customer and a typical one, and this is not a causal or coupon-uplift claim.
+    """
+    if not typical or any(name not in typical for name in names):
+        return float(model.predict_proba(row)[0, 1]), []
+    variants = pd.concat([row] * len(names), ignore_index=True)
+    for position, name in enumerate(names):
+        variants.loc[position, name] = typical[name]
+    scores = model.predict_proba(pd.concat([row, variants], ignore_index=True))[:, 1]
+    probability = float(scores[0])
+    effects = [
+        FeatureEffect(
+            feature=name,
+            value=float(row.iloc[0][name]),
+            typical_value=typical[name],
+            effect=round(probability - float(score), 4),
+        )
+        for name, score in zip(names, scores[1:])
+    ]
+    largest = sorted(effects, key=lambda e: abs(e.effect), reverse=True)
+    return probability, [e for e in largest[:TOP_EFFECTS] if abs(e.effect) >= MIN_EFFECT]
+
+
 def _predict_one(
     req: PredictionRequest,
     model: Any,
     threshold: float,
     feature_order: list[str],
     metadata: dict[str, Any],
+    typical: dict[str, float] | None = None,
 ) -> PredictionResponse:
     """Run the sklearn pipeline on a single feature dict."""
     if model is None:
@@ -93,7 +130,7 @@ def _predict_one(
     else:
         row = pd.DataFrame([req.features])
 
-    proba = float(model.predict_proba(row)[0, 1])
+    proba, explanation = _score_with_effects(model, row, list(row.columns), typical)
 
     return PredictionResponse(
         customer_id=req.customer_id,
@@ -102,6 +139,7 @@ def _predict_one(
         threshold=threshold,
         risk_label=_risk_label(proba),
         top_factors=_top_factors(req.features, feature_order, model),
+        explanation=explanation,
         model_version=metadata.get("model_version"),
     )
 
@@ -118,6 +156,7 @@ async def predict(req: PredictionRequest, request: Request) -> PredictionRespons
             threshold=request.app.state.threshold,
             feature_order=request.app.state.feature_order,
             metadata=request.app.state.metadata,
+            typical=getattr(request.app.state, "typical_values", None),
         )
     except HTTPException:
         raise
@@ -149,6 +188,7 @@ async def predict_batch(req: BatchPredictionRequest, request: Request) -> BatchP
             threshold=request.app.state.threshold,
             feature_order=request.app.state.feature_order,
             metadata=request.app.state.metadata,
+            typical=getattr(request.app.state, "typical_values", None),
         )
         results.append(result)
         request.state.prediction_records.append(

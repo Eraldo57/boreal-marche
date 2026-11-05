@@ -78,6 +78,15 @@ def test_run_produces_artifacts_on_synthetic_data(tmp_path, monkeypatch):
     report = json.loads((output / "reports" / "retention_metrics.json").read_text())
     assert set(report["splits"]) == set(train.SPLITS)
     assert report["optuna_trials"], "tuning trials must be logged"
+    assert report["pruning"]["method"] == "MedianPruner"
+    for trial in report["optuna_trials"]:
+        curve = trial["learning_curve"]
+        assert len(curve) == 3, "startup trials must evaluate all real resource steps"
+        full_rows = curve[-1]["training_rows"]
+        assert [step["training_rows"] for step in curve] == [
+            max(2, int(full_rows * fraction)) for fraction in (0.5, 0.75, 1.0)
+        ]
+        assert all(0 <= step["validation_pr_auc"] <= 1 for step in curve)
     stored = json.loads((output / "retention_model_metadata.json").read_text())
     assert stored["model_sha256"] == metadata["model_sha256"]
 

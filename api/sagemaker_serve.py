@@ -5,7 +5,7 @@ starts the container with ``serve`` (scripts/sagemaker_entry.py). The model is l
 once, with the same checksum and feature-contract checks as the API, and every instance
 goes through the API's own input validation.
 
-Request:  {"instances": [{<the 25 features>}, ...]}  (1 to 500 instances)
+Request:  {"instances": [{<the current model features>}, ...]}  (1 to 500 instances)
 Response: {"predictions": [{"probability": p, "will_return": bool}, ...],
            "model_version": ..., "threshold": ...}
 """

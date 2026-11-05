@@ -272,12 +272,12 @@ def _verified_model(directory: Path) -> tuple[Any, dict[str, Any]]:
 
 def run(artifacts: Path = ARTIFACTS, processed: Path = PROCESSED) -> dict[str, Any]:
     model, metadata = _verified_model(artifacts)
-    X = pd.read_parquet(processed / "X.parquet")[FEATURE_NAMES]
+    X = pd.read_parquet(processed / "X.parquet")
     y = pd.read_parquet(processed / "y.parquet")["will_return"]
     snapshots = pd.read_parquet(processed / "snapshots.parquet")
     threshold = float(metadata["decision_threshold"])
     test = snapshots.index[snapshots["split"] == "test"]
-    p_test = model.predict_proba(X.loc[test])[:, 1]
+    p_test = model.predict_proba(X.loc[test, FEATURE_NAMES])[:, 1]
     saved = pd.read_parquet(artifacts / "test_predictions.parquet")
     if (
         not np.allclose(saved["probability"], p_test)
@@ -296,7 +296,7 @@ def run(artifacts: Path = ARTIFACTS, processed: Path = PROCESSED) -> dict[str, A
     decision = snapshots.index[snapshots["split"] == "decision"]
     report["mitigation_estimates"] = mitigation_estimates(
         y.loc[decision].to_numpy(),
-        model.predict_proba(X.loc[decision])[:, 1],
+        model.predict_proba(X.loc[decision, FEATURE_NAMES])[:, 1],
         threshold,
         assign_groups(X.loc[decision], metadata["country_map"]),
         flagged,

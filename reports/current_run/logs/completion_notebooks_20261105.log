@@ -1,0 +1,166 @@
+/Users/runner/work/crossbow/crossbow/arrow/cpp/src/arrow/util/cpu_info.cc:239: IOError: sysctlbyname failed for 'hw.l1dcachesize'. Detail: [errno 1] Operation not permitted
+/Users/runner/work/crossbow/crossbow/arrow/cpp/src/arrow/util/cpu_info.cc:239: IOError: sysctlbyname failed for 'hw.l2cachesize'. Detail: [errno 1] Operation not permitted
+/Users/runner/work/crossbow/crossbow/arrow/cpp/src/arrow/util/cpu_info.cc:239: IOError: sysctlbyname failed for 'hw.l3cachesize'. Detail: [errno 1] Operation not permitted
+/Users/runner/work/crossbow/crossbow/arrow/cpp/src/arrow/util/cpu_info.cc:239: IOError: sysctlbyname failed for 'hw.optional.neon'. Detail: [errno 1] Operation not permitted
+Clean event rows: 820,645; engineered columns: 25; serving columns: 12
+  Invoice StockCode  ... IsPurchase  LineTotal
+0  489434     85048  ...       True       83.4
+1  489434    79323P  ...       True       81.0
+2  489434    79323W  ...       True       81.0
+3  489434     22041  ...       True      100.8
+4  489434     21232  ...       True       30.0
+
+[5 rows x 13 columns]
+         split      cutoff   label_end  rows
+0        train  2010-06-01  2010-08-30  2695
+1        train  2010-09-01  2010-11-30  3309
+2   validation  2010-12-01  2011-03-01  4249
+3  calibration  2011-03-01  2011-05-30  4522
+4     decision  2011-06-01  2011-08-30  4918
+5         test  2011-09-01  2011-11-30  5233
+                               count         mean  ...          75%            max
+recency_days                 24926.0   134.417155  ...   201.000000     638.000000
+frequency                    24926.0     4.601741  ...     5.000000     281.000000
+monetary_total               24926.0  2132.430628  ...  1708.970000  479701.580000
+monetary_mean                24926.0   375.728835  ...   423.665000   14844.766667
+monetary_std                 24926.0   140.683627  ...   167.233485   22226.807784
+days_since_first_purchase    24926.0   285.460523  ...   417.000000     638.000000
+avg_days_between_orders      24926.0   116.781892  ...   154.000000     638.000000
+std_days_between_orders      24926.0    21.929450  ...    31.941178     440.527525
+is_one_time_buyer            24926.0     0.343417  ...     1.000000       1.000000
+avg_basket_size              24926.0    22.190351  ...    28.000000     259.000000
+avg_basket_value             24926.0   375.728835  ...   423.665000   14844.766667
+max_basket_value             24926.0   607.183240  ...   630.790000   44051.600000
+avg_unique_items_per_basket  24926.0    21.141702  ...    27.000000     230.000000
+single_item_basket_ratio     24926.0     0.063059  ...     0.000000       1.000000
+top_category_share           24926.0     0.239147  ...     0.280444       1.000000
+n_unique_categories          24926.0    37.130306  ...    49.000000     592.000000
+category_entropy             24926.0     3.900746  ...     4.937566       7.517801
+has_ever_cancelled           24926.0     0.390676  ...     1.000000       1.000000
+cancellation_rate            24926.0     0.117701  ...     0.222222       0.833333
+return_rate                  24926.0     0.014591  ...     0.007061       0.833333
+weekend_purchase_ratio       24926.0     0.144887  ...     0.166667       1.000000
+morning_purchase_ratio       24926.0     0.327915  ...     0.500000       1.000000
+country_code                 24926.0    25.762136  ...    27.000000      28.000000
+is_domestic                  24926.0     0.919040  ...     1.000000       1.000000
+n_countries                  24926.0     1.001565  ...     1.000000       2.000000
+
+[25 rows x 8 columns]
+Model inputs: ['recency_days', 'frequency', 'monetary_mean', 'monetary_std', 'avg_days_between_orders', 'std_days_between_orders', 'is_one_time_buyer', 'avg_basket_size', 'single_item_basket_ratio', 'top_category_share', 'n_unique_categories', 'morning_purchase_ratio']
+Excluded from serving: ['monetary_total', 'days_since_first_purchase', 'avg_basket_value', 'max_basket_value', 'avg_unique_items_per_basket', 'category_entropy', 'has_ever_cancelled', 'cancellation_rate', 'return_rate', 'weekend_purchase_ratio', 'country_code', 'is_domestic', 'n_countries']
+recency_days                0
+frequency                   0
+monetary_mean               0
+monetary_std                0
+avg_days_between_orders     0
+std_days_between_orders     0
+is_one_time_buyer           0
+avg_basket_size             0
+single_item_basket_ratio    0
+top_category_share          0
+n_unique_categories         0
+morning_purchase_ratio      0
+Name: missing, dtype: int64
+All features precede each cutoff; labels cover the following 90 days.
+PASS notebooks/01_eda.ipynb
+Model 0.3.0 contract 2.0 features 12
+             rows                   cutoffs   label_end positive_rate
+train        6004  [2010-06-01, 2010-09-01]  2010-11-30      0.542805
+validation   4249              [2010-12-01]  2011-03-01      0.331137
+calibration  4522              [2011-03-01]  2011-05-30      0.350509
+decision     4918              [2011-06-01]  2011-08-30      0.328996
+test         5233              [2011-09-01]  2011-11-30      0.427288
+                            model    pr_auc  ...  recall_top_decile  fit_time_s
+0          RandomForestClassifier  0.672953  ...           0.250178    0.292345
+1              LogisticRegression  0.669428  ...           0.249467    0.007456
+2      GradientBoostingClassifier  0.662333  ...           0.252310    0.799696
+3                       LinearSVC  0.659845  ...           0.243781    0.007919
+4  HistGradientBoostingClassifier  0.653369  ...           0.250178    0.393539
+5            KNeighborsClassifier  0.613536  ...           0.226724    0.005533
+6                 RidgeClassifier  0.605925  ...           0.205402    0.004946
+7          DecisionTreeClassifier  0.594583  ...           0.231699    0.016045
+8      business_heuristic_recency  0.511551  ...           0.184080    0.000315
+9      DummyClassifier_stratified  0.334504  ...           0.110163    0.005133
+
+[10 rows x 6 columns]
+{'method': 'MedianPruner', 'resource': 'earlier training rows', 'fractions': [0.5, 0.75, 1.0], 'startup_trials': 4}
+                    family  trial     state  validation_pr_auc
+0   RandomForestClassifier      0  complete           0.671338
+1   RandomForestClassifier      1  complete           0.673786
+2   RandomForestClassifier      2  complete           0.669871
+3   RandomForestClassifier      3  complete           0.673215
+4   RandomForestClassifier      4  complete           0.675967
+5   RandomForestClassifier      5    pruned           0.677841
+6   RandomForestClassifier      6  complete           0.676412
+7   RandomForestClassifier      7  complete           0.675468
+8   RandomForestClassifier      8    pruned           0.676179
+9   RandomForestClassifier      9    pruned           0.671123
+10  RandomForestClassifier     10  complete           0.677180
+11  RandomForestClassifier     11    pruned           0.679871
+12      LogisticRegression      0  complete           0.663688
+13      LogisticRegression      1  complete           0.669739
+14      LogisticRegression      2  complete           0.669492
+15      LogisticRegression      3  complete           0.668956
+16      LogisticRegression      4    pruned           0.631035
+17      LogisticRegression      5    pruned           0.631031
+18      LogisticRegression      6    pruned           0.612280
+19      LogisticRegression      7  complete           0.669712
+20      LogisticRegression      8    pruned           0.667116
+21      LogisticRegression      9    pruned           0.668011
+22      LogisticRegression     10  complete           0.669745
+23      LogisticRegression     11  complete           0.669743
+Pruned trials: 9
+              brier_score
+uncalibrated     0.165062
+isotonic         0.156648
+sigmoid          0.156309
+Selected calibration: sigmoid
+                      pr_auc   roc_auc  ...   recall  selection_rate
+model               0.759631  0.786325  ...  0.82424        0.618001
+recency_same_count  0.671134  0.760756  ...  0.81932        0.618001
+
+[2 rows x 10 columns]
+                  lower     upper
+pr_auc         0.742486  0.774941
+roc_auc        0.774931  0.798266
+brier_score    0.187547  0.199814
+recall         0.808010  0.839967
+precision      0.552662  0.586079
+ap_difference  0.070782  0.104865
+<IPython.core.display.Image object>
+<IPython.core.display.Image object>
+<IPython.core.display.Image object>
+<IPython.core.display.Image object>
+PASS notebooks/02_modelling.ipynb
+Report sections: ['header', 'sweep_validation', 'selected_validation', 'final_test', 'protocol']
+    support  confidence  ...  k  mask_seed
+0     0.005         0.1  ...  5         42
+1     0.005         0.3  ...  5         42
+2     0.005         0.5  ...  5         42
+3     0.010         0.1  ...  5         42
+4     0.010         0.3  ...  5         42
+5     0.010         0.5  ...  5         42
+6     0.020         0.1  ...  5         42
+7     0.020         0.3  ...  5         42
+8     0.020         0.5  ...  5         42
+9     0.030         0.1  ...  5         42
+10    0.030         0.3  ...  5         42
+11    0.030         0.5  ...  5         42
+12    0.050         0.1  ...  5         42
+13    0.050         0.3  ...  5         42
+14    0.050         0.5  ...  5         42
+
+[15 rows x 17 columns]
+Timing: {'apriori_seconds': 1.2210091250017285, 'fpgrowth_seconds': 64.45212679100223}
+Rule keys equal: True
+Memory: {'n_invoices': 25601, 'n_items': 4687, 'dense_equivalent_bytes': 119991887, 'csr_bytes': 2707668, 'sparsity_pct': 99.56576064180072, 'dense_mb': 119.991887, 'sparse_mb': 2.707668}
+final_test {'baskets_total': 6284, 'baskets_evaluated': 5884, 'single_item_excluded': 400, 'hit_rate_at_5': 0.486743711760707, 'popularity_hit_rate_at_5': 0.17233174711080898, 'catalogue_coverage': 0.07680819287390656, 'popularity_catalogue_coverage': 0.0019202048218476637, 'rule_firing_coverage': 0.8366757307953773, 'coverage_denominator': 'distinct training descriptions', 'k': 5, 'mask_seed': 42}
+{'recommendations': ['red hanging heart t-light holder', 'cream heart card holder', 'wooden picture frame white finish', 'wooden frame antique white', 'zinc metal heart decoration'], 'because': [{'antecedent': ['white hanging heart t-light holder'], 'consequent': ['red hanging heart t-light holder'], 'confidence': 0.23110316649642496, 'lift': 4.6993424666203145, 'support': 0.03535018163352994}, {'antecedent': ['white hanging heart t-light holder'], 'consequent': ['cream heart card holder'], 'confidence': 0.10393258426966293, 'lift': 3.016755203954241, 'support': 0.015897816491543298}, {'antecedent': ['white hanging heart t-light holder'], 'consequent': ['wooden picture frame white finish'], 'confidence': 0.13100102145045966, 'lift': 2.883712080957195, 'support': 0.02003827975469708}, {'antecedent': ['white hanging heart t-light holder'], 'consequent': ['wooden frame antique white'], 'confidence': 0.1371297242083759, 'lift': 2.806281430422567, 'support': 0.020975743135033788}, {'antecedent': ['white hanging heart t-light holder'], 'consequent': ['zinc metal heart decoration'], 'confidence': 0.10163432073544434, 'lift': 2.7274006762558813, 'support': 0.015546267723917035}], 'strategy': 'rule_based'}
+Unmatched basket: popularity_fallback
+  provider  questions  tool_choice_accuracy  out_of_scope_refusal
+0    regex         40                 0.975                   1.0
+1   openai         40                 0.950                   1.0
+2   ollama         40                 0.925                   1.0
+Rater: AI evaluator (single rater, not independent); see the rubric's 'about'
+OpenAI 11/18 and Ollama 3/18 historically judged correct; independently re-evaluate new French questions.
+PASS notebooks/03_evaluation.ipynb

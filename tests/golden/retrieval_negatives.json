@@ -1,0 +1,216 @@
+{
+  "about": "Questions that sound like the shop but that no policy answers, so the assistant should decline them. Written with AI assistance on 2026-11-04. 'absent' lists words that must not occur anywhere in docs/corpus (tests/test_retrieval_negatives.py checks that), so a corpus change that starts to answer one of them is noticed. Questions that are plainly off-topic (weather, poems) are stopped earlier, by the keyword scope guard, and are not here. One author, 24 questions: a sanity check, not a benchmark.",
+  "questions": [
+    {
+      "id": "N01",
+      "language": "en",
+      "text": "What's your policy on live animals?",
+      "absent": [
+        "live animal",
+        "pets?\\b",
+        "\\bdogs?\\b"
+      ]
+    },
+    {
+      "id": "N02",
+      "language": "en",
+      "text": "Can I bring my dog into the warehouse?",
+      "absent": [
+        "pets?\\b",
+        "\\bdogs?\\b"
+      ]
+    },
+    {
+      "id": "N03",
+      "language": "en",
+      "text": "Do you offer gift wrapping?",
+      "absent": [
+        "gift.wrap"
+      ]
+    },
+    {
+      "id": "N04",
+      "language": "en",
+      "text": "Do you match competitors' prices?",
+      "absent": [
+        "price.match",
+        "competitor"
+      ]
+    },
+    {
+      "id": "N05",
+      "language": "en",
+      "text": "Is there a Boréal Marché mobile app?",
+      "absent": [
+        "mobile app",
+        "\\bapp\\b"
+      ]
+    },
+    {
+      "id": "N06",
+      "language": "en",
+      "text": "Do you give student discounts?",
+      "absent": [
+        "student"
+      ]
+    },
+    {
+      "id": "N07",
+      "language": "en",
+      "text": "How can I become a supplier of your store?",
+      "absent": [
+        "supplier"
+      ]
+    },
+    {
+      "id": "N08",
+      "language": "en",
+      "text": "Are you hiring right now?",
+      "absent": [
+        "hiring",
+        "careers",
+        "\\bjobs?\\b"
+      ]
+    },
+    {
+      "id": "N09",
+      "language": "en",
+      "text": "What is your carbon footprint?",
+      "absent": [
+        "carbon",
+        "renewable",
+        "sustainab"
+      ]
+    },
+    {
+      "id": "N10",
+      "language": "en",
+      "text": "Can I change my delivery address after placing an order?",
+      "absent": [
+        "change.{0,20}address",
+        "modify.{0,20}order"
+      ]
+    },
+    {
+      "id": "N11",
+      "language": "en",
+      "text": "Do you offer installation or assembly services?",
+      "absent": [
+        "install",
+        "assembly"
+      ]
+    },
+    {
+      "id": "N12",
+      "language": "en",
+      "text": "What is the warranty on household items?",
+      "absent": [
+        "warrant"
+      ]
+    },
+    {
+      "id": "N13",
+      "language": "en",
+      "text": "Can I pay in monthly installments?",
+      "absent": [
+        "installment",
+        "instalment",
+        "financing"
+      ]
+    },
+    {
+      "id": "N14",
+      "language": "en",
+      "text": "Do you sell fireworks?",
+      "absent": [
+        "firework"
+      ]
+    },
+    {
+      "id": "N15",
+      "language": "en",
+      "text": "How do I report a bug on your website?",
+      "absent": [
+        "\\bbug\\b",
+        "website.{0,20}(problem|error)"
+      ]
+    },
+    {
+      "id": "N16",
+      "language": "en",
+      "text": "Should I tip the delivery driver?",
+      "absent": [
+        "\\btip\\b",
+        "tipping",
+        "gratuity"
+      ]
+    },
+    {
+      "id": "N17",
+      "language": "en",
+      "text": "Do you rent party equipment?",
+      "absent": [
+        "party equipment",
+        "\\brent"
+      ]
+    },
+    {
+      "id": "N18",
+      "language": "en",
+      "text": "Which brand of olive oil do you recommend?",
+      "absent": [
+        "olive"
+      ]
+    },
+    {
+      "id": "N19",
+      "language": "fr",
+      "text": "Offrez-vous l'emballage-cadeau?",
+      "absent": [
+        "emballage",
+        "cadeau"
+      ]
+    },
+    {
+      "id": "N20",
+      "language": "fr",
+      "text": "Puis-je payer en plusieurs versements?",
+      "absent": [
+        "versements"
+      ]
+    },
+    {
+      "id": "N21",
+      "language": "fr",
+      "text": "Avez-vous une application mobile?",
+      "absent": [
+        "application mobile"
+      ]
+    },
+    {
+      "id": "N22",
+      "language": "fr",
+      "text": "Comment devenir fournisseur chez vous?",
+      "absent": [
+        "fournisseur"
+      ]
+    },
+    {
+      "id": "N23",
+      "language": "fr",
+      "text": "Quelle est la garantie sur les articles ménagers?",
+      "absent": [
+        "garantie"
+      ]
+    },
+    {
+      "id": "N24",
+      "language": "fr",
+      "text": "Puis-je amener mon chien à l'entrepôt?",
+      "absent": [
+        "\\bchiens?\\b",
+        "animaux"
+      ]
+    }
+  ]
+}

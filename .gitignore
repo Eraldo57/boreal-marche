@@ -12,7 +12,9 @@ venv/
 env/
 
 # Data — tracked by DVC, not Git
-data/raw/
+data/raw/*
+!data/raw/*.dvc
+!data/raw/.gitignore
 data/processed/
 *.parquet
 *.csv

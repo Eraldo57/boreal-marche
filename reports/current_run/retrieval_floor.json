@@ -1,0 +1,67 @@
+{
+  "executed_at": "2026-11-04T16:37:34.569161+00:00",
+  "answerable_questions": "the golden answerable questions plus the whole hold-out set",
+  "undocumented_questions": "tests/golden/retrieval_negatives.json",
+  "similarity_floor": 0.25,
+  "confident_score": 0.45,
+  "bands": {
+    "answerable": {
+      "questions": 60,
+      "declined": 2,
+      "answered_with_caution": 12,
+      "answered_plainly": 46
+    },
+    "undocumented": {
+      "questions": 24,
+      "declined": 2,
+      "answered_with_caution": 18,
+      "answered_plainly": 4
+    }
+  },
+  "single_cutoff_sweep": [
+    {
+      "cutoff": 0.25,
+      "answerable_below": 2,
+      "undocumented_below": 2
+    },
+    {
+      "cutoff": 0.3,
+      "answerable_below": 5,
+      "undocumented_below": 4
+    },
+    {
+      "cutoff": 0.35,
+      "answerable_below": 7,
+      "undocumented_below": 13
+    },
+    {
+      "cutoff": 0.4,
+      "answerable_below": 9,
+      "undocumented_below": 18
+    },
+    {
+      "cutoff": 0.45,
+      "answerable_below": 14,
+      "undocumented_below": 20
+    },
+    {
+      "cutoff": 0.5,
+      "answerable_below": 24,
+      "undocumented_below": 23
+    }
+  ],
+  "lowest_answerable": [
+    0.23037290573120117,
+    0.23223042488098145,
+    0.2808260917663574,
+    0.28295695781707764,
+    0.2956491708755493
+  ],
+  "highest_undocumented": [
+    0.42275285720825195,
+    0.45392554998397827,
+    0.47564929723739624,
+    0.49693357944488525,
+    0.6141377687454224
+  ]
+}

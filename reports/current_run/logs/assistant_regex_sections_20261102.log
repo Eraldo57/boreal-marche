@@ -1,0 +1,37 @@
+[2m2026-11-03T01:33:12.824813Z[0m [[33m[1mwarning  [0m] [1mregistry_unavailable_using_local_model[0m [36mreason[0m=[35m'MlflowException: Registered model alias champion not found.'[0m
+[2m2026-11-03T01:33:16.622517Z[0m [[32m[1minfo     [0m] [1mstartup_complete              [0m [36merrors[0m=[35m{}[0m
+[2m2026-11-03T01:33:17.176207Z[0m [[32m[1minfo     [0m] [1mrecommendation_served         [0m [36mbasket_size[0m=[35m2[0m [36mcustomer_id[0m=[35mNone[0m [36mn_recommendations[0m=[35m5[0m [36mstrategy[0m=[35mpopularity_fallback[0m
+[2m2026-11-03T01:33:17.199829Z[0m [[32m[1minfo     [0m] [1mrecommendation_served         [0m [36mbasket_size[0m=[35m1[0m [36mcustomer_id[0m=[35mNone[0m [36mn_recommendations[0m=[35m5[0m [36mstrategy[0m=[35mpopularity_fallback[0m
+[2m2026-11-03T01:33:17.300483Z[0m [[32m[1minfo     [0m] [1mrecommendation_served         [0m [36mbasket_size[0m=[35m2[0m [36mcustomer_id[0m=[35mNone[0m [36mn_recommendations[0m=[35m5[0m [36mstrategy[0m=[35mrule_based[0m
+[2m2026-11-03T01:33:17.400244Z[0m [[32m[1minfo     [0m] [1mrecommendation_served         [0m [36mbasket_size[0m=[35m2[0m [36mcustomer_id[0m=[35mNone[0m [36mn_recommendations[0m=[35m5[0m [36mstrategy[0m=[35mpopularity_fallback[0m
+[2m2026-11-03T01:33:17.548921Z[0m [[32m[1minfo     [0m] [1mrecommendation_served         [0m [36mbasket_size[0m=[35m2[0m [36mcustomer_id[0m=[35mNone[0m [36mn_recommendations[0m=[35m5[0m [36mstrategy[0m=[35mpopularity_fallback[0m
+[2m2026-11-03T01:33:17.626519Z[0m [[32m[1minfo     [0m] [1mshutdown                      [0m
+{
+  "executed_at": "2026-11-03T01:33:17.648799+00:00",
+  "provider": "regex",
+  "golden_count": 40,
+  "category_counts": {
+    "policy": 15,
+    "tool_call": 10,
+    "out_of_scope": 8,
+    "french": 7
+  },
+  "tool_choice_accuracy_all": 0.975,
+  "tool_choice_accuracy_in_scope": 0.96875,
+  "out_of_scope_refusal_rate": 1.0,
+  "in_scope_refusal_count": 1,
+  "expected_source_accuracy": 0.7777777777777778,
+  "policy_extract_grounding_proxy": 1.0,
+  "latency_p50_ms": 26.90585399977863,
+  "latency_p95_ms": 59.14579373784363,
+  "cost_usd_per_query": 0.0,
+  "cost_usd_per_streamed_answer": null,
+  "streamed_generation": null,
+  "limitations": [
+    "Golden set is a development regression set, not an unseen evaluation set",
+    "Extractive grounding proxy does not measure answer relevance or completeness",
+    "/chat policy answers quote the source text, which may be English for a French question; with OpenAI or Ollama, /chat/stream has the model write the answer (streamed_generation); this script does not score their correctness (scripts/score_answers.py does)",
+    "OpenAI and Ollama results are absent unless explicitly executed with --provider",
+    "Local providers cost nothing per query. OpenAI's cost is its measured tokens at the list price in configs/pipeline.yaml: per_query is the routing call; per_streamed_answer adds the call that writes the answer"
+  ]
+}

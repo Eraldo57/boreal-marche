@@ -1,0 +1,120 @@
+{
+  "feature_names": [
+    "recency_days",
+    "frequency",
+    "monetary_total",
+    "monetary_mean",
+    "monetary_std",
+    "days_since_first_purchase",
+    "avg_days_between_orders",
+    "std_days_between_orders",
+    "is_one_time_buyer",
+    "avg_basket_size",
+    "avg_basket_value",
+    "max_basket_value",
+    "avg_unique_items_per_basket",
+    "single_item_basket_ratio",
+    "top_category_share",
+    "n_unique_categories",
+    "category_entropy",
+    "has_ever_cancelled",
+    "cancellation_rate",
+    "return_rate",
+    "weekend_purchase_ratio",
+    "morning_purchase_ratio",
+    "country_code",
+    "is_domestic",
+    "n_countries"
+  ],
+  "contract_version": "1.0",
+  "country_map": {
+    "Australia": 0,
+    "Austria": 1,
+    "Bahrain": 2,
+    "Belgium": 3,
+    "Channel Islands": 4,
+    "Cyprus": 5,
+    "Denmark": 6,
+    "EIRE": 7,
+    "Finland": 8,
+    "France": 9,
+    "Germany": 10,
+    "Greece": 11,
+    "Italy": 12,
+    "Japan": 13,
+    "Malta": 14,
+    "Netherlands": 15,
+    "Nigeria": 16,
+    "Norway": 17,
+    "Poland": 18,
+    "Portugal": 19,
+    "RSA": 20,
+    "Singapore": 21,
+    "Spain": 22,
+    "Sweden": 23,
+    "Switzerland": 24,
+    "USA": 25,
+    "United Arab Emirates": 26,
+    "United Kingdom": 27,
+    "Unspecified": 28
+  },
+  "unknown_country_code": -1,
+  "n_features": 25,
+  "n_customers": 24926,
+  "positive_rate": 0.4053999839524994,
+  "cutoff_date": "2011-09-01",
+  "label_window_days": 90,
+  "snapshots": {
+    "train": [
+      "2010-06-01",
+      "2010-09-01"
+    ],
+    "validation": [
+      "2010-12-01"
+    ],
+    "calibration": [
+      "2011-03-01"
+    ],
+    "decision": [
+      "2011-06-01"
+    ],
+    "test": [
+      "2011-09-01"
+    ]
+  },
+  "source_data_sha256": "6f536e10bb1a34a4b1fb8dee631b6477e06e68302e4f7c6152b05ea2c78ebefb",
+  "snapshot_rows": {
+    "calibration": 4522,
+    "decision": 4918,
+    "test": 5233,
+    "train": 6004,
+    "validation": 4249
+  },
+  "missing_counts": {
+    "recency_days": 0,
+    "frequency": 0,
+    "monetary_total": 0,
+    "monetary_mean": 0,
+    "monetary_std": 0,
+    "days_since_first_purchase": 0,
+    "avg_days_between_orders": 0,
+    "std_days_between_orders": 0,
+    "is_one_time_buyer": 0,
+    "avg_basket_size": 0,
+    "avg_basket_value": 0,
+    "max_basket_value": 0,
+    "avg_unique_items_per_basket": 0,
+    "single_item_basket_ratio": 0,
+    "top_category_share": 0,
+    "n_unique_categories": 0,
+    "category_entropy": 0,
+    "has_ever_cancelled": 0,
+    "cancellation_rate": 0,
+    "return_rate": 0,
+    "weekend_purchase_ratio": 0,
+    "morning_purchase_ratio": 0,
+    "country_code": 0,
+    "is_domestic": 0,
+    "n_countries": 0
+  }
+}

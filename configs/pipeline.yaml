@@ -155,13 +155,24 @@ assistant:
   providers: ["regex", "openai", "ollama"]
   default_provider: "regex"
   embedding_model: "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
-  similarity_floor: 0.25  # judgement value, not tuned on a held-out set
+  similarity_floor: 0.25  # below this the assistant declines; judgement value
+  # Between the floor and this value a passage is shown with a caution that it may not answer.
+  # No single cutoff separates answerable from undocumented questions (see
+  # reports/current_run/retrieval_floor.json): at 0.45, 46 of 60 answerable questions are
+  # confident and 4 of 24 undocumented ones are. A judgement value chosen from that sweep.
+  confident_score: 0.45
   max_chunks_per_query: 5
   chunk_size: 420  # chars, to reduce truncation at encoder's 128 token limit
   chunk_overlap: 64
 
   openai:
     model: "gpt-4o-mini"
+    # Standard-tier list price, USD per million tokens. Read from OpenAI's pricing page on
+    # 2026-11-02 (https://developers.openai.com/api/docs/pricing); prices change, so
+    # re-check before quoting a cost. Used only by scripts/evaluate_assistant.py.
+    usd_per_million_tokens:
+      input: 0.15
+      output: 0.60
   ollama:
     model: "llama3.2:3b"  # newest Llama that fits a laptop (2.02 GB); llama3.3/llama4 are 42/67 GB
     host: "http://localhost:11434"

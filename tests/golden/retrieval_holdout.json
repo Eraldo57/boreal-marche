@@ -1,0 +1,373 @@
+{
+  "about": "Hold-out questions for judging retrieval changes. Written with AI assistance on 2026-11-02, before any retrieval change, from docs/corpus: each question asks for one fact, and 'marker' is the phrase that fact is quoted by (whitespace-insensitive; tests/test_retrieval_holdout.py checks it occurs in 'source'). 'direct' questions (H01-H26) use the document's own words; the baseline found them too easy, so 'indirect' ones (I01-I20) paraphrase, the way the failing golden questions do. They are separate from the 40 golden questions so that changes are not tuned against the questions they are scored on. One author, 46 questions: a sanity check, not a benchmark.",
+  "questions": [
+    {
+      "id": "H01",
+      "language": "en",
+      "text": "How many days do I have to return a canned good?",
+      "source": "return_policy.md",
+      "marker": "within 30 days",
+      "kind": "direct"
+    },
+    {
+      "id": "H02",
+      "language": "en",
+      "text": "How much is the return shipping fee on non-perishable items?",
+      "source": "return_policy.md",
+      "marker": "$7.95",
+      "kind": "direct"
+    },
+    {
+      "id": "H03",
+      "language": "fr",
+      "text": "Quel est le délai de remboursement sur ma carte de crédit?",
+      "source": "return_policy.md",
+      "marker": "Credit card (Visa, Mastercard, Amex) | 5–10 business days",
+      "kind": "direct"
+    },
+    {
+      "id": "H04",
+      "language": "en",
+      "text": "Can I return a gift card?",
+      "source": "return_policy.md",
+      "marker": "are non-refundable and non-exchangeable",
+      "kind": "direct"
+    },
+    {
+      "id": "H05",
+      "language": "en",
+      "text": "How far ahead must I cancel a Boréal Box delivery?",
+      "source": "return_policy.md",
+      "marker": "up to 72 hours before the scheduled dispatch date",
+      "kind": "direct"
+    },
+    {
+      "id": "H06",
+      "language": "en",
+      "text": "What is the delivery fee to Toronto?",
+      "source": "delivery_policy.md",
+      "marker": "Zone 3 | $14.95 | $24.95 | $150.00",
+      "kind": "direct"
+    },
+    {
+      "id": "H07",
+      "language": "en",
+      "text": "Do you deliver to British Columbia?",
+      "source": "delivery_policy.md",
+      "marker": "British Columbia, or the Territories",
+      "kind": "direct"
+    },
+    {
+      "id": "H08",
+      "language": "en",
+      "text": "What is the cutoff time for same-day dispatch?",
+      "source": "delivery_policy.md",
+      "marker": "confirmed before 14 h",
+      "kind": "direct"
+    },
+    {
+      "id": "H09",
+      "language": "fr",
+      "text": "Où se trouve votre point de ramassage à Québec?",
+      "source": "delivery_policy.md",
+      "marker": "1150 boulevard Charest Ouest",
+      "kind": "direct"
+    },
+    {
+      "id": "H10",
+      "language": "en",
+      "text": "What happens if nobody is home when the driver arrives?",
+      "source": "delivery_policy.md",
+      "marker": "one additional attempt the next business day",
+      "kind": "direct"
+    },
+    {
+      "id": "H11",
+      "language": "en",
+      "text": "How long do refrigerated items stay cold in transit?",
+      "source": "delivery_policy.md",
+      "marker": "up to 48 hours",
+      "kind": "direct"
+    },
+    {
+      "id": "H12",
+      "language": "en",
+      "text": "How many bonus points do I get on my birthday?",
+      "source": "loyalty_terms.md",
+      "marker": "100 bonus points",
+      "kind": "direct"
+    },
+    {
+      "id": "H13",
+      "language": "en",
+      "text": "How long until my loyalty points expire?",
+      "source": "loyalty_terms.md",
+      "marker": "24 months",
+      "kind": "direct"
+    },
+    {
+      "id": "H14",
+      "language": "en",
+      "text": "What discount do I get when I redeem 5,000 points?",
+      "source": "loyalty_terms.md",
+      "marker": "5,000 | $55.00",
+      "kind": "direct"
+    },
+    {
+      "id": "H15",
+      "language": "fr",
+      "text": "Combien de points obtient-on pour un avis de produit?",
+      "source": "loyalty_terms.md",
+      "marker": "for each product review",
+      "kind": "direct"
+    },
+    {
+      "id": "H16",
+      "language": "en",
+      "text": "Can I give my points to my sister?",
+      "source": "loyalty_terms.md",
+      "marker": "non-transferable between accounts",
+      "kind": "direct"
+    },
+    {
+      "id": "H17",
+      "language": "en",
+      "text": "Is sesame one of the priority allergens?",
+      "source": "allergen_policy.md",
+      "marker": "Sesame seeds",
+      "kind": "direct"
+    },
+    {
+      "id": "H18",
+      "language": "en",
+      "text": "Can I rely on the website's allergen filters?",
+      "source": "allergen_policy.md",
+      "marker": "cannot guarantee",
+      "kind": "direct"
+    },
+    {
+      "id": "H19",
+      "language": "en",
+      "text": "How quickly are customers told about a food recall?",
+      "source": "allergen_policy.md",
+      "marker": "within 12 hours",
+      "kind": "direct"
+    },
+    {
+      "id": "H20",
+      "language": "fr",
+      "text": "Les repas Cuisine Boréal contiennent-ils des arachides?",
+      "source": "allergen_policy.md",
+      "marker": "use peanuts in any recipe",
+      "kind": "direct"
+    },
+    {
+      "id": "H21",
+      "language": "en",
+      "text": "How long do you keep my order history?",
+      "source": "privacy_notice_en.md",
+      "marker": "Transaction history | 7 years",
+      "kind": "direct"
+    },
+    {
+      "id": "H22",
+      "language": "en",
+      "text": "In which region is my personal data stored?",
+      "source": "privacy_notice_en.md",
+      "marker": "ca-central-1 region (Montréal)",
+      "kind": "direct"
+    },
+    {
+      "id": "H23",
+      "language": "en",
+      "text": "Who is the privacy officer?",
+      "source": "privacy_notice_en.md",
+      "marker": "Marie-Claire Dufresne",
+      "kind": "direct"
+    },
+    {
+      "id": "H24",
+      "language": "fr",
+      "text": "Combien de temps conservez-vous mes données de navigation?",
+      "source": "privacy_notice_fr.md",
+      "marker": "Données comportementales (témoins, clics) | 13 mois",
+      "kind": "direct"
+    },
+    {
+      "id": "H25",
+      "language": "fr",
+      "text": "Quels témoins utilisez-vous sur le site?",
+      "source": "privacy_notice_fr.md",
+      "marker": "session_id | Essentiel | Maintient votre session",
+      "kind": "direct"
+    },
+    {
+      "id": "H26",
+      "language": "fr",
+      "text": "Comment demander une révision humaine d'une décision automatisée?",
+      "source": "privacy_notice_fr.md",
+      "marker": "Demander une révision humaine",
+      "kind": "direct"
+    },
+    {
+      "id": "I01",
+      "language": "en",
+      "text": "How soon can I get my groceries if I live in Laval?",
+      "source": "delivery_policy.md",
+      "marker": "Repentigny | Next-day",
+      "kind": "indirect"
+    },
+    {
+      "id": "I02",
+      "language": "en",
+      "text": "How much do I need to spend to get free shipping in Quebec City?",
+      "source": "delivery_policy.md",
+      "marker": "Zone 2 | $9.95 | $17.95 | $100.00",
+      "kind": "indirect"
+    },
+    {
+      "id": "I03",
+      "language": "en",
+      "text": "What does a Sapin member get that a Pousse member does not?",
+      "source": "loyalty_terms.md",
+      "marker": "1.25× earning multiplier",
+      "kind": "indirect"
+    },
+    {
+      "id": "I04",
+      "language": "en",
+      "text": "My yogurt arrived spoiled, can I get my money back?",
+      "source": "return_policy.md",
+      "marker": "A refund or replacement is issued without requiring the item to be returned",
+      "kind": "indirect"
+    },
+    {
+      "id": "I05",
+      "language": "en",
+      "text": "The courier left me an item I never ordered. What now?",
+      "source": "return_policy.md",
+      "marker": "arrange for the wrong item to be picked up at no cost",
+      "kind": "indirect"
+    },
+    {
+      "id": "I06",
+      "language": "en",
+      "text": "Will I lose my points if I close my loyalty account?",
+      "source": "loyalty_terms.md",
+      "marker": "Unredeemed points are forfeited upon closure",
+      "kind": "indirect"
+    },
+    {
+      "id": "I07",
+      "language": "en",
+      "text": "I am allergic to peanuts. Is it safe to order the prepared meals?",
+      "source": "allergen_policy.md",
+      "marker": "advisory applies",
+      "kind": "indirect"
+    },
+    {
+      "id": "I08",
+      "language": "en",
+      "text": "Who do I call at night about a serious allergic reaction?",
+      "source": "allergen_policy.md",
+      "marker": "Urgent allergen concern (24/7)",
+      "kind": "indirect"
+    },
+    {
+      "id": "I09",
+      "language": "en",
+      "text": "Can you erase everything you know about me?",
+      "source": "privacy_notice_en.md",
+      "marker": "Request deletion",
+      "kind": "indirect"
+    },
+    {
+      "id": "I10",
+      "language": "en",
+      "text": "Do you use my past orders to decide who gets coupons?",
+      "source": "privacy_notice_en.md",
+      "marker": "Select which customers receive a retention coupon",
+      "kind": "indirect"
+    },
+    {
+      "id": "I11",
+      "language": "en",
+      "text": "When can I chat with someone about my delivery?",
+      "source": "delivery_policy.md",
+      "marker": "available on borealmarche.ca, Monday–Saturday",
+      "kind": "indirect"
+    },
+    {
+      "id": "I12",
+      "language": "en",
+      "text": "What if I order a frozen pizza and live in Ottawa?",
+      "source": "delivery_policy.md",
+      "marker": "those items removed and refunded",
+      "kind": "indirect"
+    },
+    {
+      "id": "I13",
+      "language": "en",
+      "text": "Can I pay with points on an order that already has a promo code?",
+      "source": "loyalty_terms.md",
+      "marker": "cannot be combined on the same order",
+      "kind": "indirect"
+    },
+    {
+      "id": "I14",
+      "language": "en",
+      "text": "How long do you keep my support tickets?",
+      "source": "privacy_notice_en.md",
+      "marker": "Support tickets | 3 years from resolution",
+      "kind": "indirect"
+    },
+    {
+      "id": "I15",
+      "language": "fr",
+      "text": "Combien de temps faut-il pour recevoir ma commande à Laval?",
+      "source": "delivery_policy.md",
+      "marker": "Repentigny | Next-day",
+      "kind": "indirect"
+    },
+    {
+      "id": "I16",
+      "language": "fr",
+      "text": "Quel rabais obtient-on avec 2 500 points?",
+      "source": "loyalty_terms.md",
+      "marker": "2,500 | $25.00",
+      "kind": "indirect"
+    },
+    {
+      "id": "I17",
+      "language": "fr",
+      "text": "Mon yogourt est arrivé périmé, serai-je remboursé?",
+      "source": "return_policy.md",
+      "marker": "A refund or replacement is issued without requiring the item to be returned",
+      "kind": "indirect"
+    },
+    {
+      "id": "I18",
+      "language": "fr",
+      "text": "Puis-je recevoir mes données dans un format que je peux réutiliser?",
+      "source": "privacy_notice_fr.md",
+      "marker": "Portabilité des données",
+      "kind": "indirect"
+    },
+    {
+      "id": "I19",
+      "language": "fr",
+      "text": "Est-ce que vous vendez mes renseignements à des tiers?",
+      "source": "privacy_notice_fr.md",
+      "marker": "Nous ne vendons pas de renseignements personnels",
+      "kind": "indirect"
+    },
+    {
+      "id": "I20",
+      "language": "fr",
+      "text": "Qui puis-je contacter si j'ai une plainte sur ma vie privée?",
+      "source": "privacy_notice_fr.md",
+      "marker": "Déposer une plainte",
+      "kind": "indirect"
+    }
+  ]
+}

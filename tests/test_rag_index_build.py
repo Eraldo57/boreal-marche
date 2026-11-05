@@ -68,7 +68,10 @@ def test_build_index_writes_manifest_and_serves_queries(corpus, tmp_path):
 
     exact_chunk = built.collection.get(include=["documents"])["documents"][0]
     hits = built.query(exact_chunk, top_k=3)
-    assert hits[0]["text"] == exact_chunk and hits[0]["score"] == pytest.approx(1.0, abs=1e-3)
+    assert hits[0]["score"] == pytest.approx(1.0, abs=1e-3)
+    # A hit is the whole section its best chunk belongs to, not the chunk.
+    section = built.sections[hits[0]["source"]][hits[0]["chunk_index"]]
+    assert hits[0]["text"] == section["text"]
     assert {h["language"] for h in hits} <= {"en", "fr"}
 
 
@@ -165,3 +168,67 @@ def test_chunk_text_splits_paragraphs_and_sentences():
 def test_chunk_text_rejects_invalid_window(size, overlap):
     with pytest.raises(ValueError):
         index.chunk_text("anything", chunk_size=size, chunk_overlap=overlap)
+
+
+STRUCTURED = (
+    "# Test policy\n\n*Last updated: 2024-01-01*\n\n"
+    "## 1. Alpha\n\nAlpha text.\n\n### 1.1 Sub\n\nSub text stays inside Alpha.\n\n"
+    "## 2. Beta\n\n| Zone | Fee |\n|---|---|\n| One | $5 |\n| Two | $9 |\n"
+)
+
+
+def test_split_sections_keeps_subsections_and_drops_the_title_and_date_line():
+    sections = index.split_sections(STRUCTURED)
+    assert [s["heading"] for s in sections] == ["1. Alpha", "2. Beta"]  # no empty introduction
+    assert {s["title"] for s in sections} == {"Test policy"}
+    assert "### 1.1 Sub" in sections[0]["text"] and "Sub text" in sections[0]["text"]
+    assert sections[1]["text"].startswith("## 2. Beta") and "| Two | $9 |" in sections[1]["text"]
+
+
+def test_introduction_text_is_kept_and_a_flat_document_is_one_section():
+    with_intro = index.split_sections("# T\n\n*Applicable law: X.*\n\n## 1. A\n\nBody.")
+    assert [s["heading"] for s in with_intro] == ["Introduction", "1. A"]
+    assert "Applicable law" in with_intro[0]["text"]
+    flat = index.split_sections(ENGLISH)
+    assert (
+        len(flat) == 1 and flat[0]["heading"] == "Introduction" and "Perishable" in flat[0]["text"]
+    )
+
+
+def test_every_chunk_is_embedded_with_its_title_and_heading(tmp_path):
+    folder = tmp_path / "corpus"
+    folder.mkdir()
+    (folder / "policy.md").write_text(STRUCTURED, encoding="utf-8")
+    built = index.build_index(folder, tmp_path / "db")
+    documents = built.collection.get(include=["documents"])["documents"]
+    assert all(
+        d.startswith(("Test policy — 1. Alpha\n", "Test policy — 2. Beta\n")) for d in documents
+    )
+
+
+def test_a_section_is_returned_once_however_many_of_its_chunks_match(tmp_path, monkeypatch):
+    long_section = "# Long\n\n## 1. Wide\n\n" + " ".join(
+        f"Sentence number {i} here." for i in range(60)
+    )
+    folder = tmp_path / "corpus"
+    folder.mkdir()
+    (folder / "long.md").write_text(long_section, encoding="utf-8")
+    (folder / "other.md").write_text(
+        "# Other\n\n## 1. Else\n\nSomething unrelated.", encoding="utf-8"
+    )
+    built = index.build_index(folder, tmp_path / "db")
+    assert built.collection.count() > 2  # the long section was cut into several chunks
+    chunk = built.collection.get(include=["documents"])["documents"][0]
+    hits = built.query(chunk, top_k=5)
+    keys = [(h["source"], h["chunk_index"]) for h in hits]
+    assert len(keys) == len(set(keys)) == 2
+
+
+def test_an_index_with_another_layout_must_be_rebuilt(corpus, tmp_path):
+    db = tmp_path / "db"
+    index.build_index(corpus, db)
+    manifest = json.loads((db / "manifest.json").read_text())
+    manifest["layout"] = 1
+    (db / "manifest.json").write_text(json.dumps(manifest))
+    with pytest.raises(ValueError, match="layout changed"):
+        index.RagIndex(db, corpus)

@@ -9,10 +9,25 @@ from __future__ import annotations
 import structlog
 from fastapi import APIRouter, HTTPException, Request
 
-from api.schemas import FiringRule, RecommendationRequest, RecommendationResponse
+from api.schemas import (
+    FiringRule,
+    RecommendationDetailsResponse,
+    RecommendationRequest,
+    RecommendationResponse,
+)
 
 logger = structlog.get_logger(__name__)
 router = APIRouter(tags=["recommendation"])
+
+
+@router.get("/recommend/details", response_model=RecommendationDetailsResponse)
+async def recommendation_details(request: Request) -> dict:
+    """All public training item descriptions, loaded rules and mining provenance."""
+    engine = request.app.state.rule_engine
+    if engine is None:
+        raise HTTPException(503, "Recommendation artifacts missing; run python -m src.rules")
+    # The compatibility adapter used by existing fixtures exposes the same real engine.
+    return dict(getattr(engine, "engine", engine).describe())
 
 
 @router.post("/recommend", response_model=RecommendationResponse)

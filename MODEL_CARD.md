@@ -1,73 +1,82 @@
-# Model card — retention milestone
+# Model card — retention 0.3.0
 
-Updated 2026-11-01. This describes the generated artifact, not an assumed winning algorithm. The model itself was trained on 2026-09-30 and has not changed since.
+Updated 2026-11-05. Authoritative metadata: `artifacts/retention_model_metadata.json`.
+The archived 25-feature version is in `reports/archive/20261105_25_feature_model/`.
 
-## Artifact and intended use
+## Intended use and model
 
-RandomForestClassifier, training-only median-imputation pipeline, isotonic calibration selected on a separate decision period. Model version 0.2.0. Exact timestamp, run ID, library versions, dirty git state, feature/data/config/code/model hashes and threshold are in artifacts/retention_model_metadata.json.
+RandomForestClassifier with training-only median imputation and sigmoid calibration. Positive
+means a positive purchase in the following 90 days. This historical academic demo estimates
+purchase probability. It does not estimate incremental coupon response and sends no coupons.
 
-Positive target: **will place a positive purchase within 90 days**. Risk labels describe NON-return and therefore decrease as the probability increases. This is a historical academic demonstration, not an authorized campaign or deployment on contemporary customers. No coupon dispatch is implemented.
+Contract 2.0 serves **12 ordered features** from `src/contracts.py`; 25 remain engineered and
+documented for offline analysis. The 13 original removals were chosen from the June development
+audit before the new test evaluation. Location fields are excluded from model inputs and retained
+only for offline group auditing. Training fits 10,253 snapshot rows, calibration 4,522 rows and
+final test evaluates 5,233 customers. Repeat customers can occur across snapshots.
 
-## Inputs and evaluation
+## Chronological protocol
 
-Exactly 25 ordered features in src/contracts.py and governance/FEATURE_INVENTORY.md. Training snapshots precede model-selection validation, calibration, decision and final test periods. Details and every comparison are in reports/current_run/retention_metrics.json. The final estimator fits 10,253 snapshot rows, not 10,253 distinct people. Calibration uses 4,522 rows; final holdout uses 5,233.
+Train: 2010-06-01 and 2010-09-01; validation: 2010-12-01; calibrate: 2011-03-01;
+decision: 2011-06-01; test: 2011-09-01. Six cutoffs, five stages. Features strictly precede each
+cutoff and 90-day labels mature before the next stage. Eight classifier families, dummy and
+recency baselines are compared on validation. The top two tunable families receive 12 Optuna
+trials each. MedianPruner evaluates genuinely fitted 50%, 75% and 100% training resources;
+9 of 24 trials were pruned. March fits calibrators; June chooses calibration and threshold.
 
-| Final chronological holdout | Average precision | ROC-AUC | Brier |
+| September test | Average precision | ROC-AUC | Brier |
 |---|---:|---:|---:|
-| Selected calibrated model | 0.743038 | 0.780963 | 0.195399 |
-| Recency-ranking heuristic | 0.671134 | 0.760756 | 0.396624 |
+| Calibrated forest | 0.759631 | 0.786325 | 0.193983 |
+| Recency ranking | 0.671134 | 0.760756 | 0.396624 |
 | Stratified dummy | 0.431339 | 0.508110 | 0.485572 |
 
-AP is reported under the historical name PR-AUC, but implemented with sklearn average_precision_score (not trapezoidal integration). Recency is an uncalibrated ranking baseline, so its Brier score should not be interpreted as a fair comparison of learned calibration. Test prevalence is 0.427288. Recall of returners in the highest-scored decile is 0.215564.
+AP is sklearn average precision, historically labelled PR-AUC here, rather than trapezoidal PR
+integration. Test prevalence is 42.73%. Recency scores are 1/(1+recency_days), an uncalibrated
+ranking; their Brier score is not a fair comparison of learned calibration.
+AP 95% interval: 0.7425–0.7749; paired AP difference versus recency: +0.0708–+0.1049.
+These are 1,000 paired customer bootstraps conditional on this model and this one historical
+period, not uncertainty over model selection, retraining or future domain shifts.
 
-Eight classifier families and two baselines were compared. Twelve Optuna trials for each of the top two tunable families were executed; no pruning is claimed. Sigmoid, isotonic and uncalibrated Brier were compared on June decision data. No model/calibration/threshold choice uses final test data.
+## Calibration and decision policy
 
-Two charts are drawn from the saved report (`python -m src.plots`); every training run also logs them to MLflow:
+June Brier: raw 0.16506, isotonic 0.15665, sigmoid 0.15631 (selected). September Brier 0.19398
+is on a later population. Plots and confusion counts appear under Streamlit About → Model card.
 
-- **Reliability before and after calibration:** `reports/current_run/figures/reliability_curve.png`. On June decision data the Brier score goes from 0.1681 uncalibrated to 0.1578 with isotonic and 0.1582 with sigmoid; isotonic was selected.
-- **Utility across thresholds:** `reports/current_run/figures/threshold_utility.png`.
+Offer utility: pM−C; no-offer utility: −pF. Break-even C/(M+F) is 20% with assumed C=5, M=25,
+F=0. The 201-point June threshold sweep selected **20.5%**, utility 20,005 assumed units.
+At this threshold, test recall is 82.42%, precision 56.99%, selecting 61.80% of customers.
+An equal-count recency rule recalls 81.93%. The practical binary advantage is small.
+Assumed test utility 29,905 is neither observed profit nor causal uplift; purchases without an
+offer are not credited in this objective. Equal coupons are issued as a hypothetical policy only.
 
-## Registry and promotion
+## Governance and registry
 
-- **Version 1.** This model is version 1 of `boreal-retention` in the local MLflow registry, registered as a candidate.
-- **Gate check.** It passes the first-champion gate on the test snapshot: PR-AUC 0.7430 against 0.6711 for the recency heuristic.
-- **Fairness flags.** It carries five strong flags that an approver must acknowledge.
-- **Not promoted.** The approver must be the project owner (`governance/PROMOTION_POLICY.md`). Until then the API serves `artifacts/` and `/version` says so.
+MLflow registered version 2 as a candidate, without champion promotion. The API's artifact fallback
+is reported by `/version`. Owner promotion requires explicit acknowledgement of fairness flags.
+Five strong thin-history recall disparities remain; a tiny unknown-region group is inconclusive.
+See `governance/fairness_audit.md` for intervals, overlap and mitigation trade-offs. The selected
+operational mitigation is human review of every proposed action and abstention from automatic
+dispatch; it does not repair the statistical recall gap.
 
-## Fairness and minimisation
+The current 12-feature ablation finds nine individually inconclusive features. Dropping those nine
+jointly loses June AP by 0.0334 (95% interval 0.0206–0.0466), so they are retained together.
+The brief's minimisation requirement is addressed by removing the original 13, not by treating
+individually redundant signals as jointly dispensable.
 
-- **Fairness audit** (`governance/fairness_audit.md`, test snapshot, threshold 0.22). No region is flagged. Five groups are strongly flagged, all customers with a thin purchase history, against an overall returner recall of 81.4%:
-  - one-time buyers, recall 17.3%;
-  - lowest spend quartile, 14.2%;
-  - second spend quartile, 62.7%;
-  - tenure under 6 months, 69.5%;
-  - tenure 6–12 months, 64.9%.
+## Limits and reproducibility
 
-  Five mitigations are listed with their trade-offs; none is chosen.
-- **Data minimisation** (`governance/FEATURE_INVENTORY.md`). A drop-column test on June decision data:
-  - Twelve features are necessary.
-  - Thirteen show no reliable contribution, including all three location features and two exact duplicates.
-  - Removing all thirteen together scored higher, not lower.
+The September test snapshot was previously examined with the original model and re-evaluated
+under the locked retraining protocol. It is **not a new independent holdout**. The first retraining
+attempt failed during audit generation; the fixed audit and successful rerun are both logged.
+No selection between model versions used the new September result.
 
-  The recommendation to retrain on the twelve awaits the project owner's decision; it would change the API contract and every metric.
+Historical UK giftware, weak first-token category proxies, repeated customers and seasonal changes
+limit transfer to fictional Québec grocery operations. Thin-history recall remains weak; removing
+location inputs does not prove fairness. No treatment/control coupon experiment is available.
+Authentication, real rights handling, verified reviewer identity and enforced retention are absent.
+Cloud execution and current GitHub CI require credentials; local runs do not substitute for them.
 
-## Assumption-based threshold
-
-Threshold 0.22 maximizes June validation utility:
-selected × (actual_return × margin − coupon_cost), with an optional missed-return cost.
-Coupon cost 5, margin 25 and missed-return cost 0 are **assumed monetary units**, not learned economics. This targets likely returners, not proven persuadable churners. The numerical utility is not observed profit, causal uplift or ROI; it should not be presented as such.
-
-## Important limitations
-
-- Customers recur across snapshots; observation history expands and seasons differ. Unseen-customer performance is not measured.
-- Customers with a thin purchase history have much lower returner recall; see governance/fairness_audit.md.
-- Country coding is ordinal and category labels are weak first-token proxies. The redundant features found by the minimisation audit are still in the model, pending a decision.
-- Geographic/temporal/source-domain transfer is unvalidated. Live monitoring shows real 2011 traffic drifting from the 2010 training reference, especially the tenure features.
-- Metric confidence intervals are not reported (subgroup recall intervals are). There is no coupon experiment. Drift-to-performance backfill is designed but not built. SageMaker tuning is built but has not run on AWS.
-- Repeated runs reproduced the same locked protocol. They are not additional independent holdouts.
-- API top_factors are optional global importance hints, not individual SHAP explanations; calibrated wrappers may return an empty list.
-
-Joblib has pickle-equivalent arbitrary-code execution risks. Only load trusted artifacts; hashes detect change, not malicious intent.
-
-- **Ran:** MLflow tracking and registry registration.
-- **Not yet run:** registry promotion, which waits for the owner. SageMaker spot training and the endpoint ran only locally in their container (docs/SAGEMAKER.md), not on AWS.
+`top_factors` are global importances. Per-customer `explanation` uses one-at-a-time median
+substitution, not SHAP or causality; correlated contributions do not add up and explanations are
+not stored with decisions. Trusted joblib artifacts only: hashes establish integrity, not trust.
+See `docs/AI_USE.md` for assistance and verification provenance.

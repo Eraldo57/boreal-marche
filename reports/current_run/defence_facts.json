@@ -1,0 +1,181 @@
+{
+  "executed_at": "2026-11-04T16:42:47.899532+00:00",
+  "q4_purchase_gaps": {
+    "horizon_days": 90,
+    "customers_with_a_purchase": 5861,
+    "repeat_gaps": 27049,
+    "gap_days_median": 32.0,
+    "gap_days_p75": 70.0,
+    "gap_days_p90": 148.0,
+    "share_of_gaps_within": {
+      "30": 0.4906,
+      "60": 0.7086,
+      "90": 0.8061,
+      "180": 0.9274
+    }
+  },
+  "q8_feature_importance": {
+    "classifier": "RandomForestClassifier",
+    "ranking": [
+      {
+        "feature": "std_days_between_orders",
+        "importance": 0.2239
+      },
+      {
+        "feature": "frequency",
+        "importance": 0.1858
+      },
+      {
+        "feature": "avg_days_between_orders",
+        "importance": 0.1219
+      },
+      {
+        "feature": "recency_days",
+        "importance": 0.103
+      },
+      {
+        "feature": "monetary_std",
+        "importance": 0.089
+      },
+      {
+        "feature": "n_unique_categories",
+        "importance": 0.0723
+      },
+      {
+        "feature": "is_one_time_buyer",
+        "importance": 0.0698
+      },
+      {
+        "feature": "monetary_mean",
+        "importance": 0.0514
+      },
+      {
+        "feature": "top_category_share",
+        "importance": 0.0331
+      },
+      {
+        "feature": "avg_basket_size",
+        "importance": 0.0314
+      },
+      {
+        "feature": "morning_purchase_ratio",
+        "importance": 0.0132
+      },
+      {
+        "feature": "single_item_basket_ratio",
+        "importance": 0.0054
+      }
+    ]
+  },
+  "q9_model_versus_recency_rule": {
+    "snapshot": "test (2011-09-01)",
+    "customers": 5233,
+    "threshold": 0.20500000000000002,
+    "model": {
+      "selected_share": 0.618,
+      "recall": 0.8242,
+      "precision": 0.5699
+    },
+    "recency_rule_same_selection_rate": {
+      "selected_share": 0.618,
+      "recall": 0.8193,
+      "precision": 0.5665
+    },
+    "recency_rule_fixed_windows": {
+      "bought_within_30_days": {
+        "selected_share": 0.1783,
+        "recall": 0.3126,
+        "precision": 0.7492
+      },
+      "bought_within_60_days": {
+        "selected_share": 0.2828,
+        "recall": 0.4718,
+        "precision": 0.7128
+      },
+      "bought_within_90_days": {
+        "selected_share": 0.3688,
+        "recall": 0.5863,
+        "precision": 0.6793
+      },
+      "bought_within_120_days": {
+        "selected_share": 0.4391,
+        "recall": 0.6717,
+        "precision": 0.6536
+      },
+      "bought_within_180_days": {
+        "selected_share": 0.5312,
+        "recall": 0.7531,
+        "precision": 0.6058
+      }
+    }
+  },
+  "q12_lift_filter": {
+    "training_baskets": 25601,
+    "min_support": 0.005,
+    "min_confidence": 0.1,
+    "min_lift": 1.2,
+    "rules_without_a_lift_filter": 3579,
+    "rules_dropped_by_the_lift_filter": 12,
+    "highest_confidence_among_dropped": 0.1725,
+    "dropped_rules_with_confidence_at_least_0.30": 0,
+    "most_common_items_share_of_baskets": [
+      {
+        "item": "white hanging heart t-light holder",
+        "share": 0.153
+      },
+      {
+        "item": "regency cakestand 3 tier",
+        "share": 0.0962
+      },
+      {
+        "item": "assorted colour bird ornament",
+        "share": 0.0725
+      }
+    ],
+    "highest_confidence_dropped_rules": [
+      {
+        "antecedent": "jumbo shopper vintage red paisley",
+        "consequent": "white hanging heart t-light holder",
+        "confidence": 0.1725,
+        "lift": 1.1275,
+        "consequent_share_of_baskets": 0.153
+      },
+      {
+        "antecedent": "pack of 72 retrospot cake cases",
+        "consequent": "white hanging heart t-light holder",
+        "confidence": 0.1675,
+        "lift": 1.0949,
+        "consequent_share_of_baskets": 0.153
+      },
+      {
+        "antecedent": "vintage snap cards",
+        "consequent": "white hanging heart t-light holder",
+        "confidence": 0.1667,
+        "lift": 1.0896,
+        "consequent_share_of_baskets": 0.153
+      },
+      {
+        "antecedent": "plasters in tin spaceboy",
+        "consequent": "white hanging heart t-light holder",
+        "confidence": 0.1644,
+        "lift": 1.0747,
+        "consequent_share_of_baskets": 0.153
+      },
+      {
+        "antecedent": "regency cakestand 3 tier",
+        "consequent": "white hanging heart t-light holder",
+        "confidence": 0.1615,
+        "lift": 1.056,
+        "consequent_share_of_baskets": 0.153
+      },
+      {
+        "antecedent": "baking set 9 piece retrospot",
+        "consequent": "white hanging heart t-light holder",
+        "confidence": 0.1505,
+        "lift": 0.984,
+        "consequent_share_of_baskets": 0.153
+      }
+    ]
+  },
+  "model_version": "0.3.0"
+}

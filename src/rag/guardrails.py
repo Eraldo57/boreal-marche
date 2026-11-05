@@ -85,6 +85,28 @@ def check_out_of_scope(query: str, **_: Any) -> GuardrailResult:
 # ---------------------------------------------------------------------------
 
 
+# Shown above a passage that scored between the similarity floor and the confident level.
+UNCERTAIN_NOTICE = {
+    "en": (
+        "I could not find a passage that clearly answers this, so the closest one is shown "
+        "below. If it does not help, please contact support@borealmarche.ca / 1-877-BOREAL-1.\n\n"
+    ),
+    "fr": (
+        "Je n'ai pas trouvé de passage qui répond clairement à cette question; voici le plus "
+        "proche. S'il ne vous aide pas, contactez support@borealmarche.ca / 1-877-BOREAL-1.\n\n"
+    ),
+}
+
+HANDOFF_NOTICE = {
+    "en": "I could not find policy evidence that answers this question. Please contact "
+    "support@borealmarche.ca / 1-877-BOREAL-1 for human assistance. "
+    "These are fictional demonstration contacts.",
+    "fr": "Je n'ai pas trouvé de politique qui répond à cette question. Pour une aide humaine, "
+    "contactez support@borealmarche.ca / 1-877-BOREAL-1. "
+    "Ces coordonnées sont fictives et servent à la démonstration.",
+}
+
+
 def check_similarity_floor(
     query: str,
     context_chunks: list[dict[str, Any]],

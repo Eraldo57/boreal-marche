@@ -1,0 +1,44 @@
+{
+  "executed_at": "2026-11-04T05:40:32.837909+00:00",
+  "queries": 300,
+  "query_source": "real September-to-November baskets with more than one item",
+  "note": "Only the 3,567-rule row uses the real export; larger rows are synthetic.",
+  "results": [
+    {
+      "rules": 3567,
+      "rules_are": "real export",
+      "build_seconds": 0.0,
+      "memory_added_mb": 0.0,
+      "recommend_ms_p50": 0.025,
+      "recommend_ms_p95": 0.222,
+      "recommend_ms_max": 0.278
+    },
+    {
+      "rules": 10000,
+      "rules_are": "synthetic",
+      "build_seconds": 0.01,
+      "memory_added_mb": 0.0,
+      "recommend_ms_p50": 0.035,
+      "recommend_ms_p95": 0.188,
+      "recommend_ms_max": 0.347
+    },
+    {
+      "rules": 100000,
+      "rules_are": "synthetic",
+      "build_seconds": 0.2,
+      "memory_added_mb": 17.9,
+      "recommend_ms_p50": 0.48,
+      "recommend_ms_p95": 2.077,
+      "recommend_ms_max": 5.889
+    },
+    {
+      "rules": 500000,
+      "rules_are": "synthetic",
+      "build_seconds": 1.13,
+      "memory_added_mb": 325.8,
+      "recommend_ms_p50": 3.144,
+      "recommend_ms_p95": 14.808,
+      "recommend_ms_max": 31.115
+    }
+  ]
+}

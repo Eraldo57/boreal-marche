@@ -10,7 +10,7 @@ Boréal Marché is fictional. Public source identifiers and transaction historie
 
 ## Implemented controls
 
-- Strict prediction/tool input validation; exactly 25 features; no names/emails/payment details are model inputs.
+- Strict prediction/tool input validation; exactly 12 model features (25 engineered offline); no names/emails/payment details are model inputs.
 - Shared assistant scope/privacy checks precede tool routing; policy answers cite retrieved text.
 - Retention tools require matching caller-supplied demo customer context.
 - No coupon dispatch or customer-data mutation exists.
@@ -28,8 +28,8 @@ These controls are limited: a supplied ID is **not authentication**, regex guard
 |---|---|
 | Authentication and authorization | Add authenticated identity, per-customer permissions, rate limits and access audit |
 | Human review | The approval step exists, but the reviewer's name is declared, not authenticated. There is no customer-facing appeal or correction process, no support handoff, and no retention period yet for `decision_log`, which holds customer IDs |
-| Explanation and correction | Global feature hints are not individual explanations; implement reviewed explanations and correction process |
-| Minimization | Audit done (`governance/FEATURE_INVENTORY.md`). A drop-column test on development data finds 13 of 25 features with no reliable contribution, including all three location features, and a 12-feature model scores higher. Removing them is recommended but not applied: it needs the owner's decision and a retrain. Predictive necessity is not legal necessity |
+| Explanation and correction | Per-customer explanations exist (`explanation` in `/predict`, shown in the interface: each feature's effect against the training median). They are not stored with the decision, their customer-facing wording has not been reviewed, and there is no correction process |
+| Minimization | Audit done (`governance/FEATURE_INVENTORY.md`). A drop-column test on development data finds 13 of 25 features with no reliable contribution, including all three location features, and a 12-feature model scores higher. The original 13 have been removed and the model retrained with 12 inputs under contract 2.0. Predictive necessity is not legal necessity |
 | Retention/deletion | No scheduled purge, erasure request workflow, backup/cache/model lineage deletion or proof of deletion |
 | External processing | OpenAI would transmit message/retrieved context; no privacy impact assessment or provider agreement completed |
 | Fairness | Subgroup audit done (`governance/fairness_audit.md`). There are five strong recall flags, all customers with a thin purchase history; five mitigations are listed, none chosen. Promotion gates stop a new model from adding or widening a flag. The groups are behavioural proxies only, so there are no protected-characteristic conclusions |
@@ -48,3 +48,9 @@ See governance/FEATURE_INVENTORY.md for the canonical 25 names, order and defini
 - **Location proxies.** Geographic features can stand in for location; integer encoding does not anonymize it.
 - **What the ablation found.** The location features and the monetary duplicates show no reliable predictive contribution.
 - **Not a legal claim.** No statement that every feature is legally necessary is made.
+
+## Primary-source review — 5 November 2026
+
+CAI guidance and private-sector statute section 12.1 were checked for transparency and the opportunity for a person to make observations to personnel able to review an exclusively automated decision. This is a design reference, not a compliance determination. A declared reviewer name and fictional contact do not establish a functioning rights process.
+
+[CAI guidance](https://www.cai.gouv.qc.ca/protection-renseignements-personnels/information-entreprises-privees/utilisation-communication-renseignements-personnels); [official statute](https://www.legisquebec.gouv.qc.ca/en/document/cs/p-39.1).

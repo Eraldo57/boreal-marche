@@ -1,0 +1,1 @@
+{"active":["error_rate"],"alerts":[{"at":"2026-11-05T21:29:10.136856Z","check":"error_rate","state":"raised","level":"yellow","value":0.058823529411764705,"rule":"yellow above 0.05, red above 0.1","detail":"","delivered_to":["log","database"]}],"channels":["log","database","webhook"],"webhook_configured":false,"delivery_failures":0}

@@ -30,6 +30,7 @@ def main():
         sample = check("GET", "/customers/12347/features")
         payload = {"customer_id": sample["customer_id"], "features": sample["features"]}
         single = check("POST", "/predict", payload)
+        assert single["explanation"], "a prediction must explain this customer's own score"
         batch = check("POST", "/predict/batch", {"customers": [payload, payload]})
         assert batch["count"] == 2
         assert all(r["probability"] == single["probability"] for r in batch["predictions"])

@@ -14,7 +14,7 @@ from fastapi.testclient import TestClient
 
 from scripts import sagemaker_entry, sagemaker_jobs
 from src import registry
-from src.contracts import FEATURE_NAMES
+from src.contracts import CONTRACT_VERSION, FEATURE_NAMES
 from tests.test_registry import _good_model
 from tests.test_train_run import _synthetic_inputs
 
@@ -49,7 +49,7 @@ def _model_dir(tmp_path):
     folder.mkdir()
     joblib.dump(_good_model(), folder / registry.MODEL_FILE)
     metadata = {
-        "contract_version": "1.0",
+        "contract_version": CONTRACT_VERSION,
         "feature_names": FEATURE_NAMES,
         "decision_threshold": 0.5,
         "target": "will_return",

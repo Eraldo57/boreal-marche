@@ -25,6 +25,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from src.contracts import FEATURE_NAMES, PROCESSED, PROJECT_ROOT
+from src.envfile import load_env_file
 
 REGION = "ca-central-1"
 PREFIX = "boreal-marche"
@@ -351,6 +352,7 @@ def compare(args) -> None:
 
 
 def main() -> None:
+    load_env_file()  # SAGEMAKER_ROLE_ARN and friends may live in .env
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("upload-data")

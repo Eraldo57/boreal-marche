@@ -1,0 +1,3 @@
+golden_answerable   14 questions | fact in the 3 excerpts given to the model: 12 | in all 5 retrieved: 12
+holdout_direct      26 questions | fact in the 3 excerpts given to the model: 23 | in all 5 retrieved: 24
+holdout_indirect    20 questions | fact in the 3 excerpts given to the model: 18 | in all 5 retrieved: 18

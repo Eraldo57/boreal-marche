@@ -1,0 +1,359 @@
+{
+  "about": "Hand-made answer-correctness rubric for the 18 golden questions that have an expected source. Facts come from docs/corpus (each marker is a verbatim phrase that must occur in its source file; tests/test_answer_rubric.py checks that). Verdicts are one rater's reading, the AI rater's, of the saved answers: not independent, so spot-check them. Each verdict is tied to the SHA-256 of the answer it judged; scripts/score_answers.py refuses stale ones.",
+  "judged_runs": {
+    "openai": "2026-11-03T01:16:09.852194+00:00",
+    "ollama": "2026-11-01T22:34:12.108927+00:00"
+  },
+  "verdicts": {
+    "correct": "States the facts the question needs, and nothing the corpus contradicts or lacks.",
+    "partly_correct": "Says only true things but leaves out a fact the question asks for.",
+    "declined_appropriate": "Declines, and the corpus really does not answer the question.",
+    "declined_answerable": "Declines, although the corpus answers the question.",
+    "wrong": "Says something the corpus contradicts or does not contain.",
+    "no_answer": "No answer was produced (the routing step failed or refused)."
+  },
+  "questions": [
+    {
+      "id": 1,
+      "answerable": true,
+      "source": "return_policy.md",
+      "marker": "cannot be physically returned",
+      "fact": "Perishable products (refrigerated, frozen, fresh produce, bakery, anything expiring within 14 days of delivery) cannot be physically returned; a quality problem gets a refund or replacement if reported within 48 hours with a photo (sections 3.1, 3.2).",
+      "judgments": {
+        "openai": {
+          "verdict": "correct",
+          "reason": "States that perishables cannot be returned, with the right examples.",
+          "reply_sha256": "ad1ad05221ccc56ca1f1dabba938de3884905f166193bbec50333ee415f94abe"
+        },
+        "ollama": {
+          "verdict": "declined_answerable",
+          "reason": "Refuses although the rule was the top excerpt.",
+          "reply_sha256": "1624df048ca4bbf1e261f9f40b7401218c44018b615ec32d084fb99e07c7e121"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "answerable": true,
+      "source": "delivery_policy.md",
+      "marker": "Repentigny | Next-day",
+      "fact": "Zone 1 (Montréal métropolitain): standard delivery is next-day; express is same-day for orders placed and paid before 11 h Eastern (sections 1, 2.2).",
+      "judgments": {
+        "openai": {
+          "verdict": "declined_answerable",
+          "reason": "Refuses; the zone table was not among the excerpts.",
+          "reply_sha256": "4ec967df60d154497b4282d89e745c5d9ce9c8ea43e2abbf08a6bc231e902848"
+        },
+        "ollama": {
+          "verdict": "declined_answerable",
+          "reason": "Refuses; the zone table was not among the excerpts.",
+          "reply_sha256": "487b163159da63878d9884d4c282ba104fe5f502193a064347b4487980068045"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "answerable": true,
+      "source": "delivery_policy.md",
+      "marker": "Frozen shipments are only available for Zones 1 and 2",
+      "fact": "Frozen items ship in insulated containers with dry ice, to Zones 1 and 2 only; in Zones 3 and 4 they are removed and refunded, with an email before dispatch (section 4.2).",
+      "judgments": {
+        "openai": {
+          "verdict": "correct",
+          "reason": "Zones 1 and 2 only, dry ice, removal and refund, email notice: all as written.",
+          "reply_sha256": "1a5df97c63fa9073332a1a2ba26a7714fbbf8b8537482b4875b179dc7c87fc23"
+        },
+        "ollama": {
+          "verdict": "wrong",
+          "reason": "Opens with 'we do not ship frozen products', which contradicts section 4.2.",
+          "reply_sha256": "3a2786d2d535a914c2616c7e8f7550946f58338fc26d014324164a27002a801e"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "answerable": false,
+      "source": "allergen_policy.md",
+      "marker": null,
+      "fact": "The corpus has no allergen list for bakery products. It says product pages carry a 'Contains' box and the physical label lists priority allergens (3.1); only the prepared meals have a stated advisory (4.2).",
+      "judgments": {
+        "openai": {
+          "verdict": "declined_appropriate",
+          "reason": "Says the policies do not list bakery allergens and points to the product page and label, as section 3.1 does.",
+          "reply_sha256": "adba5123f7eded6816efb203d45747568c09e24558c4c552572ddb32ed4c5090"
+        },
+        "ollama": {
+          "verdict": "no_answer",
+          "reason": "The model's tool request failed validation; no answer was produced.",
+          "reply_sha256": "87c45099b3dfa20d594cb272b49de4c77d5939a6f0f44e8d4534f9ede3eb106b"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "answerable": true,
+      "source": "loyalty_terms.md",
+      "marker": "1 point per $1 spent",
+      "fact": "Members earn 1 point per $1 spent, before taxes and after discounts; shipping fees earn nothing; some categories earn bonus points (sections 2.1, 2.2).",
+      "judgments": {
+        "openai": {
+          "verdict": "partly_correct",
+          "reason": "True but vague: omits the rate of 1 point per $1.",
+          "reply_sha256": "95ce2188272814919cb42997f577d91d7a95166d3c64cd465495c84c7d693ec1"
+        },
+        "ollama": {
+          "verdict": "wrong",
+          "reason": "Gives the rate and the exclusions, then says 'there are no bonus categories', which contradicts section 2.2.",
+          "reply_sha256": "59be6e809158fde2809631304aef7d9a5fdecdb4e9c5156d39c8c39b7f5596a1"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "answerable": true,
+      "source": "return_policy.md",
+      "marker": "eligible for a full refund or replacement",
+      "fact": "Damaged or defective items are eligible for a full refund or replacement, reported within 48 hours with a photo (section 4).",
+      "judgments": {
+        "openai": {
+          "verdict": "no_answer",
+          "reason": "The router refused before any answer was written.",
+          "reply_sha256": "415f8a569e3e7570b7a77a43edbf613606b395c4fe626e1189de4009da19ec97"
+        },
+        "ollama": {
+          "verdict": "declined_answerable",
+          "reason": "Refuses; the damaged-items section was not among the excerpts.",
+          "reply_sha256": "340968724ca24c75b6406cf5ad65993edd4d602efa3964e86f41e49c8a81e07d"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "answerable": true,
+      "source": "privacy_notice_en.md",
+      "marker": "Full name, date of birth",
+      "fact": "It collects identity, contact, payment (tokenised), transaction, delivery, behavioural, device, loyalty, communications and AI-derived data (section 2).",
+      "judgments": {
+        "openai": {
+          "verdict": "declined_answerable",
+          "reason": "Refuses; the data table was not among the excerpts.",
+          "reply_sha256": "c479069bba0ac1e162a00170a606d5a47fcc464a8be34d0cbdc6cf63d438c54d"
+        },
+        "ollama": {
+          "verdict": "partly_correct",
+          "reason": "Names contact, browsing and purchase data, which is right but a fraction of the table; the 'Electronic Documents Act (PIPEDA)' name is garbled.",
+          "reply_sha256": "ec0dde70c4494663e02d42a23a74e7fa58ca87d66295bea05633144ea293a62c"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "answerable": false,
+      "source": "return_policy.md",
+      "marker": null,
+      "fact": "The corpus has no procedure for cancelling an ordinary order. It covers only Boréal Box subscriptions: individual deliveries up to 72 hours before dispatch, or My Account > Subscriptions > Cancel (section 7).",
+      "judgments": {
+        "openai": {
+          "verdict": "declined_appropriate",
+          "reason": "Says the policies do not cover it. It does not mention the subscription rule.",
+          "reply_sha256": "4bb67b2a1ad8e1d51cdb72a4db4c1d209b54ac17aea48667a68a9d7e6f423290"
+        },
+        "ollama": {
+          "verdict": "correct",
+          "reason": "Says ordinary orders are not covered and gives the one cancellation path the policy has, for subscriptions.",
+          "reply_sha256": "d4fffc262801c488c0355b8de6226c88ee9b95f707767625c5548a8357ef1272"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "answerable": true,
+      "source": "loyalty_terms.md",
+      "marker": "Pousse (Seedling) | $0 – $499",
+      "fact": "Three tiers over a rolling 12 months: Pousse $0-499, Sapin $500-1,499, Étoile $1,500+ (section 3).",
+      "judgments": {
+        "openai": {
+          "verdict": "partly_correct",
+          "reason": "Three tiers, rolling 12 months, monthly review and grace period are right, but it names no tier and no threshold.",
+          "reply_sha256": "408e41adfa9c10d6ff6525beccc18a4e95da221e6515c0a5bdf39e4c8593830b"
+        },
+        "ollama": {
+          "verdict": "declined_answerable",
+          "reason": "Refuses; the tier table was not among the excerpts.",
+          "reply_sha256": "b26b230b1da473be0e68e65cafa5750c886a658ee056789beaa624997b3e50e4"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "answerable": true,
+      "source": "delivery_policy.md",
+      "marker": "Zone 1 | $6.95 | $12.95 | $75.00",
+      "fact": "Free shipping starts at $75 (Zone 1), $100 (Zone 2), $150 (Zone 3) or $200 (Zone 4), on the subtotal before taxes (section 3).",
+      "judgments": {
+        "openai": {
+          "verdict": "partly_correct",
+          "reason": "Right that it applies before taxes; says honestly that the amount is not in the excerpts.",
+          "reply_sha256": "ba16c294ca586c7c83153328a4984a4eb2c56ec481d885acd8d600420f17ba78"
+        },
+        "ollama": {
+          "verdict": "declined_answerable",
+          "reason": "Refuses; the fee table was not among the excerpts.",
+          "reply_sha256": "50dd7f072575c1079ac74aab6be094acb197c13c08a4e837b2309445413aca9e"
+        }
+      }
+    },
+    {
+      "id": 12,
+      "answerable": true,
+      "source": "privacy_notice_en.md",
+      "marker": "Request deletion",
+      "fact": "You can request deletion of your account and associated data, subject to legal retention, through privacy@borealmarche.ca, answered within 30 days (sections 8, 12). Closing only the loyalty account is separate: fidelite@borealmarche.ca (loyalty section 9).",
+      "judgments": {
+        "openai": {
+          "verdict": "wrong",
+          "reason": "Says the loyalty address deletes 'your loyalty account and all associated data'; the policy says nothing like that and omits the privacy officer.",
+          "reply_sha256": "41dc8f76a89e585ad3ea4acf7b0b97de4e56e3e2f71f39b6754c749ef983245e"
+        },
+        "ollama": {
+          "verdict": "no_answer",
+          "reason": "The model's tool request failed validation; no answer was produced.",
+          "reply_sha256": "87c45099b3dfa20d594cb272b49de4c77d5939a6f0f44e8d4534f9ede3eb106b"
+        }
+      }
+    },
+    {
+      "id": 13,
+      "answerable": true,
+      "source": "loyalty_terms.md",
+      "marker": "the points earned on that order are deducted",
+      "fact": "A returned order loses the points it earned; points redeemed on it are restored and the refund is reduced by the discount (section 7).",
+      "judgments": {
+        "openai": {
+          "verdict": "partly_correct",
+          "reason": "Grounded in the fraud clause (section 6) and hedged, but misses section 7, which answers the question.",
+          "reply_sha256": "bb3fc849358b82e5532fa53b1b0334ca49472d25c77a58ce677d89b644fd3d4c"
+        },
+        "ollama": {
+          "verdict": "declined_answerable",
+          "reason": "Refuses; section 7 was not among the excerpts.",
+          "reply_sha256": "5e0ca5a115b6369c6e1ed56348f7dd71585f7527fe2e719d4af5cfd4d18e0da2"
+        }
+      }
+    },
+    {
+      "id": 14,
+      "answerable": false,
+      "source": "delivery_policy.md",
+      "marker": null,
+      "fact": "The corpus says ambient items ship in 'standard cardboard boxes' (4.3). It says nothing about recyclability.",
+      "judgments": {
+        "openai": {
+          "verdict": "declined_appropriate",
+          "reason": "Says the policies do not cover it.",
+          "reply_sha256": "5aa12c173cd0a7331f5e158e57078a013e76a86426f159bf659819565fb8fff7"
+        },
+        "ollama": {
+          "verdict": "declined_appropriate",
+          "reason": "Says the policies do not cover it.",
+          "reply_sha256": "bc4f0dc2b7289979b2b86a4ce59dc654f262de4c9b80f05a5fb5e1c99e065c19"
+        }
+      }
+    },
+    {
+      "id": 15,
+      "answerable": true,
+      "source": "delivery_policy.md",
+      "marker": "Free pickup is available at our Montréal warehouse",
+      "fact": "Free click-and-collect at the Montréal warehouse (4300 rue Saint-Ambroise) and the Québec City depot (1150 boulevard Charest Ouest); ready within 4 hours, held 48 hours (section 2.3).",
+      "judgments": {
+        "openai": {
+          "verdict": "declined_answerable",
+          "reason": "Refuses; the click-and-collect section was not among the excerpts.",
+          "reply_sha256": "90064fe79f22adb85a729dead022f4b0ff0febb51fdeea6022536a57b8acb2b7"
+        },
+        "ollama": {
+          "verdict": "wrong",
+          "reason": "Says pickup is only for non-perishable items at the nearest depot for $9.95, which is the failed-delivery rule of section 5.3.",
+          "reply_sha256": "f2280b0da44024df810cf9dd6b8c414e3a5c86ef75dbb827937f614015af628c"
+        }
+      }
+    },
+    {
+      "id": 34,
+      "answerable": true,
+      "source": "return_policy.md",
+      "marker": "cannot be physically returned",
+      "fact": "Frozen products cannot be physically returned (section 3.1).",
+      "judgments": {
+        "openai": {
+          "verdict": "declined_answerable",
+          "reason": "Refuses; the perishables rule was not among the excerpts.",
+          "reply_sha256": "951c44a8052529eb1da05ac1c14f53f46a2d8c9f46b0a3f43c58aff899592f2a"
+        },
+        "ollama": {
+          "verdict": "declined_answerable",
+          "reason": "Refuses; the perishables rule was not among the excerpts.",
+          "reply_sha256": "1e0bdaab3f13c99f899ff6e65b35d5e6f8fbf8ad0f58e91afd915738ef3e6ee4"
+        }
+      }
+    },
+    {
+      "id": 35,
+      "answerable": true,
+      "source": "delivery_policy.md",
+      "marker": "Repentigny | Next-day",
+      "fact": "Zone 1 (Montréal métropolitain): standard delivery is next-day (section 1).",
+      "judgments": {
+        "openai": {
+          "verdict": "declined_answerable",
+          "reason": "Refuses; the zone table was third among the excerpts.",
+          "reply_sha256": "2df69b18762048c434cef9d1a4bde4471443b0ee5a6faf62fe4af69a7b93d2d3"
+        },
+        "ollama": {
+          "verdict": "wrong",
+          "reason": "Answers with click-and-collect readiness (4 hours), not delivery time.",
+          "reply_sha256": "fdbf90d6b2d7c9597e0924236c1ae427ff1438a0efc0b0f404510a6d412df673"
+        }
+      }
+    },
+    {
+      "id": 38,
+      "answerable": true,
+      "source": "privacy_notice_fr.md",
+      "marker": "Demander la suppression",
+      "fact": "You can request deletion of your account and associated data through the privacy officer, answered within 30 days (sections 8, 12 of the French notice).",
+      "judgments": {
+        "openai": {
+          "verdict": "partly_correct",
+          "reason": "Right about closing the loyalty account; says it cannot answer about personal data.",
+          "reply_sha256": "86c01fcd737ef8803ad60210356a7341e6a805a296d45f61e8c2320f5a280bd3"
+        },
+        "ollama": {
+          "verdict": "wrong",
+          "reason": "Presents the loyalty address as the way to 'supprimer votre compte' and promises handling 'dans les plus brefs délais', which no policy says.",
+          "reply_sha256": "f9b4e86977bbcf6b0f248b2db1163e824e4e782340ee5d80fe6feebddb6412f5"
+        }
+      }
+    },
+    {
+      "id": 40,
+      "answerable": false,
+      "source": "allergen_policy.md",
+      "marker": null,
+      "fact": "The corpus has no allergen list for bakery products (see question 4).",
+      "judgments": {
+        "openai": {
+          "verdict": "wrong",
+          "reason": "Lists milk, eggs, wheat, gluten, nuts and sesame as allergens that bakery products 'peuvent inclure'; no policy says so, and this is a safety claim.",
+          "reply_sha256": "ba5ff3ac73e22eae5221fc288c1b34fd5b7110c23fdd85e71624c4de168f3260"
+        },
+        "ollama": {
+          "verdict": "no_answer",
+          "reason": "The model's tool request failed validation; no answer was produced.",
+          "reply_sha256": "87c45099b3dfa20d594cb272b49de4c77d5939a6f0f44e8d4534f9ede3eb106b"
+        }
+      }
+    }
+  ]
+}

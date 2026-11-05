@@ -64,12 +64,14 @@ def tracking(tmp_path, monkeypatch):
 
 def _good_model() -> Pipeline:
     frame, y = _frame(seed=0)
-    return Pipeline([("classifier", LogisticRegression(max_iter=500))]).fit(frame, y)
+    return Pipeline([("classifier", LogisticRegression(max_iter=500))]).fit(frame[FEATURE_NAMES], y)
 
 
 def _constant_model() -> Pipeline:
     frame, y = _frame(seed=0)
-    return Pipeline([("classifier", DummyClassifier(strategy="prior"))]).fit(frame, y)
+    return Pipeline([("classifier", DummyClassifier(strategy="prior"))]).fit(
+        frame[FEATURE_NAMES], y
+    )
 
 
 def _register(tmp_path, model, label: str) -> str:

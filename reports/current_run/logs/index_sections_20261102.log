@@ -1,0 +1,18 @@
+INFO  Found 6 documents in /Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/docs/corpus
+INFO  Loading embedding model 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'…
+INFO  Loading SentenceTransformer model from sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2.
+INFO    allergen_policy.md → 8 sections, 22 chunks (en)
+INFO    delivery_policy.md → 6 sections, 18 chunks (en)
+INFO    loyalty_terms.md → 10 sections, 18 chunks (en)
+INFO    privacy_notice_en.md → 13 sections, 29 chunks (en)
+INFO    privacy_notice_fr.md → 13 sections, 29 chunks (fr)
+INFO    return_policy.md → 9 sections, 14 chunks (en)
+INFO  Embedding 130 chunks…
+
+Batches:   0%|          | 0/5 [00:00<?, ?it/s]
+Batches:  20%|██        | 1/5 [00:00<00:01,  2.17it/s]
+Batches:  40%|████      | 2/5 [00:00<00:01,  2.48it/s]
+Batches:  60%|██████    | 3/5 [00:01<00:00,  2.63it/s]
+Batches:  80%|████████  | 4/5 [00:01<00:00,  3.05it/s]
+Batches: 100%|██████████| 5/5 [00:01<00:00,  3.48it/s]
+INFO  Index complete — 130 chunks in collection 'boreal_policy'.

@@ -1,0 +1,131 @@
+{
+  "retrieval": {
+    "answerable_questions": 14,
+    "fact_given_to_model": 4,
+    "fact_in_retrieved_top_k": 8,
+    "excerpts_given_to_model": 3,
+    "chunks_retrieved": 5,
+    "similarity_floor": 0.25,
+    "per_question": {
+      "1": {
+        "rank": 1,
+        "given_to_model": true
+      },
+      "2": {
+        "rank": 5,
+        "given_to_model": false
+      },
+      "3": {
+        "rank": 1,
+        "given_to_model": true
+      },
+      "5": {
+        "rank": 2,
+        "given_to_model": true
+      },
+      "6": {
+        "rank": 4,
+        "given_to_model": false
+      },
+      "7": {
+        "rank": 4,
+        "given_to_model": false
+      },
+      "9": {
+        "rank": null,
+        "given_to_model": false
+      },
+      "10": {
+        "rank": null,
+        "given_to_model": false
+      },
+      "12": {
+        "rank": null,
+        "given_to_model": false
+      },
+      "13": {
+        "rank": null,
+        "given_to_model": false
+      },
+      "15": {
+        "rank": null,
+        "given_to_model": false
+      },
+      "34": {
+        "rank": 4,
+        "given_to_model": false
+      },
+      "35": {
+        "rank": 3,
+        "given_to_model": true
+      },
+      "38": {
+        "rank": null,
+        "given_to_model": false
+      }
+    },
+    "note": "Searches with the golden question's own text. A provider may rephrase the question it sends to policy_search, so its excerpts can differ slightly."
+  },
+  "providers": {
+    "openai": {
+      "questions": 18,
+      "verdicts": {
+        "correct": 2,
+        "partly_correct": 5,
+        "declined_answerable": 5,
+        "no_answer": 1,
+        "wrong": 2,
+        "declined_appropriate": 3
+      },
+      "right_behaviour": 5,
+      "answered_wrongly": 2,
+      "by_retrieval": {
+        "fact_given": {
+          "correct": 2,
+          "partly_correct": 1,
+          "declined_answerable": 1
+        },
+        "fact_not_given": {
+          "declined_answerable": 4,
+          "no_answer": 1,
+          "partly_correct": 4,
+          "wrong": 1
+        },
+        "unanswerable": {
+          "declined_appropriate": 3,
+          "wrong": 1
+        }
+      }
+    },
+    "ollama": {
+      "questions": 18,
+      "verdicts": {
+        "declined_answerable": 7,
+        "wrong": 5,
+        "partly_correct": 1,
+        "no_answer": 3,
+        "correct": 1,
+        "declined_appropriate": 1
+      },
+      "right_behaviour": 2,
+      "answered_wrongly": 5,
+      "by_retrieval": {
+        "fact_given": {
+          "declined_answerable": 1,
+          "wrong": 3
+        },
+        "fact_not_given": {
+          "declined_answerable": 6,
+          "partly_correct": 1,
+          "no_answer": 1,
+          "wrong": 2
+        },
+        "unanswerable": {
+          "no_answer": 2,
+          "correct": 1,
+          "declined_appropriate": 1
+        }
+      }
+    }
+  }
+}

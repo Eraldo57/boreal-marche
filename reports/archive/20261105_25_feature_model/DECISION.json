@@ -1,0 +1,8 @@
+{
+  "recorded_at": "2026-11-05T21:07:31.533745+00:00",
+  "instruction": "User requested project completion on 2026-11-05",
+  "decision": "Apply the previously recorded decision-period feature-minimisation recommendation before evaluating the new candidate on test data",
+  "basis": "minimisation_audit.json joint_removal; keep the twelve features with established decision-period contribution",
+  "selection_uses_new_test_results": false,
+  "original_model_preserved": true
+}

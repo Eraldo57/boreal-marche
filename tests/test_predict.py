@@ -24,12 +24,15 @@ from src.contracts import FEATURE_NAMES as FEATURE_ORDER
 # Feature ordering
 # ---------------------------------------------------------------------------
 def test_feature_order_length() -> None:
-    """Generation and serving share the 25-feature contract."""
+    """Keep 25 engineered features but serve only the 12 justified by minimisation."""
+    from src.contracts import ENGINEERED_FEATURE_NAMES
     from src.ingest import load_config
 
     declared = [f for group in load_config()["features"]["groups"].values() for f in group]
-    assert FEATURE_ORDER == declared
-    assert len(FEATURE_ORDER) == 25
+    assert ENGINEERED_FEATURE_NAMES == declared
+    assert len(ENGINEERED_FEATURE_NAMES) == 25
+    assert len(FEATURE_ORDER) == 12
+    assert set(FEATURE_ORDER) < set(ENGINEERED_FEATURE_NAMES)
 
 
 def test_feature_order_no_duplicates() -> None:

@@ -46,67 +46,67 @@
   "model_comparison_validation": [
     {
       "model": "RandomForestClassifier",
-      "pr_auc": 0.6723765307446378,
-      "roc_auc": 0.7794702470356571,
-      "brier_score": 0.23223386541759725,
-      "recall_top_decile": 0.24662402274342574,
-      "fit_time_s": 0.410131459007971
+      "pr_auc": 0.672952558447603,
+      "roc_auc": 0.7765400403231656,
+      "brier_score": 0.22958389266531046,
+      "recall_top_decile": 0.2501776830135039,
+      "fit_time_s": 0.2923447089269757
     },
     {
       "model": "LogisticRegression",
-      "pr_auc": 0.6694676553483669,
-      "roc_auc": 0.7787367575513405,
-      "brier_score": 0.2470540467688919,
-      "recall_top_decile": 0.2508884150675195,
-      "fit_time_s": 0.012648415984585881
+      "pr_auc": 0.6694279295555777,
+      "roc_auc": 0.7817262336152755,
+      "brier_score": 0.23809426945719428,
+      "recall_top_decile": 0.24946695095948826,
+      "fit_time_s": 0.007455707993358374
     },
     {
       "model": "GradientBoostingClassifier",
-      "pr_auc": 0.6672835318065616,
-      "roc_auc": 0.77365822441027,
-      "brier_score": 0.24146884573633506,
-      "recall_top_decile": 0.2537313432835821,
-      "fit_time_s": 1.4991467079962604
+      "pr_auc": 0.6623327213608732,
+      "roc_auc": 0.7684212645428733,
+      "brier_score": 0.23337020219373414,
+      "recall_top_decile": 0.2523098791755508,
+      "fit_time_s": 0.7996964999474585
     },
     {
       "model": "LinearSVC",
-      "pr_auc": 0.6647973862769481,
-      "roc_auc": 0.7764627650928029,
-      "brier_score": 0.23182352284970564,
-      "recall_top_decile": 0.2523098791755508,
-      "fit_time_s": 0.023101542028598487
-    },
-    {
-      "model": "RidgeClassifier",
-      "pr_auc": 0.6560598610363279,
-      "roc_auc": 0.7716641983607648,
-      "brier_score": 0.2341148330716593,
-      "recall_top_decile": 0.24449182658137883,
-      "fit_time_s": 0.0074689589673653245
+      "pr_auc": 0.6598454730963234,
+      "roc_auc": 0.7782233399204841,
+      "brier_score": 0.22985886243641893,
+      "recall_top_decile": 0.24378109452736318,
+      "fit_time_s": 0.007918832823634148
     },
     {
       "model": "HistGradientBoostingClassifier",
-      "pr_auc": 0.6526483529102165,
-      "roc_auc": 0.7597690645995918,
-      "brier_score": 0.25447483377133,
-      "recall_top_decile": 0.2508884150675195,
-      "fit_time_s": 0.41800866700941697
+      "pr_auc": 0.6533693978312156,
+      "roc_auc": 0.7577896683267087,
+      "brier_score": 0.2409596965267435,
+      "recall_top_decile": 0.2501776830135039,
+      "fit_time_s": 0.39353854209184647
     },
     {
       "model": "KNeighborsClassifier",
-      "pr_auc": 0.60059725495782,
-      "roc_auc": 0.7595189829479325,
-      "brier_score": 0.24871002327344993,
-      "recall_top_decile": 0.2302771855010661,
-      "fit_time_s": 0.008071957970969379
+      "pr_auc": 0.6135357894482103,
+      "roc_auc": 0.7653037466732888,
+      "brier_score": 0.2427426061033969,
+      "recall_top_decile": 0.2267235252309879,
+      "fit_time_s": 0.005533291958272457
+    },
+    {
+      "model": "RidgeClassifier",
+      "pr_auc": 0.605925346386015,
+      "roc_auc": 0.7620935735517647,
+      "brier_score": 0.23385036550605287,
+      "recall_top_decile": 0.20540156361051884,
+      "fit_time_s": 0.004945833934471011
     },
     {
       "model": "DecisionTreeClassifier",
-      "pr_auc": 0.6003177555911863,
-      "roc_auc": 0.7556253366724236,
-      "brier_score": 0.24348268386192426,
-      "recall_top_decile": 0.2224591329068941,
-      "fit_time_s": 0.030970207997597754
+      "pr_auc": 0.5945832366254077,
+      "roc_auc": 0.7346342330770996,
+      "brier_score": 0.24732884048354078,
+      "recall_top_decile": 0.23169864960909736,
+      "fit_time_s": 0.016044791089370847
     },
     {
       "model": "business_heuristic_recency",
@@ -114,7 +114,7 @@
       "roc_auc": 0.7059372385083731,
       "brier_score": 0.2832667461459842,
       "recall_top_decile": 0.18407960199004975,
-      "fit_time_s": 0.0003733329940587282
+      "fit_time_s": 0.0003154999576508999
     },
     {
       "model": "DummyClassifier_stratified",
@@ -122,314 +122,613 @@
       "roc_auc": 0.5074635618529449,
       "brier_score": 0.5071781595669569,
       "recall_top_decile": 0.11016346837242359,
-      "fit_time_s": 0.00800562504446134
+      "fit_time_s": 0.005132958991453052
     }
   ],
   "optuna_trials": [
     {
       "family": "RandomForestClassifier",
       "trial": 0,
-      "validation_pr_auc": 0.6698611207451941,
+      "state": "complete",
+      "validation_pr_auc": 0.6713378339348497,
       "params": {
         "n_estimators": 156,
         "max_depth": 12,
         "min_samples_leaf": 19
-      }
+      },
+      "learning_curve": [
+        {
+          "training_rows": 3002,
+          "validation_pr_auc": 0.6772379444921742
+        },
+        {
+          "training_rows": 4503,
+          "validation_pr_auc": 0.6786154977334081
+        },
+        {
+          "training_rows": 6004,
+          "validation_pr_auc": 0.6713378339348497
+        }
+      ]
     },
     {
       "family": "RandomForestClassifier",
       "trial": 1,
-      "validation_pr_auc": 0.6705679813704918,
+      "state": "complete",
+      "validation_pr_auc": 0.6737858486870049,
       "params": {
         "n_estimators": 190,
         "max_depth": 5,
         "min_samples_leaf": 5
-      }
+      },
+      "learning_curve": [
+        {
+          "training_rows": 3002,
+          "validation_pr_auc": 0.6791358086960477
+        },
+        {
+          "training_rows": 4503,
+          "validation_pr_auc": 0.6773122756048628
+        },
+        {
+          "training_rows": 6004,
+          "validation_pr_auc": 0.6737858486870049
+        }
+      ]
     },
     {
       "family": "RandomForestClassifier",
       "trial": 2,
-      "validation_pr_auc": 0.6705068835053926,
+      "state": "complete",
+      "validation_pr_auc": 0.6698705512097727,
       "params": {
         "n_estimators": 108,
         "max_depth": 11,
         "min_samples_leaf": 16
-      }
+      },
+      "learning_curve": [
+        {
+          "training_rows": 3002,
+          "validation_pr_auc": 0.6801589798059406
+        },
+        {
+          "training_rows": 4503,
+          "validation_pr_auc": 0.678008962389408
+        },
+        {
+          "training_rows": 6004,
+          "validation_pr_auc": 0.6698705512097727
+        }
+      ]
     },
     {
       "family": "RandomForestClassifier",
       "trial": 3,
-      "validation_pr_auc": 0.6681292340579829,
+      "state": "complete",
+      "validation_pr_auc": 0.673214730860878,
       "params": {
         "n_estimators": 206,
         "max_depth": 4,
         "min_samples_leaf": 25
-      }
+      },
+      "learning_curve": [
+        {
+          "training_rows": 3002,
+          "validation_pr_auc": 0.6794456384553752
+        },
+        {
+          "training_rows": 4503,
+          "validation_pr_auc": 0.6803620767691266
+        },
+        {
+          "training_rows": 6004,
+          "validation_pr_auc": 0.673214730860878
+        }
+      ]
     },
     {
       "family": "RandomForestClassifier",
       "trial": 4,
-      "validation_pr_auc": 0.6708394851240936,
+      "state": "complete",
+      "validation_pr_auc": 0.6759671049458035,
       "params": {
         "n_estimators": 225,
         "max_depth": 5,
         "min_samples_leaf": 6
-      }
+      },
+      "learning_curve": [
+        {
+          "training_rows": 3002,
+          "validation_pr_auc": 0.6805592163284493
+        },
+        {
+          "training_rows": 4503,
+          "validation_pr_auc": 0.6785918453028791
+        },
+        {
+          "training_rows": 6004,
+          "validation_pr_auc": 0.6759671049458035
+        }
+      ]
     },
     {
       "family": "RandomForestClassifier",
       "trial": 5,
-      "validation_pr_auc": 0.6739172464675545,
+      "state": "pruned",
+      "validation_pr_auc": 0.6778407569718173,
       "params": {
         "n_estimators": 127,
         "max_depth": 6,
         "min_samples_leaf": 14
-      }
+      },
+      "learning_curve": [
+        {
+          "training_rows": 3002,
+          "validation_pr_auc": 0.6778407569718173
+        }
+      ]
     },
     {
       "family": "RandomForestClassifier",
       "trial": 6,
-      "validation_pr_auc": 0.6743437724534069,
+      "state": "complete",
+      "validation_pr_auc": 0.6764117917510012,
       "params": {
         "n_estimators": 165,
         "max_depth": 6,
         "min_samples_leaf": 16
-      }
+      },
+      "learning_curve": [
+        {
+          "training_rows": 3002,
+          "validation_pr_auc": 0.6796634562008468
+        },
+        {
+          "training_rows": 4503,
+          "validation_pr_auc": 0.681162812113399
+        },
+        {
+          "training_rows": 6004,
+          "validation_pr_auc": 0.6764117917510012
+        }
+      ]
     },
     {
       "family": "RandomForestClassifier",
       "trial": 7,
-      "validation_pr_auc": 0.6745426977202474,
+      "state": "complete",
+      "validation_pr_auc": 0.6754682520592363,
       "params": {
         "n_estimators": 121,
         "max_depth": 6,
         "min_samples_leaf": 10
-      }
+      },
+      "learning_curve": [
+        {
+          "training_rows": 3002,
+          "validation_pr_auc": 0.6817850402183544
+        },
+        {
+          "training_rows": 4503,
+          "validation_pr_auc": 0.6795249930997656
+        },
+        {
+          "training_rows": 6004,
+          "validation_pr_auc": 0.6754682520592363
+        }
+      ]
     },
     {
       "family": "RandomForestClassifier",
       "trial": 8,
-      "validation_pr_auc": 0.6641267563146989,
+      "state": "pruned",
+      "validation_pr_auc": 0.67617949188008,
       "params": {
         "n_estimators": 168,
         "max_depth": 11,
         "min_samples_leaf": 6
-      }
+      },
+      "learning_curve": [
+        {
+          "training_rows": 3002,
+          "validation_pr_auc": 0.67617949188008
+        }
+      ]
     },
     {
       "family": "RandomForestClassifier",
       "trial": 9,
-      "validation_pr_auc": 0.6679134901837942,
+      "state": "pruned",
+      "validation_pr_auc": 0.6711226435991569,
       "params": {
         "n_estimators": 177,
         "max_depth": 9,
         "min_samples_leaf": 3
-      }
+      },
+      "learning_curve": [
+        {
+          "training_rows": 3002,
+          "validation_pr_auc": 0.6711226435991569
+        }
+      ]
     },
     {
       "family": "RandomForestClassifier",
       "trial": 10,
-      "validation_pr_auc": 0.6718526280189645,
+      "state": "complete",
+      "validation_pr_auc": 0.6771799933802631,
       "params": {
         "n_estimators": 243,
         "max_depth": 8,
-        "min_samples_leaf": 11
-      }
+        "min_samples_leaf": 25
+      },
+      "learning_curve": [
+        {
+          "training_rows": 3002,
+          "validation_pr_auc": 0.6812648340345879
+        },
+        {
+          "training_rows": 4503,
+          "validation_pr_auc": 0.6809730401066173
+        },
+        {
+          "training_rows": 6004,
+          "validation_pr_auc": 0.6771799933802631
+        }
+      ]
     },
     {
       "family": "RandomForestClassifier",
       "trial": 11,
-      "validation_pr_auc": 0.6727889557413228,
+      "state": "pruned",
+      "validation_pr_auc": 0.6798708493460912,
       "params": {
-        "n_estimators": 138,
-        "max_depth": 7,
-        "min_samples_leaf": 11
-      }
+        "n_estimators": 240,
+        "max_depth": 8,
+        "min_samples_leaf": 23
+      },
+      "learning_curve": [
+        {
+          "training_rows": 3002,
+          "validation_pr_auc": 0.6798708493460912
+        }
+      ]
     },
     {
       "family": "LogisticRegression",
       "trial": 0,
-      "validation_pr_auc": 0.6667356370619814,
+      "state": "complete",
+      "validation_pr_auc": 0.6636879388204318,
       "params": {
         "C": 0.04082331665966554
-      }
+      },
+      "learning_curve": [
+        {
+          "training_rows": 3002,
+          "validation_pr_auc": 0.6592784687296305
+        },
+        {
+          "training_rows": 4503,
+          "validation_pr_auc": 0.6659514312269978
+        },
+        {
+          "training_rows": 6004,
+          "validation_pr_auc": 0.6636879388204318
+        }
+      ]
     },
     {
       "family": "LogisticRegression",
       "trial": 1,
-      "validation_pr_auc": 0.6696302533134575,
+      "state": "complete",
+      "validation_pr_auc": 0.6697394701945019,
       "params": {
         "C": 12.275826710862326
-      }
+      },
+      "learning_curve": [
+        {
+          "training_rows": 3002,
+          "validation_pr_auc": 0.6685023428698026
+        },
+        {
+          "training_rows": 4503,
+          "validation_pr_auc": 0.6720223312623614
+        },
+        {
+          "training_rows": 6004,
+          "validation_pr_auc": 0.6697394701945019
+        }
+      ]
     },
     {
       "family": "LogisticRegression",
       "trial": 2,
-      "validation_pr_auc": 0.6695415964522096,
+      "state": "complete",
+      "validation_pr_auc": 0.669492115402651,
       "params": {
         "C": 1.4071095169064511
-      }
+      },
+      "learning_curve": [
+        {
+          "training_rows": 3002,
+          "validation_pr_auc": 0.6681413635220919
+        },
+        {
+          "training_rows": 4503,
+          "validation_pr_auc": 0.6719558365866877
+        },
+        {
+          "training_rows": 6004,
+          "validation_pr_auc": 0.669492115402651
+        }
+      ]
     },
     {
       "family": "LogisticRegression",
       "trial": 3,
-      "validation_pr_auc": 0.6691196709056051,
+      "state": "complete",
+      "validation_pr_auc": 0.6689564414478959,
       "params": {
         "C": 0.37570597138026457
-      }
+      },
+      "learning_curve": [
+        {
+          "training_rows": 3002,
+          "validation_pr_auc": 0.6670672938223615
+        },
+        {
+          "training_rows": 4503,
+          "validation_pr_auc": 0.6713252508820746
+        },
+        {
+          "training_rows": 6004,
+          "validation_pr_auc": 0.6689564414478959
+        }
+      ]
     },
     {
       "family": "LogisticRegression",
       "trial": 4,
-      "validation_pr_auc": 0.6578702228081057,
+      "state": "pruned",
+      "validation_pr_auc": 0.6310354018747072,
       "params": {
         "C": 0.004688574837063985
-      }
+      },
+      "learning_curve": [
+        {
+          "training_rows": 3002,
+          "validation_pr_auc": 0.6310354018747072
+        }
+      ]
     },
     {
       "family": "LogisticRegression",
       "trial": 5,
-      "validation_pr_auc": 0.6578688368868268,
+      "state": "pruned",
+      "validation_pr_auc": 0.6310312020978712,
       "params": {
         "C": 0.004687454996076497
-      }
+      },
+      "learning_curve": [
+        {
+          "training_rows": 3002,
+          "validation_pr_auc": 0.6310312020978712
+        }
+      ]
     },
     {
       "family": "LogisticRegression",
       "trial": 6,
-      "validation_pr_auc": 0.6483978632470284,
+      "state": "pruned",
+      "validation_pr_auc": 0.6122802402633392,
       "params": {
         "C": 0.0017775399007348214
-      }
+      },
+      "learning_curve": [
+        {
+          "training_rows": 3002,
+          "validation_pr_auc": 0.6122802402633392
+        }
+      ]
     },
     {
       "family": "LogisticRegression",
       "trial": 7,
-      "validation_pr_auc": 0.6695586046129745,
+      "state": "complete",
+      "validation_pr_auc": 0.6697120356127985,
       "params": {
         "C": 5.314343038625021
-      }
+      },
+      "learning_curve": [
+        {
+          "training_rows": 3002,
+          "validation_pr_auc": 0.6684355677615814
+        },
+        {
+          "training_rows": 4503,
+          "validation_pr_auc": 0.6720421162020274
+        },
+        {
+          "training_rows": 6004,
+          "validation_pr_auc": 0.6697120356127985
+        }
+      ]
     },
     {
       "family": "LogisticRegression",
       "trial": 8,
-      "validation_pr_auc": 0.669122531164793,
+      "state": "pruned",
+      "validation_pr_auc": 0.6671155926144039,
       "params": {
         "C": 0.3849583075868116
-      }
+      },
+      "learning_curve": [
+        {
+          "training_rows": 3002,
+          "validation_pr_auc": 0.6671155926144039
+        }
+      ]
     },
     {
       "family": "LogisticRegression",
       "trial": 9,
-      "validation_pr_auc": 0.669462214636049,
+      "state": "pruned",
+      "validation_pr_auc": 0.6680113271054596,
       "params": {
         "C": 1.1103027007359598
-      }
+      },
+      "learning_curve": [
+        {
+          "training_rows": 3002,
+          "validation_pr_auc": 0.6680113271054596
+        }
+      ]
     },
     {
       "family": "LogisticRegression",
       "trial": 10,
-      "validation_pr_auc": 0.6696058298846587,
+      "state": "complete",
+      "validation_pr_auc": 0.6697445467562048,
       "params": {
         "C": 14.907888012947872
-      }
+      },
+      "learning_curve": [
+        {
+          "training_rows": 3002,
+          "validation_pr_auc": 0.668508308444616
+        },
+        {
+          "training_rows": 4503,
+          "validation_pr_auc": 0.6720390911086029
+        },
+        {
+          "training_rows": 6004,
+          "validation_pr_auc": 0.6697445467562048
+        }
+      ]
     },
     {
       "family": "LogisticRegression",
       "trial": 11,
-      "validation_pr_auc": 0.6696353343796676,
+      "state": "complete",
+      "validation_pr_auc": 0.6697429091814115,
       "params": {
         "C": 13.302768407132174
-      }
+      },
+      "learning_curve": [
+        {
+          "training_rows": 3002,
+          "validation_pr_auc": 0.668503998122752
+        },
+        {
+          "training_rows": 4503,
+          "validation_pr_auc": 0.6720365714963632
+        },
+        {
+          "training_rows": 6004,
+          "validation_pr_auc": 0.6697429091814115
+        }
+      ]
     }
   ],
-  "pruning": false,
+  "pruning": {
+    "method": "MedianPruner",
+    "resource": "earlier training rows",
+    "fractions": [
+      0.5,
+      0.75,
+      1.0
+    ],
+    "startup_trials": 4
+  },
   "selected_model": "RandomForestClassifier",
-  "selected_calibration": "isotonic",
+  "selected_calibration": "sigmoid",
   "calibration_decision_period": {
     "uncalibrated": {
-      "brier_score": 0.16813245765178914,
+      "brier_score": 0.1650624493326165,
       "curve_true": [
-        0.03767123287671233,
-        0.07532956685499058,
-        0.14777070063694267,
-        0.2143569292123629,
-        0.32058047493403696,
-        0.41818181818181815,
-        0.6073446327683616,
-        0.7465753424657534,
-        0.925531914893617,
-        0.971830985915493
+        0.034324942791762014,
+        0.09133489461358314,
+        0.14754098360655737,
+        0.22385321100917432,
+        0.3229166666666667,
+        0.4779735682819383,
+        0.6038961038961039,
+        0.8,
+        0.8974358974358975,
+        0.9696969696969697
       ],
       "curve_pred": [
-        0.07822475027153387,
-        0.15541782142751123,
-        0.25513374185727866,
-        0.34558990735061146,
-        0.4485858459707609,
-        0.5512780065265493,
-        0.6438056096296138,
-        0.7496049961727824,
-        0.8530816247157432,
-        0.9077635680053446
+        0.07043257356012304,
+        0.15907762038978732,
+        0.2553224967713568,
+        0.3490406060556974,
+        0.44765532959225984,
+        0.5439408190750702,
+        0.6472455210866697,
+        0.7486310529581757,
+        0.8498031831408992,
+        0.9281194214678821
       ]
     },
     "isotonic": {
-      "brier_score": 0.15784123471267097,
+      "brier_score": 0.1566483218590126,
       "curve_true": [
-        0.04060913705583756,
-        0.11940298507462686,
-        0.23011363636363635,
-        0.32989690721649484,
-        0.4357262103505843,
-        0.6116071428571429,
-        0.6690140845070423,
-        0.7336683417085427,
-        0.8902439024390244,
-        0.9626168224299065
+        0.045454545454545456,
+        0.1267379679144385,
+        0.24868421052631579,
+        0.34061569016881826,
+        0.5384615384615384,
+        0.5798319327731093,
+        0.7211538461538461,
+        0.7404580152671756,
+        0.8666666666666667,
+        0.9486301369863014
       ],
       "curve_pred": [
-        0.06785737437920082,
-        0.1444653072471743,
-        0.23231548442860078,
-        0.3237633755203524,
-        0.44517479896758216,
-        0.5507084124904041,
-        0.6376173737252457,
-        0.7548063451748971,
-        0.8778234194414193,
-        0.9857965834749892
+        0.043875486858356204,
+        0.14717911661778516,
+        0.23440741275907548,
+        0.354763445299464,
+        0.49361323610972047,
+        0.5464684294588186,
+        0.653780433493568,
+        0.7319168184606767,
+        0.8240512153831508,
+        0.9652292493433735
       ]
     },
     "sigmoid": {
-      "brier_score": 0.1582469533853295,
+      "brier_score": 0.15630905748175858,
       "curve_true": [
-        0.05345911949685535,
-        0.14883346741753822,
-        0.23059096176129779,
-        0.327150084317032,
-        0.39746835443037976,
-        0.5056179775280899,
-        0.6653225806451613,
-        0.7669172932330827,
-        0.9433962264150944
+        0.057863501483679525,
+        0.1413427561837456,
+        0.2422110552763819,
+        0.32210834553440704,
+        0.4308093994778068,
+        0.5634920634920635,
+        0.6551724137931034,
+        0.8113207547169812,
+        0.9164179104477612,
+        1.0
       ],
       "curve_pred": [
-        0.07214737854002733,
-        0.15132110343124752,
-        0.24482033045725612,
-        0.34681170730671856,
-        0.44878146818340614,
-        0.545184318171154,
-        0.6494535549527621,
-        0.7526073155594156,
-        0.8447220094727725
+        0.06714302594053362,
+        0.15130123519547242,
+        0.24705502429826356,
+        0.3471832691037616,
+        0.44414733902683384,
+        0.5488484587168873,
+        0.6501405034540578,
+        0.7523466017839837,
+        0.8527546246666936,
+        0.9027365170923302
       ]
     }
   },
   "threshold_selection": {
-    "best_threshold": 0.22,
-    "validation_utility": 19800.0,
+    "best_threshold": 0.20500000000000002,
+    "validation_utility": 20005.0,
     "cost_assumptions": {
       "cost_coupon": 5.0,
       "margin_retained": 25.0,
@@ -641,215 +940,215 @@
     ],
     "curve_utility": [
       15860.0,
-      15905.0,
-      15905.0,
-      15905.0,
-      15905.0,
-      15905.0,
-      15910.0,
-      16150.0,
-      16150.0,
-      16150.0,
-      16150.0,
-      16150.0,
-      16150.0,
-      16150.0,
-      16150.0,
-      16150.0,
-      16150.0,
-      16150.0,
-      16150.0,
-      16150.0,
-      16645.0,
-      16645.0,
-      16645.0,
-      18510.0,
-      18510.0,
-      18510.0,
-      18515.0,
-      18515.0,
-      18525.0,
-      19755.0,
-      19755.0,
-      19755.0,
-      19755.0,
-      19755.0,
-      19755.0,
-      19755.0,
-      19755.0,
-      19755.0,
-      19750.0,
-      19750.0,
-      19750.0,
-      19750.0,
-      19790.0,
-      19790.0,
+      15860.0,
+      15860.0,
+      15860.0,
+      15860.0,
+      15860.0,
+      15860.0,
+      15860.0,
+      15860.0,
+      15860.0,
+      15960.0,
+      16315.0,
+      16845.0,
+      17465.0,
+      17685.0,
+      17850.0,
+      17935.0,
+      17990.0,
+      18125.0,
+      18140.0,
+      18255.0,
+      18495.0,
+      18655.0,
+      18855.0,
+      19035.0,
+      19085.0,
+      19255.0,
+      19345.0,
+      19375.0,
+      19460.0,
+      19515.0,
+      19715.0,
       19800.0,
+      19770.0,
+      19710.0,
+      19730.0,
       19785.0,
-      19530.0,
+      19795.0,
+      19880.0,
+      19900.0,
+      19915.0,
+      20005.0,
+      19895.0,
+      19780.0,
+      19770.0,
+      19660.0,
       19615.0,
-      19605.0,
-      19595.0,
-      19600.0,
-      18955.0,
-      18955.0,
-      18955.0,
-      18955.0,
-      18955.0,
-      18955.0,
-      18955.0,
-      18955.0,
-      18955.0,
-      18955.0,
-      18955.0,
-      18955.0,
-      17320.0,
-      17320.0,
-      17320.0,
-      17320.0,
-      17290.0,
-      17290.0,
-      17290.0,
-      17290.0,
-      17290.0,
-      17290.0,
-      17155.0,
-      17155.0,
-      17155.0,
-      17065.0,
-      17065.0,
-      17065.0,
-      17065.0,
-      17065.0,
-      17065.0,
-      16130.0,
-      16130.0,
-      16135.0,
-      16135.0,
-      15720.0,
-      15720.0,
-      15720.0,
-      15720.0,
-      15720.0,
-      15720.0,
-      15720.0,
-      15720.0,
-      15720.0,
-      14220.0,
-      14200.0,
-      14200.0,
-      14205.0,
-      14185.0,
-      14185.0,
-      13535.0,
-      13535.0,
-      13535.0,
-      13535.0,
-      13535.0,
-      13535.0,
-      12885.0,
-      12885.0,
-      12885.0,
-      12890.0,
-      12890.0,
-      12735.0,
-      11460.0,
-      11230.0,
-      11230.0,
-      11230.0,
-      11230.0,
-      11230.0,
-      11230.0,
-      11230.0,
-      11230.0,
-      11230.0,
-      11210.0,
-      10900.0,
-      10900.0,
-      10420.0,
-      10420.0,
-      10420.0,
-      10420.0,
-      10420.0,
-      10420.0,
-      9680.0,
-      9685.0,
-      9565.0,
-      9565.0,
-      9565.0,
-      9565.0,
-      9565.0,
-      9565.0,
-      9565.0,
-      9565.0,
-      9565.0,
-      8925.0,
-      8925.0,
-      8925.0,
-      8925.0,
-      8775.0,
-      8775.0,
-      8775.0,
-      8780.0,
-      8780.0,
-      8780.0,
-      8780.0,
-      8780.0,
-      6910.0,
-      6910.0,
-      6910.0,
-      6910.0,
-      6910.0,
-      6910.0,
-      6910.0,
-      6910.0,
-      6910.0,
-      6910.0,
-      6910.0,
-      6910.0,
-      6910.0,
-      6160.0,
-      6160.0,
-      6160.0,
-      6160.0,
-      6160.0,
-      6160.0,
-      6160.0,
-      6160.0,
-      6140.0,
-      6145.0,
-      6145.0,
-      4080.0,
-      4080.0,
-      4080.0,
-      4080.0,
-      4080.0,
-      4080.0,
-      4080.0,
-      4080.0,
-      4080.0,
-      4080.0,
-      4080.0,
-      4080.0,
-      4080.0,
-      4080.0,
-      4080.0,
-      3470.0,
-      3470.0,
-      3450.0,
-      1370.0,
-      1310.0,
-      1270.0,
-      1230.0
+      19555.0,
+      19560.0,
+      19515.0,
+      19455.0,
+      19480.0,
+      19495.0,
+      19360.0,
+      19375.0,
+      19365.0,
+      19225.0,
+      19165.0,
+      18995.0,
+      18870.0,
+      18865.0,
+      18845.0,
+      18770.0,
+      18700.0,
+      18530.0,
+      18445.0,
+      18355.0,
+      18240.0,
+      18225.0,
+      18040.0,
+      17895.0,
+      17835.0,
+      17755.0,
+      17735.0,
+      17645.0,
+      17485.0,
+      17390.0,
+      17190.0,
+      16935.0,
+      16970.0,
+      16780.0,
+      16630.0,
+      16475.0,
+      16445.0,
+      16450.0,
+      16340.0,
+      16160.0,
+      16010.0,
+      15935.0,
+      15890.0,
+      15870.0,
+      15660.0,
+      15585.0,
+      15320.0,
+      15290.0,
+      15220.0,
+      15170.0,
+      15075.0,
+      14905.0,
+      14725.0,
+      14570.0,
+      14495.0,
+      14325.0,
+      14190.0,
+      14070.0,
+      13980.0,
+      13845.0,
+      13755.0,
+      13615.0,
+      13460.0,
+      13425.0,
+      13295.0,
+      13210.0,
+      13160.0,
+      12975.0,
+      12935.0,
+      12830.0,
+      12640.0,
+      12545.0,
+      12460.0,
+      12280.0,
+      12165.0,
+      12060.0,
+      11880.0,
+      11785.0,
+      11695.0,
+      11600.0,
+      11540.0,
+      11420.0,
+      11300.0,
+      11170.0,
+      10965.0,
+      10880.0,
+      10805.0,
+      10685.0,
+      10475.0,
+      10385.0,
+      10240.0,
+      10025.0,
+      9765.0,
+      9640.0,
+      9465.0,
+      9375.0,
+      9210.0,
+      9085.0,
+      8960.0,
+      8790.0,
+      8680.0,
+      8650.0,
+      8505.0,
+      8325.0,
+      8145.0,
+      8040.0,
+      7895.0,
+      7705.0,
+      7405.0,
+      7265.0,
+      7010.0,
+      6870.0,
+      6580.0,
+      6400.0,
+      6225.0,
+      5920.0,
+      5780.0,
+      5515.0,
+      5230.0,
+      5025.0,
+      4685.0,
+      4330.0,
+      4040.0,
+      3870.0,
+      3570.0,
+      3340.0,
+      3080.0,
+      2620.0,
+      2210.0,
+      1810.0,
+      1480.0,
+      1140.0,
+      700.0,
+      400.0,
+      40.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
     ]
   },
   "final_test": {
-    "pr_auc": 0.7430379084309567,
-    "roc_auc": 0.7809627606139234,
-    "brier_score": 0.19539851063119004,
+    "pr_auc": 0.7596308206529796,
+    "roc_auc": 0.7863253832246079,
+    "brier_score": 0.19398294852850284,
     "recall_top_decile": 0.21556350626118068,
-    "fit_time_s": 0.4538198749651201,
-    "assumed_test_utility": 29605.0
+    "fit_time_s": 0.7012122918386012,
+    "assumed_test_utility": 29905.0
   },
   "final_test_baselines": {
     "DummyClassifier_stratified": {
@@ -870,39 +1169,39 @@
   "error_analysis": {
     "is_one_time_buyer=0": {
       "n": 3645,
-      "tp": 1765,
-      "fp": 1286,
-      "fn": 153,
-      "tn": 441,
-      "returner_recall": 0.9202294056308655,
-      "precision": 0.578498852835136
+      "tp": 1795,
+      "fp": 1329,
+      "fn": 123,
+      "tn": 398,
+      "returner_recall": 0.9358706986444213,
+      "precision": 0.5745838668373879
     },
     "is_one_time_buyer=1": {
       "n": 1588,
-      "tp": 55,
-      "fp": 73,
-      "fn": 263,
-      "tn": 1197,
-      "returner_recall": 0.17295597484276728,
-      "precision": 0.4296875
+      "tp": 48,
+      "fp": 62,
+      "fn": 270,
+      "tn": 1208,
+      "returner_recall": 0.1509433962264151,
+      "precision": 0.43636363636363634
     },
     "is_domestic=0": {
       "n": 458,
-      "tp": 180,
-      "fp": 125,
-      "fn": 30,
-      "tn": 123,
-      "returner_recall": 0.8571428571428571,
-      "precision": 0.5901639344262295
+      "tp": 176,
+      "fp": 122,
+      "fn": 34,
+      "tn": 126,
+      "returner_recall": 0.8380952380952381,
+      "precision": 0.5906040268456376
     },
     "is_domestic=1": {
       "n": 4775,
-      "tp": 1640,
-      "fp": 1234,
-      "fn": 386,
-      "tn": 1515,
-      "returner_recall": 0.8094768015794669,
-      "precision": 0.5706332637439109
+      "tp": 1667,
+      "fp": 1269,
+      "fn": 359,
+      "tn": 1480,
+      "returner_recall": 0.8228035538005923,
+      "precision": 0.5677792915531336
     }
   }
 }

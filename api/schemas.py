@@ -68,7 +68,8 @@ class PredictionRequest(StrictModel):
     def canonical_features(cls, value: Any) -> Any:
         if not isinstance(value, dict) or set(value) != set(FEATURE_NAMES):
             raise ValueError(
-                "features must contain exactly the canonical 25 names; see /feature-contract"
+                f"features must contain exactly the canonical {len(FEATURE_NAMES)} names; "
+                "see /feature-contract"
             )
         for name, number in value.items():
             if (
@@ -92,13 +93,29 @@ class PredictionRequest(StrictModel):
         return value
 
 
+class FeatureEffect(BaseModel):
+    """How far one feature of this customer moves their probability, against a typical value."""
+
+    feature: str
+    value: float | None
+    typical_value: float = Field(..., description="The training median of this feature.")
+    effect: float = Field(
+        ...,
+        description=(
+            "Change in the probability of returning when the feature has this customer's "
+            "value instead of the typical one. Positive raises it."
+        ),
+    )
+
+
 class PredictionResponse(BaseModel):
     customer_id: str
     probability: float = Field(..., ge=0.0, le=1.0)
     will_return: bool
     threshold: float
     risk_label: str  # "high", "medium", "low"
-    top_factors: list[dict[str, Any]] = []
+    top_factors: list[dict[str, Any]] = []  # global importances, the same for every customer
+    explanation: list[FeatureEffect] = []  # this customer's own largest feature effects
     model_version: str | None = None
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
@@ -177,6 +194,12 @@ class RecommendationResponse(BaseModel):
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
+class RecommendationDetailsResponse(BaseModel):
+    items: list[str]
+    rules: list[FiringRule]
+    metadata: dict[str, Any]
+
+
 # ---------------------------------------------------------------------------
 # Head C — Assistant
 # ---------------------------------------------------------------------------
@@ -215,6 +238,9 @@ class ChatResponse(BaseModel):
     provider_used: str
     refused: bool = False
     refusal_reason: str | None = None
+    # For policy answers: "uncertain" when the best passage scored between the similarity
+    # floor and the confident level, so it may not answer the question. None otherwise.
+    passage_confidence: Literal["confident", "uncertain"] | None = None
     language: str
     provider_latency_ms: float | None = None
     token_usage: dict[str, int] | None = None

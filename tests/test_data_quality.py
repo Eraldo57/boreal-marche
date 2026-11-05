@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.contracts import FEATURE_NAMES, PROCESSED
+from src.contracts import ENGINEERED_FEATURE_NAMES, PROCESSED
 from src.ingest import SERVICE_SKUS, _sha256, load_config
 
 FILES = ("manifest.json", "transactions.parquet", "X.parquet", "y.parquet", "snapshots.parquet")
@@ -77,7 +77,7 @@ def test_processed_data_quality():
     features = pd.read_parquet(PROCESSED / "X.parquet")
     y = pd.read_parquet(PROCESSED / "y.parquet")["will_return"]
     snapshots = pd.read_parquet(PROCESSED / "snapshots.parquet")
-    assert list(features.columns) == FEATURE_NAMES
+    assert list(features.columns) == ENGINEERED_FEATURE_NAMES
     assert len(features) == len(y) == len(snapshots)
     values = features.to_numpy(dtype=float)
     assert np.isfinite(values).all(), "no missing or infinite feature values"

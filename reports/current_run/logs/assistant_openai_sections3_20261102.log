@@ -1,0 +1,479 @@
+[2m2026-11-03T01:40:28.379815Z[0m [[33m[1mwarning  [0m] [1mregistry_unavailable_using_local_model[0m [36mreason[0m=[35m'MlflowException: Registered model alias champion not found.'[0m
+[2m2026-11-03T01:40:32.552772Z[0m [[32m[1minfo     [0m] [1mstartup_complete              [0m [36merrors[0m=[35m{}[0m
+[2m2026-11-03T01:40:52.946698Z[0m [[32m[1minfo     [0m] [1mrecommendation_served         [0m [36mbasket_size[0m=[35m2[0m [36mcustomer_id[0m=[35mNone[0m [36mn_recommendations[0m=[35m5[0m [36mstrategy[0m=[35mpopularity_fallback[0m
+[2m2026-11-03T01:40:54.252530Z[0m [[32m[1minfo     [0m] [1mrecommendation_served         [0m [36mbasket_size[0m=[35m1[0m [36mcustomer_id[0m=[35mNone[0m [36mn_recommendations[0m=[35m5[0m [36mstrategy[0m=[35mpopularity_fallback[0m
+[2m2026-11-03T01:40:57.178328Z[0m [[32m[1minfo     [0m] [1mrecommendation_served         [0m [36mbasket_size[0m=[35m2[0m [36mcustomer_id[0m=[35mNone[0m [36mn_recommendations[0m=[35m5[0m [36mstrategy[0m=[35mrule_based[0m
+[2m2026-11-03T01:41:00.274904Z[0m [[32m[1minfo     [0m] [1mrecommendation_served         [0m [36mbasket_size[0m=[35m2[0m [36mcustomer_id[0m=[35mNone[0m [36mn_recommendations[0m=[35m5[0m [36mstrategy[0m=[35mpopularity_fallback[0m
+[2m2026-11-03T01:41:04.188139Z[0m [[32m[1minfo     [0m] [1mrecommendation_served         [0m [36mbasket_size[0m=[35m2[0m [36mcustomer_id[0m=[35mNone[0m [36mn_recommendations[0m=[35m5[0m [36mstrategy[0m=[35mpopularity_fallback[0m
+[2m2026-11-03T01:41:32.560765Z[0m [[33m[1mwarning  [0m] [1mmonitoring_alert              [0m [36mat[0m=[35m2026-11-03T01:41:32.560606Z[0m [36mcheck[0m=[35mrule_fire_rate[0m [36mdetail[0m=[35m[0m [36mrule[0m=[35m'yellow below 0.5 (from 20 non-empty baskets)'[0m [36mstate[0m=[35mraised[0m [36mvalue[0m=[35m0.2[0m
+[2m2026-11-03T01:41:48.272433Z[0m [[32m[1minfo     [0m] [1mshutdown                      [0m
+{
+  "executed_at": "2026-11-03T01:41:48.324327+00:00",
+  "provider": "openai",
+  "golden_count": 40,
+  "category_counts": {
+    "policy": 15,
+    "tool_call": 10,
+    "out_of_scope": 8,
+    "french": 7
+  },
+  "tool_choice_accuracy_all": 0.95,
+  "tool_choice_accuracy_in_scope": 0.9375,
+  "out_of_scope_refusal_rate": 1.0,
+  "in_scope_refusal_count": 1,
+  "expected_source_accuracy": 0.7777777777777778,
+  "policy_extract_grounding_proxy": 1.0,
+  "latency_p50_ms": 1014.7617494221777,
+  "latency_p95_ms": 1335.7489160494877,
+  "cost_usd_per_query": 6.232125e-05,
+  "cost_usd_per_streamed_answer": 0.00021971666666666665,
+  "streamed_generation": {
+    "policy_questions": 18,
+    "written_by_model": 18,
+    "fallbacks": 0,
+    "language_match_rate": 1.0,
+    "french_written": 4,
+    "all_written_answers_cited": true,
+    "answers_adding_figures": [],
+    "answers_omitting_top_source_figures": [
+      1,
+      2,
+      3,
+      5,
+      8,
+      14,
+      15,
+      34,
+      35
+    ],
+    "seconds_p50": 2.3228035209467635,
+    "questions": [
+      {
+        "id": 1,
+        "language": "en",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "30",
+            "7"
+          ]
+        },
+        "token_usage": {
+          "prompt_tokens": 384,
+          "completion_tokens": 40
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 675,
+          "completion_tokens": 86
+        },
+        "seconds": 2.246864709071815,
+        "reply": "Perishable products cannot be physically returned due to food-safety regulations. If a perishable product arrives in unsatisfactory condition, such as being spoiled or past its expiry date, you may request a refund or replacement within 48 hours of delivery by including at least one photo showing the issue. However, returns for reasons of taste or preference are not eligible for a refund or exchange. This information is sourced from the return policy document."
+      },
+      {
+        "id": 2,
+        "language": "en",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "4",
+            "48"
+          ]
+        },
+        "token_usage": {
+          "prompt_tokens": 384,
+          "completion_tokens": 40
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 414,
+          "completion_tokens": 72
+        },
+        "seconds": 2.4204439579043537,
+        "reply": "For orders within Montreal, standard delivery is dispatched the same business day if confirmed before 14 h (Eastern) and the next business day if confirmed after 14 h. Additionally, express delivery is available for same-day delivery for orders placed and paid before 11 h Eastern. Please refer to the delivery policy for more details. (Source: delivery_policy.md)"
+      },
+      {
+        "id": 3,
+        "language": "en",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "48"
+          ]
+        },
+        "token_usage": {
+          "prompt_tokens": 387,
+          "completion_tokens": 43
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 821,
+          "completion_tokens": 67
+        },
+        "seconds": 2.0939964160788804,
+        "reply": "Yes, we do ship frozen products, but they are only available for Zones 1 and 2. Frozen items are shipped in insulated containers with dry ice, ensuring they remain frozen during transit. The cold chain is maintained by using dry ice in the packaging. For more details, please refer to the delivery policy (delivery_policy.md)."
+      },
+      {
+        "id": 4,
+        "language": "en",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "token_usage": {
+          "prompt_tokens": 383,
+          "completion_tokens": 39
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 823,
+          "completion_tokens": 37
+        },
+        "seconds": 1.7497732499614358,
+        "reply": "I cannot answer that question from the policies provided. I suggest contacting customer service for specific information regarding allergens in bakery products. The source document I relied on is the allergen_policy.md."
+      },
+      {
+        "id": 5,
+        "language": "en",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "60"
+          ]
+        },
+        "token_usage": {
+          "prompt_tokens": 386,
+          "completion_tokens": 42
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 755,
+          "completion_tokens": 117
+        },
+        "seconds": 2.8788972501643,
+        "reply": "You can earn loyalty points with Bor\u00e9al March\u00e9 by spending money on purchases, as members earn **1 point per $1 spent** (before taxes, after discounts). Additionally, certain product categories offer bonus points, such as **2 points per $1** for Cuisine Bor\u00e9al prepared meals and **1.5 points per $1** for organic products. New members receive **200 bonus points** upon placing their first order of $50 or more, and there are also bonuses for birthdays, referrals, and product reviews. For more details, please refer to the loyalty terms document."
+      },
+      {
+        "id": 6,
+        "language": "en",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "token_usage": {
+          "prompt_tokens": 385,
+          "completion_tokens": 41
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 312,
+          "completion_tokens": 43
+        },
+        "seconds": 1.8409877081867307,
+        "reply": "Yes, items that arrive damaged are eligible for a full refund or replacement. You need to report the issue within 48 hours and provide a photo. For more details, you can refer to the return policy document."
+      },
+      {
+        "id": 7,
+        "language": "en",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "token_usage": {
+          "prompt_tokens": 386,
+          "completion_tokens": 42
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 911,
+          "completion_tokens": 156
+        },
+        "seconds": 2.835152250016108,
+        "reply": "Bor\u00e9al March\u00e9 collects various categories of personal information, including identity (full name, date of birth, language preference), contact (email address, phone number, mailing address), payment (tokenized credit/debit card number, billing address), transaction (order history, items purchased), delivery (shipping address, delivery instructions), behavioral data (pages viewed, search queries), device and technical information (IP address, browser type), loyalty program details (points balance, tier status), communications (support tickets, chat transcripts), and AI-derived data (retention probability score, customer segment). This information is used for purposes such as account creation, order fulfillment, delivery logistics, and customer service. For more details, you may refer to the privacy notice. \n\n(Source: privacy_notice_en.md)"
+      },
+      {
+        "id": 8,
+        "language": "en",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "72"
+          ]
+        },
+        "token_usage": {
+          "prompt_tokens": 382,
+          "completion_tokens": 38
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 328,
+          "completion_tokens": 42
+        },
+        "seconds": 1.6889510829932988,
+        "reply": "I cannot answer that from the policies. I suggest contacting customer service for assistance with canceling an existing order. The information provided does not specify the cancellation process for existing orders. Source document: return_policy.md."
+      },
+      {
+        "id": 9,
+        "language": "en",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "token_usage": {
+          "prompt_tokens": 383,
+          "completion_tokens": 39
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 758,
+          "completion_tokens": 144
+        },
+        "seconds": 2.5444258330389857,
+        "reply": "The loyalty program has three tiers based on cumulative spending in a rolling 12-month period:\n\n1. \ud83c\udf31 Pousse (Seedling): $0 \u2013 $499 with a base earning rate.\n2. \ud83c\udf32 Sapin (Fir): $500 \u2013 $1,499 with a 1.25\u00d7 earning multiplier, free standard shipping on orders over $50, and early access to seasonal products.\n3. \u2744\ufe0f \u00c9toile (Star): $1,500+ with a 1.5\u00d7 earning multiplier, free express shipping on all orders, dedicated support line, an annual 10% birthday coupon, and an invitation to tasting events.\n\nThis information is sourced from the loyalty_terms.md document."
+      },
+      {
+        "id": 10,
+        "language": "en",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "token_usage": {
+          "prompt_tokens": 386,
+          "completion_tokens": 42
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 679,
+          "completion_tokens": 83
+        },
+        "seconds": 2.4302267502062023,
+        "reply": "Yes, we offer free shipping, and the minimum order amount for free shipping varies by zone. For example, the free-shipping threshold is $75.00 for Zone 1, $100.00 for Zone 2, $150.00 for Zone 3, and $200.00 for Zone 4. Please refer to the shipping fees section for more details. (Source: delivery_policy.md)"
+      },
+      {
+        "id": 12,
+        "language": "en",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "token_usage": {
+          "prompt_tokens": 385,
+          "completion_tokens": 41
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 219,
+          "completion_tokens": 38
+        },
+        "seconds": 2.2506491248495877,
+        "reply": "I cannot answer your question from the policies provided. I suggest contacting customer service for assistance with deleting your account and all your data. The source document I relied on is the loyalty_terms.md."
+      },
+      {
+        "id": 13,
+        "language": "en",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "token_usage": {
+          "prompt_tokens": 386,
+          "completion_tokens": 42
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 525,
+          "completion_tokens": 65
+        },
+        "seconds": 2.1048162090592086,
+        "reply": "If an order is returned, the points earned on that order are deducted from your balance. If you redeemed points on an order that is later returned, the points will be restored, and the refund will be reduced by the discount amount. This information is from the \"Returns and Cancellations\" section of the loyalty terms."
+      },
+      {
+        "id": 14,
+        "language": "en",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "30",
+            "7"
+          ]
+        },
+        "token_usage": {
+          "prompt_tokens": 380,
+          "completion_tokens": 36
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 835,
+          "completion_tokens": 24
+        },
+        "seconds": 1.7386262090876698,
+        "reply": "I cannot answer that from the policies. I suggest contacting customer service for more information regarding the recyclability of delivery boxes."
+      },
+      {
+        "id": 15,
+        "language": "en",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "en",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "11",
+            "14"
+          ]
+        },
+        "token_usage": {
+          "prompt_tokens": 386,
+          "completion_tokens": 42
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 416,
+          "completion_tokens": 69
+        },
+        "seconds": 2.3813112501520663,
+        "reply": "Yes, you can pick up your order in store using the Click-and-Collect option. Free pickup is available at our Montr\u00e9al warehouse and our Qu\u00e9bec City depot, with orders ready within 4 hours of confirmation. Uncollected orders are held for 48 hours and then cancelled with a full refund. This information is from the delivery policy document."
+      },
+      {
+        "id": 34,
+        "language": "fr",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "fr",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "14"
+          ]
+        },
+        "token_usage": {
+          "prompt_tokens": 386,
+          "completion_tokens": 40
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 731,
+          "completion_tokens": 97
+        },
+        "seconds": 2.3569590419065207,
+        "reply": "Selon notre politique, les produits p\u00e9rissables, y compris les produits congel\u00e9s, ne peuvent pas \u00eatre retourn\u00e9s physiquement en raison des r\u00e9glementations de s\u00e9curit\u00e9 alimentaire. Si un produit p\u00e9rissable arrive dans un \u00e9tat insatisfaisant, vous pouvez demander un remboursement ou un remplacement dans les 48 heures suivant la livraison, sans avoir \u00e0 retourner l'article. Pour plus d'informations, je vous recommande de contacter notre service client. Source : [1] (return_policy.md)."
+      },
+      {
+        "id": 35,
+        "language": "fr",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "fr",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": [
+            "4",
+            "48"
+          ]
+        },
+        "token_usage": {
+          "prompt_tokens": 384,
+          "completion_tokens": 40
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 414,
+          "completion_tokens": 91
+        },
+        "seconds": 2.4808712918311357,
+        "reply": "La livraison standard \u00e0 Montr\u00e9al prend g\u00e9n\u00e9ralement un jour ouvrable si la commande est confirm\u00e9e avant 14 h. Pour les commandes confirm\u00e9es apr\u00e8s 14 h, elles sont exp\u00e9di\u00e9es le jour ouvrable suivant. Si vous optez pour la livraison express et que votre commande est pass\u00e9e avant 11 h, la livraison peut \u00eatre le m\u00eame jour. Pour plus de d\u00e9tails, je vous recommande de contacter le service client. (Source : delivery_policy.md)"
+      },
+      {
+        "id": 38,
+        "language": "fr",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "fr",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "token_usage": {
+          "prompt_tokens": 385,
+          "completion_tokens": 41
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 362,
+          "completion_tokens": 85
+        },
+        "seconds": 2.288647999987006,
+        "reply": "Pour supprimer votre compte de fid\u00e9lit\u00e9, vous devez contacter fidelite@borealmarche.ca. Veuillez noter que tous les points non \u00e9chang\u00e9s seront perdus lors de la fermeture de votre compte. En ce qui concerne vos donn\u00e9es personnelles, je ne peux pas r\u00e9pondre \u00e0 cette question \u00e0 partir des politiques. Je vous sugg\u00e8re de contacter le service client pour plus d'informations. (Source : loyalty_terms.md)"
+      },
+      {
+        "id": 40,
+        "language": "fr",
+        "answer_written_by": "openai",
+        "fell_back": false,
+        "reply_language": "fr",
+        "cited": true,
+        "figure_check": {
+          "figures_not_in_sources": [],
+          "top_source_figures_missing": []
+        },
+        "token_usage": {
+          "prompt_tokens": 387,
+          "completion_tokens": 43
+        },
+        "generation_token_usage": {
+          "prompt_tokens": 827,
+          "completion_tokens": 112
+        },
+        "seconds": 2.4020224169362336,
+        "reply": "Tous les produits de Bor\u00e9al March\u00e9 doivent d\u00e9clarer la pr\u00e9sence des allerg\u00e8nes prioritaires, qui incluent le lait, les \u0153ufs, le bl\u00e9 et le soja. Les produits de boulangerie peuvent donc contenir ces allerg\u00e8nes. Cependant, nous ne pouvons pas certifier qu'un produit manipul\u00e9 dans notre entrep\u00f4t est exempt de contamination crois\u00e9e avec d'autres allerg\u00e8nes. Pour plus d'informations, je vous recommande de consulter les \u00e9tiquettes physiques des produits ou de contacter le service client. (Source : allergen_policy.md)"
+      }
+    ]
+  },
+  "limitations": [
+    "Golden set is a development regression set, not an unseen evaluation set",
+    "Extractive grounding proxy does not measure answer relevance or completeness",
+    "/chat policy answers quote the source text, which may be English for a French question; with OpenAI or Ollama, /chat/stream has the model write the answer (streamed_generation); this script does not score their correctness (scripts/score_answers.py does)",
+    "OpenAI and Ollama results are absent unless explicitly executed with --provider",
+    "Local providers cost nothing per query. OpenAI's cost is its measured tokens at the list price in configs/pipeline.yaml: per_query is the routing call; per_streamed_answer adds the call that writes the answer"
+  ]
+}

@@ -179,7 +179,7 @@ def resolve_champion(cache_dir: Path = CACHE_DIR) -> tuple[Path, Path, dict[str,
 def _scores(
     model: Any, X: pd.DataFrame, y: np.ndarray, threshold: float, groups: pd.DataFrame
 ) -> dict[str, Any]:
-    p = model.predict_proba(X)[:, 1]
+    p = model.predict_proba(X[FEATURE_NAMES])[:, 1]
     report = audit(y, p, threshold, groups)
     strong = {
         f"{dimension}={row['group']}": row["recall_gap_pp"]
@@ -265,7 +265,7 @@ def check_gates(
 def holdout(processed: Path | None = None) -> tuple[pd.DataFrame, np.ndarray, str]:
     """The test snapshot of the processed data on disk: the candidate's untouched holdout."""
     processed = processed or PROCESSED
-    X = pd.read_parquet(processed / "X.parquet")[FEATURE_NAMES]
+    X = pd.read_parquet(processed / "X.parquet")
     y = pd.read_parquet(processed / "y.parquet")["will_return"]
     snapshots = pd.read_parquet(processed / "snapshots.parquet")
     test = snapshots.index[snapshots["split"] == "test"]

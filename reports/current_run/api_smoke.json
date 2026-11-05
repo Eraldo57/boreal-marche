@@ -1,6 +1,6 @@
 {
-  "executed_at": "2026-11-01T22:23:49.006970+00:00",
-  "base_url": "http://127.0.0.1:8765",
+  "executed_at": "2026-11-05T21:28:52.970506+00:00",
+  "base_url": "http://127.0.0.1:18000",
   "passed_requests": 16,
   "checks": [
     {
@@ -32,24 +32,24 @@
       "status": 200,
       "response": {
         "version": "0.1.0",
-        "git_sha": "d6dd83357bcf30f33ca20b167634491a84f9124e",
-        "model_version": "0.2.0",
-        "trained_at": "2026-09-30T22:18:43.851782+00:00",
+        "git_sha": "unknown",
+        "model_version": "0.3.0",
+        "trained_at": "2026-11-05T21:10:31.146307+00:00",
         "model_family": "RandomForestClassifier",
-        "calibration_method": "isotonic",
+        "calibration_method": "sigmoid",
         "metrics": {
-          "pr_auc": 0.7430379084309567,
-          "roc_auc": 0.7809627606139234,
-          "brier_score": 0.19539851063119004,
+          "pr_auc": 0.7596308206529796,
+          "roc_auc": 0.7863253832246079,
+          "brier_score": 0.19398294852850284,
           "recall_top_decile": 0.21556350626118068,
-          "fit_time_s": 0.4538198749651201,
-          "assumed_test_utility": 29605.0
+          "fit_time_s": 0.7012122918386012,
+          "assumed_test_utility": 29905.0
         },
-        "decision_threshold": 0.22,
+        "decision_threshold": 0.20500000000000002,
         "model_source": {
           "source": "local",
           "path": "artifacts/",
-          "fallback_reason": "MlflowException: Registered model alias champion not found."
+          "fallback_reason": "MlflowException: API request to http://mlflow:5000/api/2.0/mlflow/registered-models/alias failed with exception HTTPConnectionPool(host='mlflow', port=5000): Max retries exceeded with url: /api/2.0/mlflow/registered-m"
         }
       }
     },
@@ -61,31 +61,18 @@
         "feature_names": [
           "recency_days",
           "frequency",
-          "monetary_total",
           "monetary_mean",
           "monetary_std",
-          "days_since_first_purchase",
           "avg_days_between_orders",
           "std_days_between_orders",
           "is_one_time_buyer",
           "avg_basket_size",
-          "avg_basket_value",
-          "max_basket_value",
-          "avg_unique_items_per_basket",
           "single_item_basket_ratio",
           "top_category_share",
           "n_unique_categories",
-          "category_entropy",
-          "has_ever_cancelled",
-          "cancellation_rate",
-          "return_rate",
-          "weekend_purchase_ratio",
-          "morning_purchase_ratio",
-          "country_code",
-          "is_domestic",
-          "n_countries"
+          "morning_purchase_ratio"
         ],
-        "contract_version": "1.0",
+        "contract_version": "2.0",
         "target": "will_return",
         "positive_means": "purchase within the next 90 days",
         "currency": "GBP",
@@ -101,29 +88,16 @@
         "features": {
           "recency_days": 29.0,
           "frequency": 6.0,
-          "monetary_total": 4114.18,
           "monetary_mean": 685.6966666666667,
           "monetary_std": 373.82359966522534,
-          "days_since_first_purchase": 304.0,
           "avg_days_between_orders": 54.4,
           "std_days_between_orders": 12.759310326189265,
           "is_one_time_buyer": 0.0,
           "avg_basket_size": 32.5,
-          "avg_basket_value": 685.6966666666667,
-          "max_basket_value": 1423.58,
-          "avg_unique_items_per_basket": 27.333333333333332,
           "single_item_basket_ratio": 0.0,
           "top_category_share": 0.09100233825452461,
           "n_unique_categories": 61.0,
-          "category_entropy": 5.048832897163167,
-          "has_ever_cancelled": 0.0,
-          "cancellation_rate": 0.0,
-          "return_rate": 0.0,
-          "weekend_purchase_ratio": 0.16666666666666666,
-          "morning_purchase_ratio": 0.3333333333333333,
-          "country_code": -1.0,
-          "is_domestic": 0.0,
-          "n_countries": 1.0
+          "morning_purchase_ratio": 0.3333333333333333
         },
         "snapshot": "2011-09-01",
         "demonstration_only": true
@@ -135,39 +109,71 @@
       "status": 200,
       "response": {
         "customer_id": "12347",
-        "probability": 0.711864,
+        "probability": 0.762683,
         "will_return": true,
-        "threshold": 0.22,
+        "threshold": 0.20500000000000002,
         "risk_label": "low",
         "top_factors": [
           {
             "feature": "std_days_between_orders",
-            "importance": 0.1735,
+            "importance": 0.2239,
             "value": 12.759310326189265
           },
           {
             "feature": "frequency",
-            "importance": 0.1479,
+            "importance": 0.1858,
             "value": 6.0
           },
           {
-            "feature": "monetary_total",
-            "importance": 0.1419,
-            "value": 4114.18
-          },
-          {
             "feature": "avg_days_between_orders",
-            "importance": 0.0849,
+            "importance": 0.1219,
             "value": 54.4
           },
           {
+            "feature": "recency_days",
+            "importance": 0.103,
+            "value": 29.0
+          },
+          {
             "feature": "monetary_std",
-            "importance": 0.0787,
+            "importance": 0.089,
             "value": 373.82359966522534
           }
         ],
-        "model_version": "0.2.0",
-        "timestamp": "2026-11-01T22:23:48.728261Z"
+        "explanation": [
+          {
+            "feature": "frequency",
+            "value": 6.0,
+            "typical_value": 2.0,
+            "effect": 0.1483
+          },
+          {
+            "feature": "std_days_between_orders",
+            "value": 12.759310326189265,
+            "typical_value": 0.0,
+            "effect": 0.1223
+          },
+          {
+            "feature": "monetary_mean",
+            "value": 685.6966666666667,
+            "typical_value": 289.9475,
+            "effect": 0.0325
+          },
+          {
+            "feature": "n_unique_categories",
+            "value": 61.0,
+            "typical_value": 23.0,
+            "effect": 0.0277
+          },
+          {
+            "feature": "recency_days",
+            "value": 29.0,
+            "typical_value": 54.0,
+            "effect": 0.0226
+          }
+        ],
+        "model_version": "0.3.0",
+        "timestamp": "2026-11-05T21:28:52.181504Z"
       }
     },
     {
@@ -178,75 +184,139 @@
         "predictions": [
           {
             "customer_id": "12347",
-            "probability": 0.711864,
+            "probability": 0.762683,
             "will_return": true,
-            "threshold": 0.22,
+            "threshold": 0.20500000000000002,
             "risk_label": "low",
             "top_factors": [
               {
                 "feature": "std_days_between_orders",
-                "importance": 0.1735,
+                "importance": 0.2239,
                 "value": 12.759310326189265
               },
               {
                 "feature": "frequency",
-                "importance": 0.1479,
+                "importance": 0.1858,
                 "value": 6.0
               },
               {
-                "feature": "monetary_total",
-                "importance": 0.1419,
-                "value": 4114.18
-              },
-              {
                 "feature": "avg_days_between_orders",
-                "importance": 0.0849,
+                "importance": 0.1219,
                 "value": 54.4
               },
               {
+                "feature": "recency_days",
+                "importance": 0.103,
+                "value": 29.0
+              },
+              {
                 "feature": "monetary_std",
-                "importance": 0.0787,
+                "importance": 0.089,
                 "value": 373.82359966522534
               }
             ],
-            "model_version": "0.2.0",
-            "timestamp": "2026-11-01T22:23:48.767397Z"
+            "explanation": [
+              {
+                "feature": "frequency",
+                "value": 6.0,
+                "typical_value": 2.0,
+                "effect": 0.1483
+              },
+              {
+                "feature": "std_days_between_orders",
+                "value": 12.759310326189265,
+                "typical_value": 0.0,
+                "effect": 0.1223
+              },
+              {
+                "feature": "monetary_mean",
+                "value": 685.6966666666667,
+                "typical_value": 289.9475,
+                "effect": 0.0325
+              },
+              {
+                "feature": "n_unique_categories",
+                "value": 61.0,
+                "typical_value": 23.0,
+                "effect": 0.0277
+              },
+              {
+                "feature": "recency_days",
+                "value": 29.0,
+                "typical_value": 54.0,
+                "effect": 0.0226
+              }
+            ],
+            "model_version": "0.3.0",
+            "timestamp": "2026-11-05T21:28:52.255434Z"
           },
           {
             "customer_id": "12347",
-            "probability": 0.711864,
+            "probability": 0.762683,
             "will_return": true,
-            "threshold": 0.22,
+            "threshold": 0.20500000000000002,
             "risk_label": "low",
             "top_factors": [
               {
                 "feature": "std_days_between_orders",
-                "importance": 0.1735,
+                "importance": 0.2239,
                 "value": 12.759310326189265
               },
               {
                 "feature": "frequency",
-                "importance": 0.1479,
+                "importance": 0.1858,
                 "value": 6.0
               },
               {
-                "feature": "monetary_total",
-                "importance": 0.1419,
-                "value": 4114.18
-              },
-              {
                 "feature": "avg_days_between_orders",
-                "importance": 0.0849,
+                "importance": 0.1219,
                 "value": 54.4
               },
               {
+                "feature": "recency_days",
+                "importance": 0.103,
+                "value": 29.0
+              },
+              {
                 "feature": "monetary_std",
-                "importance": 0.0787,
+                "importance": 0.089,
                 "value": 373.82359966522534
               }
             ],
-            "model_version": "0.2.0",
-            "timestamp": "2026-11-01T22:23:48.807608Z"
+            "explanation": [
+              {
+                "feature": "frequency",
+                "value": 6.0,
+                "typical_value": 2.0,
+                "effect": 0.1483
+              },
+              {
+                "feature": "std_days_between_orders",
+                "value": 12.759310326189265,
+                "typical_value": 0.0,
+                "effect": 0.1223
+              },
+              {
+                "feature": "monetary_mean",
+                "value": 685.6966666666667,
+                "typical_value": 289.9475,
+                "effect": 0.0325
+              },
+              {
+                "feature": "n_unique_categories",
+                "value": 61.0,
+                "typical_value": 23.0,
+                "effect": 0.0277
+              },
+              {
+                "feature": "recency_days",
+                "value": 29.0,
+                "typical_value": 54.0,
+                "effect": 0.0226
+              }
+            ],
+            "model_version": "0.3.0",
+            "timestamp": "2026-11-05T21:28:52.320557Z"
           }
         ],
         "count": 2
@@ -264,7 +334,7 @@
               "body",
               "features"
             ],
-            "msg": "Value error, features must contain exactly the canonical 25 names; see /feature-contract",
+            "msg": "Value error, features must contain exactly the canonical 12 names; see /feature-contract",
             "input": {},
             "ctx": {
               "error": {}
@@ -343,7 +413,7 @@
           }
         ],
         "strategy": "rule_based",
-        "timestamp": "2026-11-01T22:23:48.811491Z"
+        "timestamp": "2026-11-05T21:28:52.327310Z"
       }
     },
     {
@@ -360,7 +430,7 @@
         ],
         "because": [],
         "strategy": "empty_basket",
-        "timestamp": "2026-11-01T22:23:48.812837Z"
+        "timestamp": "2026-11-05T21:28:52.332212Z"
       }
     },
     {
@@ -368,12 +438,12 @@
       "route": "/chat",
       "status": 200,
       "response": {
-        "reply": "Based on our documents: or a refund subject to the\nconditions described in this policy. All return and refund requests must be submitted within the applicable timeframe\ncounted from the date of delivery (or the date of pickup for click-and-collect\norders).\n\n## 2. Non-Perishable Products\n\n### 2.1 Eligibility\n\nNon-perishable products (canned goods, dry goods, household items, cleaning\nsupplies, personal care) may be returned if:",
+        "reply": "Based on our documents: ## 2. Non-Perishable Products\n\n### 2.1 Eligibility\n\nNon-perishable products (canned goods, dry goods, household items, cleaning\nsupplies, personal care) may be returned if:\n\n- The return request is made **within 30 days** of delivery.\n- The item is **unopened and in its original packaging**.\n- The item is **not a final-sale or clearance item** (marked \"Vente finale\" on the\n  product page).\n\n### 2.2 Process\n\n1. Log in to your Bor\u00e9al March\u00e9 account and navigate to \"Order History.\"\n2. Select the order and click \"Request a return.\"\n3. Choose the items you wish to return and provide a reason.\n4. Print the prepaid return label that is emailed to you.\n5. Ship the item(s) within 7 days.\n\nOnce we receive and inspect the returned items, a refund is processed to the\noriginal payment method within 5 business days.\n\n### 2.3 Return shipping cost\n\nFor non-perishable returns, the return shipping cost is borne by the customer\nunless the return is due to a Bor\u00e9al March\u00e9 error (wrong item shipped, item\ndefective on arrival). A flat return shipping fee of $7.95 is deducted from the\nrefund.",
         "citations": [
           {
             "source": "return_policy.md",
-            "chunk": "or a refund subject to the\nconditions described in this policy. All return and refund requests must be submitted within the applicable timeframe\ncounted from the date of delivery (or the date of pickup for click-and-collect\norders).\n\n## 2. Non-Perishable Products\n\n### 2.1 Eligibility\n\nNon-perishable products (canned goods, dry goods, household items, cleaning\nsupplies, personal care) may be returned if:",
-            "score": 0.6022119522094727
+            "chunk": "## 2. Non-Perishable Products\n\n### 2.1 Eligibility\n\nNon-perishable products (canned goods, dry goods, household items, cleaning\nsupplies, personal care) may be returned if:\n\n- The return request is made **within 30 days** of delivery.\n- The item is **unopened and in its original packaging**.\n- The item is **not a final-sale or clearance item** (marked \"Vente finale\" on the\n  product page).\n\n### 2.2 Process\n\n1. Log in to your Bor\u00e9al March\u00e9 account and navigate to \"Order History.\"\n2. Select the order and click \"Request a return.\"\n3. Choose the items you wish to return and provide a reason.\n4. Print the prepaid return label that is emailed to you.\n5. Ship the item(s) within 7 days.\n\nOnce we receive and inspect the returned items, a refund is processed to the\noriginal payment method within 5 business days.\n\n### 2.3 Return shipping cost\n\nFor non-perishable returns, the return shipping cost is borne by the customer\nunless the return is due to a Bor\u00e9al March\u00e9 error (wrong item shipped, item\ndefective on arrival). A flat return shipping fee of $7.95 is deducted from the\nrefund.",
+            "score": 0.5797538757324219
           }
         ],
         "tool_calls": [
@@ -385,33 +455,33 @@
             "result": {
               "chunks": [
                 {
-                  "text": "or a refund subject to the\nconditions described in this policy. All return and refund requests must be submitted within the applicable timeframe\ncounted from the date of delivery (or the date of pickup for click-and-collect\norders).\n\n## 2. Non-Perishable Products\n\n### 2.1 Eligibility\n\nNon-perishable products (canned goods, dry goods, household items, cleaning\nsupplies, personal care) may be returned if:",
+                  "text": "## 2. Non-Perishable Products\n\n### 2.1 Eligibility\n\nNon-perishable products (canned goods, dry goods, household items, cleaning\nsupplies, personal care) may be returned if:\n\n- The return request is made **within 30 days** of delivery.\n- The item is **unopened and in its original packaging**.\n- The item is **not a final-sale or clearance item** (marked \"Vente finale\" on the\n  product page).\n\n### 2.2 Process\n\n1. Log in to your Bor\u00e9al March\u00e9 account and navigate to \"Order History.\"\n2. Select the order and click \"Request a return.\"\n3. Choose the items you wish to return and provide a reason.\n4. Print the prepaid return label that is emailed to you.\n5. Ship the item(s) within 7 days.\n\nOnce we receive and inspect the returned items, a refund is processed to the\noriginal payment method within 5 business days.\n\n### 2.3 Return shipping cost\n\nFor non-perishable returns, the return shipping cost is borne by the customer\nunless the return is due to a Bor\u00e9al March\u00e9 error (wrong item shipped, item\ndefective on arrival). A flat return shipping fee of $7.95 is deducted from the\nrefund.",
                   "source": "return_policy.md",
-                  "score": 0.6022119522094727,
+                  "score": 0.5797538757324219,
                   "language": "en"
                 },
                 {
-                  "text": "# Bor\u00e9al March\u00e9 \u2014 Return and Refund Policy\n\n*Last updated: 2024-11-01*\n\n## 1. General Principles\n\nBor\u00e9al March\u00e9 wants every customer to be satisfied with their purchase. If you\nare not happy with an item, you may request a return or a refund subject to the\nconditions described in this policy.",
+                  "text": "## 9. Contact\n\nFor return and refund inquiries:\n\n- **Email:** retours@borealmarche.ca\n- **Phone:** 1-877-BOREAL-1, option 2\n- **Live chat:** borealmarche.ca, Monday\u2013Saturday, 9 h\u201321 h Eastern",
                   "source": "return_policy.md",
-                  "score": 0.5742428302764893,
+                  "score": 0.5791743397712708,
                   "language": "en"
                 },
                 {
-                  "text": "ng\n  points on the same order).\n\n## 7. Returns and Cancellations - If an order is returned or cancelled, the points earned on that order are\n  deducted from the member's balance.\n- If a member redeemed points on an order that is later returned, the points are\n  restored and the refund is reduced by the discount amount.\n\n## 8. Program Changes",
-                  "source": "loyalty_terms.md",
-                  "score": 0.5344459414482117,
-                  "language": "en"
-                },
-                {
-                  "text": "ically: do not consume, discard or return for a full refund). 4. A full refund is issued automatically \u2014 no action is required from the\n   customer.\n\n### 5.2 Voluntary recalls by manufacturers\n\nBor\u00e9al March\u00e9 cooperates with manufacturers who initiate voluntary recalls. The\nsame notification process applies.\n\n### 5.3 Internal quality alerts",
-                  "source": "allergen_policy.md",
-                  "score": 0.5206199884414673,
-                  "language": "en"
-                },
-                {
-                  "text": "processed to the\noriginal payment method within 5 business days. ### 2.3 Return shipping cost\n\nFor non-perishable returns, the return shipping cost is borne by the customer\nunless the return is due to a Bor\u00e9al March\u00e9 error (wrong item shipped, item\ndefective on arrival). A flat return shipping fee of $7.95 is deducted from the\nrefund.\n\n## 3. Perishable Products\n\n### 3.1 General rule",
+                  "text": "## 3. Perishable Products\n\n### 3.1 General rule\n\nDue to food-safety regulations, **perishable products cannot be physically\nreturned**. This includes all items tagged as \"refrigerated\" or \"frozen,\" fresh\nproduce, bakery items, and any item with an expiration date within 14 days of\ndelivery.\n\n### 3.2 Quality issues\n\nIf a perishable product arrives in unsatisfactory condition (spoiled, past its\nexpiry date, incorrect temperature, wrong item), you may request a refund or\nreplacement:\n\n- Submit a request **within 48 hours** of delivery.\n- Include **at least one photo** showing the issue.\n- A refund or replacement is issued without requiring the item to be returned.\n\n### 3.3 Taste or preference\n\nPerishable items returned for reasons of taste or preference (\"I didn't like\nit,\" \"I changed my mind\") are **not eligible for a refund or exchange**. We\nencourage customers to review product descriptions, ingredients, and reviews\nbefore purchasing.",
                   "source": "return_policy.md",
-                  "score": 0.5158478617668152,
+                  "score": 0.5669877529144287,
+                  "language": "en"
+                },
+                {
+                  "text": "## 4. Damaged or Defective Items\n\nItems that arrive damaged (broken packaging, crushed, leaking) or defective are\neligible for a full refund or replacement regardless of whether they are\nperishable or non-perishable. Report the issue within 48 hours with a photo.",
+                  "source": "return_policy.md",
+                  "score": 0.5527355670928955,
+                  "language": "en"
+                },
+                {
+                  "text": "## 1. General Principles\n\nBor\u00e9al March\u00e9 wants every customer to be satisfied with their purchase. If you\nare not happy with an item, you may request a return or a refund subject to the\nconditions described in this policy.\n\nAll return and refund requests must be submitted within the applicable timeframe\ncounted from the date of delivery (or the date of pickup for click-and-collect\norders).",
+                  "source": "return_policy.md",
+                  "score": 0.5497947931289673,
                   "language": "en"
                 }
               ],
@@ -422,11 +492,12 @@
         "provider_used": "regex",
         "refused": false,
         "refusal_reason": null,
+        "passage_confidence": "confident",
         "language": "en",
-        "provider_latency_ms": 0.02308306284248829,
+        "provider_latency_ms": 0.238500000023123,
         "token_usage": null,
         "cost_usd": 0.0,
-        "timestamp": "2026-11-01T22:23:48.843545Z"
+        "timestamp": "2026-11-05T21:28:52.638597Z"
       }
     },
     {
@@ -434,12 +505,12 @@
       "route": "/chat",
       "status": 200,
       "response": {
-        "reply": "D'apr\u00e8s nos documents (extrait dans la langue source) : # Bor\u00e9al March\u00e9 \u2014 Return and Refund Policy\n\n*Last updated: 2024-11-01*\n\n## 1. General Principles\n\nBor\u00e9al March\u00e9 wants every customer to be satisfied with their purchase. If you\nare not happy with an item, you may request a return or a refund subject to the\nconditions described in this policy.",
+        "reply": "D'apr\u00e8s nos documents (extrait dans la langue source) : ## 9. Contact\n\nFor return and refund inquiries:\n\n- **Email:** retours@borealmarche.ca\n- **Phone:** 1-877-BOREAL-1, option 2\n- **Live chat:** borealmarche.ca, Monday\u2013Saturday, 9 h\u201321 h Eastern",
         "citations": [
           {
             "source": "return_policy.md",
-            "chunk": "# Bor\u00e9al March\u00e9 \u2014 Return and Refund Policy\n\n*Last updated: 2024-11-01*\n\n## 1. General Principles\n\nBor\u00e9al March\u00e9 wants every customer to be satisfied with their purchase. If you\nare not happy with an item, you may request a return or a refund subject to the\nconditions described in this policy.",
-            "score": 0.5432543158531189
+            "chunk": "## 9. Contact\n\nFor return and refund inquiries:\n\n- **Email:** retours@borealmarche.ca\n- **Phone:** 1-877-BOREAL-1, option 2\n- **Live chat:** borealmarche.ca, Monday\u2013Saturday, 9 h\u201321 h Eastern",
+            "score": 0.5711647868156433
           }
         ],
         "tool_calls": [
@@ -451,33 +522,33 @@
             "result": {
               "chunks": [
                 {
-                  "text": "# Bor\u00e9al March\u00e9 \u2014 Return and Refund Policy\n\n*Last updated: 2024-11-01*\n\n## 1. General Principles\n\nBor\u00e9al March\u00e9 wants every customer to be satisfied with their purchase. If you\nare not happy with an item, you may request a return or a refund subject to the\nconditions described in this policy.",
+                  "text": "## 9. Contact\n\nFor return and refund inquiries:\n\n- **Email:** retours@borealmarche.ca\n- **Phone:** 1-877-BOREAL-1, option 2\n- **Live chat:** borealmarche.ca, Monday\u2013Saturday, 9 h\u201321 h Eastern",
                   "source": "return_policy.md",
-                  "score": 0.5432543158531189,
+                  "score": 0.5711647868156433,
                   "language": "en"
                 },
                 {
-                  "text": "or a refund subject to the\nconditions described in this policy. All return and refund requests must be submitted within the applicable timeframe\ncounted from the date of delivery (or the date of pickup for click-and-collect\norders).\n\n## 2. Non-Perishable Products\n\n### 2.1 Eligibility\n\nNon-perishable products (canned goods, dry goods, household items, cleaning\nsupplies, personal care) may be returned if:",
+                  "text": "## 3. Perishable Products\n\n### 3.1 General rule\n\nDue to food-safety regulations, **perishable products cannot be physically\nreturned**. This includes all items tagged as \"refrigerated\" or \"frozen,\" fresh\nproduce, bakery items, and any item with an expiration date within 14 days of\ndelivery.\n\n### 3.2 Quality issues\n\nIf a perishable product arrives in unsatisfactory condition (spoiled, past its\nexpiry date, incorrect temperature, wrong item), you may request a refund or\nreplacement:\n\n- Submit a request **within 48 hours** of delivery.\n- Include **at least one photo** showing the issue.\n- A refund or replacement is issued without requiring the item to be returned.\n\n### 3.3 Taste or preference\n\nPerishable items returned for reasons of taste or preference (\"I didn't like\nit,\" \"I changed my mind\") are **not eligible for a refund or exchange**. We\nencourage customers to review product descriptions, ingredients, and reviews\nbefore purchasing.",
                   "source": "return_policy.md",
-                  "score": 0.48459887504577637,
+                  "score": 0.5224477052688599,
                   "language": "en"
                 },
                 {
-                  "text": "ng\n  points on the same order).\n\n## 7. Returns and Cancellations - If an order is returned or cancelled, the points earned on that order are\n  deducted from the member's balance.\n- If a member redeemed points on an order that is later returned, the points are\n  restored and the refund is reduced by the discount amount.\n\n## 8. Program Changes",
-                  "source": "loyalty_terms.md",
-                  "score": 0.42713308334350586,
-                  "language": "en"
-                },
-                {
-                  "text": "ically: do not consume, discard or return for a full refund). 4. A full refund is issued automatically \u2014 no action is required from the\n   customer.\n\n### 5.2 Voluntary recalls by manufacturers\n\nBor\u00e9al March\u00e9 cooperates with manufacturers who initiate voluntary recalls. The\nsame notification process applies.\n\n### 5.3 Internal quality alerts",
-                  "source": "allergen_policy.md",
-                  "score": 0.40548384189605713,
-                  "language": "en"
-                },
-                {
-                  "text": "business days |\n\n## 9. Contact\n\nFor return and refund inquiries: - **Email:** retours@borealmarche.ca\n- **Phone:** 1-877-BOREAL-1, option 2\n- **Live chat:** borealmarche.ca, Monday\u2013Saturday, 9 h\u201321 h Eastern",
+                  "text": "## 1. General Principles\n\nBor\u00e9al March\u00e9 wants every customer to be satisfied with their purchase. If you\nare not happy with an item, you may request a return or a refund subject to the\nconditions described in this policy.\n\nAll return and refund requests must be submitted within the applicable timeframe\ncounted from the date of delivery (or the date of pickup for click-and-collect\norders).",
                   "source": "return_policy.md",
-                  "score": 0.3569929599761963,
+                  "score": 0.5203854441642761,
+                  "language": "en"
+                },
+                {
+                  "text": "## 4. Damaged or Defective Items\n\nItems that arrive damaged (broken packaging, crushed, leaking) or defective are\neligible for a full refund or replacement regardless of whether they are\nperishable or non-perishable. Report the issue within 48 hours with a photo.",
+                  "source": "return_policy.md",
+                  "score": 0.5167911648750305,
+                  "language": "en"
+                },
+                {
+                  "text": "## 8. Refund Methods\n\nRefunds are issued to the original payment method:\n\n| Payment method | Refund timeline |\n|----------------|----------------|\n| Credit card (Visa, Mastercard, Amex) | 5\u201310 business days |\n| Debit card (Interac) | 5\u201310 business days |\n| Bor\u00e9al March\u00e9 gift card | Instantly re-credited |\n| Loyalty points | Points restored within 24 hours |\n| PayPal | 3\u20135 business days |",
+                  "source": "return_policy.md",
+                  "score": 0.5133020877838135,
                   "language": "en"
                 }
               ],
@@ -488,11 +559,12 @@
         "provider_used": "regex",
         "refused": false,
         "refusal_reason": null,
+        "passage_confidence": "confident",
         "language": "fr",
-        "provider_latency_ms": 0.016208039596676826,
+        "provider_latency_ms": 0.019791999989138276,
         "token_usage": null,
         "cost_usd": 0.0,
-        "timestamp": "2026-11-01T22:23:48.874156Z"
+        "timestamp": "2026-11-05T21:28:52.745241Z"
       }
     },
     {
@@ -506,11 +578,12 @@
         "provider_used": "regex",
         "refused": true,
         "refusal_reason": "I can only access your own account information. I cannot look up or share another customer's data. / Je ne peux acc\u00e9der qu'\u00e0 vos propres informations. Je ne peux ni consulter ni partager les donn\u00e9es d'un autre client.",
+        "passage_confidence": null,
         "language": "en",
         "provider_latency_ms": null,
         "token_usage": null,
         "cost_usd": null,
-        "timestamp": "2026-11-01T22:23:48.875928Z"
+        "timestamp": "2026-11-05T21:28:52.748911Z"
       }
     },
     {
@@ -518,7 +591,7 @@
       "route": "/chat",
       "status": 200,
       "response": {
-        "reply": "Probability of purchase within 90 days: 71.2%. Non-return risk: low. Historical public-data demo / d\u00e9monstration historique.",
+        "reply": "Probability of purchase within 90 days: 76.3%. Non-return risk: low. Historical public-data demo / d\u00e9monstration historique.",
         "citations": [],
         "tool_calls": [
           {
@@ -528,10 +601,10 @@
             },
             "result": {
               "customer_id": "12347",
-              "probability": 0.711864,
+              "probability": 0.762683,
               "will_return": true,
               "risk_label": "low",
-              "threshold": 0.22,
+              "threshold": 0.20500000000000002,
               "error": null
             }
           }
@@ -539,11 +612,12 @@
         "provider_used": "regex",
         "refused": false,
         "refusal_reason": null,
+        "passage_confidence": null,
         "language": "en",
-        "provider_latency_ms": 0.013333046808838844,
+        "provider_latency_ms": 0.015749999988656782,
         "token_usage": null,
         "cost_usd": 0.0,
-        "timestamp": "2026-11-01T22:23:48.937115Z"
+        "timestamp": "2026-11-05T21:28:52.871545Z"
       }
     },
     {
@@ -592,11 +666,12 @@
         "provider_used": "regex",
         "refused": false,
         "refusal_reason": null,
+        "passage_confidence": null,
         "language": "en",
-        "provider_latency_ms": 0.02095918171107769,
+        "provider_latency_ms": 0.022458999978880456,
         "token_usage": null,
         "cost_usd": 0.0,
-        "timestamp": "2026-11-01T22:23:48.967571Z"
+        "timestamp": "2026-11-05T21:28:52.956484Z"
       }
     },
     {
@@ -604,487 +679,94 @@
       "route": "/metrics",
       "status": 200,
       "response": {
-        "request_count": 157,
-        "error_rate": 0.0701,
-        "latency_p50_ms": 0.63,
-        "latency_p95_ms": 626.39,
-        "latency_p99_ms": 2216.16,
-        "drift_metrics": [
-          {
-            "feature": "recency_days",
-            "statistic": "psi",
-            "value": 1.830180542110915,
-            "threshold": 0.2,
-            "alert": true
-          },
-          {
-            "feature": "recency_days",
-            "statistic": "ks_pvalue",
-            "value": 5.192124588068793e-93,
-            "threshold": 0.05,
-            "alert": true
-          },
-          {
-            "feature": "frequency",
-            "statistic": "psi",
-            "value": 0.10068724384500603,
-            "threshold": 0.2,
-            "alert": false
-          },
-          {
-            "feature": "frequency",
-            "statistic": "ks_pvalue",
-            "value": 0.00047461109754431534,
-            "threshold": 0.05,
-            "alert": true
-          },
-          {
-            "feature": "monetary_total",
-            "statistic": "psi",
-            "value": 0.07090618468190522,
-            "threshold": 0.2,
-            "alert": false
-          },
-          {
-            "feature": "monetary_total",
-            "statistic": "ks_pvalue",
-            "value": 0.009967261382908347,
-            "threshold": 0.05,
-            "alert": true
-          },
-          {
-            "feature": "monetary_mean",
-            "statistic": "psi",
-            "value": 0.048114737900296356,
-            "threshold": 0.2,
-            "alert": false
-          },
-          {
-            "feature": "monetary_mean",
-            "statistic": "ks_pvalue",
-            "value": 0.26539964637073055,
-            "threshold": 0.05,
-            "alert": false
-          },
-          {
-            "feature": "monetary_std",
-            "statistic": "psi",
-            "value": 0.08886007047736863,
-            "threshold": 0.2,
-            "alert": false
-          },
-          {
-            "feature": "monetary_std",
-            "statistic": "ks_pvalue",
-            "value": 2.3756530041781124e-05,
-            "threshold": 0.05,
-            "alert": true
-          },
-          {
-            "feature": "days_since_first_purchase",
-            "statistic": "psi",
-            "value": 2.1716062046940063,
-            "threshold": 0.2,
-            "alert": true
-          },
-          {
-            "feature": "days_since_first_purchase",
-            "statistic": "ks_pvalue",
-            "value": 2.525839276074436e-101,
-            "threshold": 0.05,
-            "alert": true
-          },
-          {
-            "feature": "avg_days_between_orders",
-            "statistic": "psi",
-            "value": 0.3191015396222512,
-            "threshold": 0.2,
-            "alert": true
-          },
-          {
-            "feature": "avg_days_between_orders",
-            "statistic": "ks_pvalue",
-            "value": 1.9311118796236334e-13,
-            "threshold": 0.05,
-            "alert": true
-          },
-          {
-            "feature": "std_days_between_orders",
-            "statistic": "psi",
-            "value": 0.20813477179010312,
-            "threshold": 0.2,
-            "alert": true
-          },
-          {
-            "feature": "std_days_between_orders",
-            "statistic": "ks_pvalue",
-            "value": 6.924712468904387e-08,
-            "threshold": 0.05,
-            "alert": true
-          },
-          {
-            "feature": "is_one_time_buyer",
-            "statistic": "psi",
-            "value": 0.08600394813324146,
-            "threshold": 0.2,
-            "alert": false
-          },
-          {
-            "feature": "is_one_time_buyer",
-            "statistic": "ks_pvalue",
-            "value": 0.0004746110975443053,
-            "threshold": 0.05,
-            "alert": true
-          },
-          {
-            "feature": "avg_basket_size",
-            "statistic": "psi",
-            "value": 0.07544805204537552,
-            "threshold": 0.2,
-            "alert": false
-          },
-          {
-            "feature": "avg_basket_size",
-            "statistic": "ks_pvalue",
-            "value": 0.20481306129613086,
-            "threshold": 0.05,
-            "alert": false
-          },
-          {
-            "feature": "avg_basket_value",
-            "statistic": "psi",
-            "value": 0.048114737900296356,
-            "threshold": 0.2,
-            "alert": false
-          },
-          {
-            "feature": "avg_basket_value",
-            "statistic": "ks_pvalue",
-            "value": 0.26539964637073055,
-            "threshold": 0.05,
-            "alert": false
-          },
-          {
-            "feature": "max_basket_value",
-            "statistic": "psi",
-            "value": 0.06335124856676091,
-            "threshold": 0.2,
-            "alert": false
-          },
-          {
-            "feature": "max_basket_value",
-            "statistic": "ks_pvalue",
-            "value": 0.14632547432884568,
-            "threshold": 0.05,
-            "alert": false
-          },
-          {
-            "feature": "avg_unique_items_per_basket",
-            "statistic": "psi",
-            "value": 0.06633948443888088,
-            "threshold": 0.2,
-            "alert": false
-          },
-          {
-            "feature": "avg_unique_items_per_basket",
-            "statistic": "ks_pvalue",
-            "value": 0.3918910797480466,
-            "threshold": 0.05,
-            "alert": false
-          },
-          {
-            "feature": "single_item_basket_ratio",
-            "statistic": "psi",
-            "value": 0.0010288074109211724,
-            "threshold": 0.2,
-            "alert": false
-          },
-          {
-            "feature": "single_item_basket_ratio",
-            "statistic": "ks_pvalue",
-            "value": 0.9999729416813392,
-            "threshold": 0.05,
-            "alert": false
-          },
-          {
-            "feature": "top_category_share",
-            "statistic": "psi",
-            "value": 0.07412869109292304,
-            "threshold": 0.2,
-            "alert": false
-          },
-          {
-            "feature": "top_category_share",
-            "statistic": "ks_pvalue",
-            "value": 0.057713456454205114,
-            "threshold": 0.05,
-            "alert": false
-          },
-          {
-            "feature": "n_unique_categories",
-            "statistic": "psi",
-            "value": 0.09661281580285773,
-            "threshold": 0.2,
-            "alert": false
-          },
-          {
-            "feature": "n_unique_categories",
-            "statistic": "ks_pvalue",
-            "value": 0.014446765593502556,
-            "threshold": 0.05,
-            "alert": true
-          },
-          {
-            "feature": "category_entropy",
-            "statistic": "psi",
-            "value": 0.051375539068127044,
-            "threshold": 0.2,
-            "alert": false
-          },
-          {
-            "feature": "category_entropy",
-            "statistic": "ks_pvalue",
-            "value": 0.034446825671818004,
-            "threshold": 0.05,
-            "alert": true
-          },
-          {
-            "feature": "has_ever_cancelled",
-            "statistic": "psi",
-            "value": 0.007912249272608765,
-            "threshold": 0.2,
-            "alert": false
-          },
-          {
-            "feature": "has_ever_cancelled",
-            "statistic": "ks_pvalue",
-            "value": 0.9999999999998723,
-            "threshold": 0.05,
-            "alert": false
-          },
-          {
-            "feature": "cancellation_rate",
-            "statistic": "psi",
-            "value": 0.02767459193719754,
-            "threshold": 0.2,
-            "alert": false
-          },
-          {
-            "feature": "cancellation_rate",
-            "statistic": "ks_pvalue",
-            "value": 0.332414542378035,
-            "threshold": 0.05,
-            "alert": false
-          },
-          {
-            "feature": "return_rate",
-            "statistic": "psi",
-            "value": 7.011727550165498e-05,
-            "threshold": 0.2,
-            "alert": false
-          },
-          {
-            "feature": "return_rate",
-            "statistic": "ks_pvalue",
-            "value": 0.9930390415563558,
-            "threshold": 0.05,
-            "alert": false
-          },
-          {
-            "feature": "weekend_purchase_ratio",
-            "statistic": "psi",
-            "value": 0.005948523230987138,
-            "threshold": 0.2,
-            "alert": false
-          },
-          {
-            "feature": "weekend_purchase_ratio",
-            "statistic": "ks_pvalue",
-            "value": 0.17743728301339912,
-            "threshold": 0.05,
-            "alert": false
-          },
-          {
-            "feature": "morning_purchase_ratio",
-            "statistic": "psi",
-            "value": 0.05679249155788896,
-            "threshold": 0.2,
-            "alert": false
-          },
-          {
-            "feature": "morning_purchase_ratio",
-            "statistic": "ks_pvalue",
-            "value": 0.07862337673163255,
-            "threshold": 0.05,
-            "alert": false
-          },
-          {
-            "feature": "country_code",
-            "statistic": "psi",
-            "value": 0.01925657902719359,
-            "threshold": 0.2,
-            "alert": false
-          },
-          {
-            "feature": "country_code",
-            "statistic": "ks_pvalue",
-            "value": 0.4088593101804219,
-            "threshold": 0.05,
-            "alert": false
-          },
-          {
-            "feature": "is_domestic",
-            "statistic": "psi",
-            "value": 0.032963288924528926,
-            "threshold": 0.2,
-            "alert": false
-          },
-          {
-            "feature": "is_domestic",
-            "statistic": "ks_pvalue",
-            "value": 0.6707253976376084,
-            "threshold": 0.05,
-            "alert": false
-          },
-          {
-            "feature": "n_countries",
-            "statistic": "psi",
-            "value": 0.007879004568112455,
-            "threshold": 0.2,
-            "alert": false
-          },
-          {
-            "feature": "n_countries",
-            "statistic": "ks_pvalue",
-            "value": 1.0,
-            "threshold": 0.05,
-            "alert": false
-          }
-        ],
-        "status": "red",
-        "drift_status": "measured",
+        "request_count": 12,
+        "error_rate": 0.0833,
+        "latency_p50_ms": 84.46,
+        "latency_p95_ms": 415.22,
+        "latency_p99_ms": 524.55,
+        "drift_metrics": [],
+        "status": "yellow",
+        "drift_status": "insufficient_data_or_reference",
         "window_description": "bounded local request log",
         "log_write_failures": 0,
         "requests_by_route": {
-          "/predict": 55,
-          "/predict/batch": 9,
-          "/recommend": 83,
-          "/chat": 7,
-          "/chat/stream": 3
+          "/chat/stream": 1,
+          "/predict": 3,
+          "/predict/batch": 1,
+          "/recommend": 2,
+          "/chat": 5
         },
         "latency_p95_by_route_ms": {
-          "/predict": 49.52,
-          "/predict/batch": 1396.95,
-          "/recommend": 0.88,
-          "/chat": 55.27,
-          "/chat/stream": 3765.06
+          "/chat/stream": 551.89,
+          "/predict": 83.53,
+          "/predict/batch": 127.57,
+          "/recommend": 2.0,
+          "/chat": 266.97
         },
-        "prediction_drift": [
-          {
-            "feature": "predicted_probability",
-            "statistic": "psi",
-            "value": 0.34281660830652777,
-            "threshold": 0.2,
-            "alert": true
-          },
-          {
-            "feature": "predicted_probability",
-            "statistic": "ks_pvalue",
-            "value": 1.8927206815736328e-08,
-            "threshold": 0.05,
-            "alert": true
-          }
-        ],
+        "prediction_drift": [],
         "data_quality": {
-          "prediction_requests": 64,
-          "rejected_by_validation": 11,
-          "invalid_request_rate": 0.171875,
-          "out_of_range_share": {
-            "recency_days": 0.5609756097560976,
-            "frequency": 0.0,
-            "monetary_total": 0.0,
-            "monetary_mean": 0.0,
-            "monetary_std": 0.0,
-            "days_since_first_purchase": 0.5934959349593496,
-            "avg_days_between_orders": 0.11382113821138211,
-            "std_days_between_orders": 0.008130081300813009,
-            "is_one_time_buyer": 0.0,
-            "avg_basket_size": 0.0,
-            "avg_basket_value": 0.0,
-            "max_basket_value": 0.0,
-            "avg_unique_items_per_basket": 0.0,
-            "single_item_basket_ratio": 0.0,
-            "top_category_share": 0.0,
-            "n_unique_categories": 0.0,
-            "category_entropy": 0.0,
-            "has_ever_cancelled": 0.0,
-            "cancellation_rate": 0.0,
-            "return_rate": 0.0,
-            "weekend_purchase_ratio": 0.0,
-            "morning_purchase_ratio": 0.0,
-            "country_code": 0.0,
-            "is_domestic": 0.0,
-            "n_countries": 0.0
-          }
+          "prediction_requests": 4,
+          "rejected_by_validation": 1,
+          "invalid_request_rate": null,
+          "out_of_range_share": {}
         },
         "recommendation": {
-          "requests": 83,
+          "requests": 2,
           "by_strategy": {
-            "rule_based": 51,
-            "popularity_fallback": 31,
+            "rule_based": 1,
             "empty_basket": 1
           },
-          "non_empty_baskets": 82,
-          "rule_fire_rate": 0.6219512195121951
+          "non_empty_baskets": 1,
+          "rule_fire_rate": 1.0
         },
         "checks": [
           {
             "check": "error_rate",
-            "value": 0.07006369426751592,
+            "value": 0.08333333333333333,
             "rule": "yellow above 0.05, red above 0.1",
             "level": "yellow",
             "detail": ""
           },
           {
             "check": "predict_latency_p95_ms",
-            "value": 49.51662898529321,
+            "value": 83.53394579993392,
             "rule": "yellow above 500 ms, single /predict requests",
             "level": "green",
             "detail": ""
           },
           {
             "check": "input_drift",
-            "value": 2.1716062046940063,
+            "value": null,
             "rule": "red when any PSI > 0.2 or KS p-value < 0.05; value is the largest PSI",
-            "level": "red",
-            "detail": "alerting: avg_days_between_orders, category_entropy, days_since_first_purchase, frequency, is_one_time_buyer, monetary_std, monetary_total, n_unique_categories, recency_days, std_days_between_orders"
+            "level": "not_evaluated",
+            "detail": ""
           },
           {
             "check": "prediction_drift",
-            "value": 0.34281660830652777,
+            "value": null,
             "rule": "red when any PSI > 0.2 or KS p-value < 0.05; value is the largest PSI",
-            "level": "red",
-            "detail": "alerting: predicted_probability"
+            "level": "not_evaluated",
+            "detail": ""
           },
           {
             "check": "invalid_request_rate",
-            "value": 0.171875,
+            "value": null,
             "rule": "yellow above 0.05 (from 20 prediction requests)",
-            "level": "yellow",
+            "level": "not_evaluated",
             "detail": ""
           },
           {
             "check": "out_of_range_share",
-            "value": 0.5934959349593496,
+            "value": null,
             "rule": "yellow when any feature has more than 0.01 of its values outside the training range",
-            "level": "yellow",
-            "detail": "features: avg_days_between_orders, days_since_first_purchase, recency_days"
+            "level": "not_evaluated",
+            "detail": ""
           },
           {
             "check": "rule_fire_rate",
-            "value": 0.6219512195121951,
+            "value": null,
             "rule": "yellow below 0.5 (from 20 non-empty baskets)",
-            "level": "green",
+            "level": "not_evaluated",
             "detail": ""
           }
         ]

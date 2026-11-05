@@ -6,7 +6,11 @@ import os
 import httpx
 import pandas as pd
 import streamlit as st
-from about import mermaid_to_dot, read_document
+from about import DIAGRAM_CSS, mermaid_to_dot, read_document
+from basket import basket_inputs, load_details, show_mining_explanation
+from coupon import show_coupon_math
+from evaluation import show_ranking_plots
+from notes import effect_lines, reason_lines, strategy_note
 
 st.set_page_config(page_title="Boréal Marché", page_icon="🍁", layout="wide")
 API_BASE = st.sidebar.text_input(
@@ -111,9 +115,20 @@ with prediction:
                 f"Assumption-based threshold: {result['threshold']:.3f}; "
                 f"model {result['model_version']}"
             )
+            reasons = effect_lines(result)
+            if reasons:
+                st.subheader("Why this score / Pourquoi ce score")
+                st.markdown("\n".join(f"- {line}" for line in reasons))
+                st.caption(
+                    "Compared with a typical customer (the training median) on each feature, "
+                    "one at a time. Features are related, so these do not add up. This is "
+                    "association in past data, not a cause and not the effect of a coupon."
+                )
             if result["top_factors"]:
-                with st.expander("Global importance hints (not individual explanations)"):
+                with st.expander("Global importance (the same for every customer)"):
                     st.json(result["top_factors"])
+
+            show_coupon_math(result["probability"], result["threshold"])
 
             st.subheader("Human review / Révision humaine")
             proposed = "offer_coupon" if result["will_return"] else "no_action"
@@ -166,20 +181,37 @@ with recommendation:
         "Use UCI giftware descriptions. The fictional grocery catalogue is "
         "a separate assistant demonstration."
     )
-    basket_text = st.text_area(
-        "One item per line; leave empty for popularity", value="white hanging heart t-light holder"
-    )
-    if st.button("Get recommendations"):
-        result = api_call(
-            "POST",
-            "/recommend",
-            {"basket": [x.strip() for x in basket_text.splitlines() if x.strip()], "top_k": 5},
+    try:
+        details = load_details(API_BASE)
+    except httpx.HTTPError:
+        details = None
+        st.info("Product picker unavailable. You can still enter product descriptions below.")
+    if details:
+        basket_items = basket_inputs(details)
+    else:
+        basket_text = st.text_area(
+            "One item per line; leave empty for popularity",
+            value="white hanging heart t-light holder",
         )
-        if result:
-            st.write(result["recommendations"])
-            st.caption(f"Strategy: {result['strategy']}")
-            with st.expander("Firing rules: support, confidence and lift"):
-                st.json(result["because"])
+        basket_items = [x.strip() for x in basket_text.splitlines() if x.strip()]
+    top_k = 5
+    recommendation_request = (tuple(basket_items), top_k)
+    if st.button("Get recommendations"):
+        fresh = api_call("POST", "/recommend", {"basket": basket_items, "top_k": top_k})
+        st.session_state["last_recommendation"] = fresh
+        st.session_state["recommended_for"] = recommendation_request
+    result = st.session_state.get("last_recommendation")
+    if result and st.session_state.get("recommended_for") == recommendation_request:
+        if result["strategy"] != "rule_based":
+            level, note = strategy_note(result)
+            getattr(st, level)(note)
+        lines = reason_lines(result)
+        st.markdown("\n".join(f"- {line}" for line in lines or result["recommendations"]))
+        st.caption(f"Strategy: {result['strategy']}")
+        with st.expander("Firing rules: support, confidence and lift"):
+            st.json(result["because"])
+    if details:
+        show_mining_explanation(details)
 
 with assistant:
     st.header("Grounded assistant / Assistant avec sources")
@@ -208,6 +240,14 @@ with assistant:
             st.error(final["error"])
         if "fallback" in final:
             st.warning(final["fallback"])
+        by_model = final.get("answer_written_by") not in {"source text", "template"}
+        if final.get("passage_confidence") == "uncertain" and by_model:
+            # A model wrote this answer. When it quotes the source instead, the notice is
+            # already the first lines of the reply.
+            st.warning(
+                "The best policy passage matched this question only weakly, so the answer "
+                "may not be about what you asked. Check the excerpt below, or contact support."
+            )
         figures = final.get("figure_check", {})
         if figures.get("figures_not_in_sources"):
             st.warning(
@@ -309,6 +349,7 @@ with about:
         show_document("notice", "Customer notice missing from this installation.")
     with card:
         show_document("model_card", "MODEL_CARD.md missing from this installation.")
+        show_ranking_plots()
     with privacy:
         show_document("privacy", "Privacy notice missing from this installation.")
     with provenance:
@@ -317,7 +358,8 @@ with about:
         source = read_document("architecture")
         dot = mermaid_to_dot(source) if source else None
         if dot:
-            st.graphviz_chart(dot)
+            st.markdown(DIAGRAM_CSS, unsafe_allow_html=True)  # a constant, not user input
+            st.graphviz_chart(dot, width="stretch")
         st.caption("Source and rationale: ARCHITECTURE.md")
     with version_tab:
         version = api_call("GET", "/version")

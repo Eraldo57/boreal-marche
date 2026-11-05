@@ -1,9 +1,12 @@
 """
 Document indexing for the Boréal Marché RAG assistant.
 
-Loads Markdown policy documents from docs/corpus/, chunks them with configurable
-size and overlap, embeds each chunk with a multilingual sentence-transformer,
-and stores the vectors in a persistent ChromaDB collection.
+Loads Markdown policy documents from docs/corpus/, splits each into sections (a "## "
+heading and everything under it), cuts the sections into small chunks, embeds each chunk
+with a multilingual sentence-transformer and stores the vectors in a persistent ChromaDB
+collection. A chunk is matched by its small, titled text, but a query returns the whole
+section it belongs to ("small to big"): the encoder reads only 128 tokens, so matching must
+use small pieces, while a fact often sits in a table or list that a small piece would cut.
 
 Usage (CLI):
     python -m src.rag.index                     # default paths
@@ -31,6 +34,9 @@ DEFAULT_DB = ROOT / "data" / "chromadb"
 CONFIG_PATH = ROOT / "configs" / "pipeline.yaml"
 COLLECTION_NAME = "boreal_policy"
 DEFAULT_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+SECTION_LAYOUT = 2  # bumped when the index layout changes; an older index must be rebuilt
+SECTIONS_FILE = "sections.json"  # section texts, stored beside the manifest
+CHUNKS_PER_PASSAGE = 3  # chunks fetched per returned section, so sections can be deduplicated
 
 
 def corpus_hash(corpus_dir: Path) -> str:
@@ -69,32 +75,47 @@ class RagIndex:
             or metadata["chunk_overlap"] != cfg["chunk_overlap"]
         ):
             raise ValueError("Chunk configuration changed; rebuild RAG index")
+        if metadata.get("layout") != SECTION_LAYOUT:
+            raise ValueError("Index layout changed; rebuild RAG index (--force)")
         self.client = chromadb.PersistentClient(path=str(self.db_dir))
         self.collection = self.client.get_collection(COLLECTION_NAME)
         if self.collection.count() != metadata["chunk_count"] or not self.collection.count():
             raise ValueError("RAG collection/manifest count mismatch")
         self.model = embedding_model(metadata["embedding_model"])
+        self.sections = json.loads((self.db_dir / SECTIONS_FILE).read_text(encoding="utf-8"))
         self.metadata = metadata
 
     def query(self, question: str, top_k: int = 5) -> list[dict[str, Any]]:
-        vectors = self.model.encode([question], normalize_embeddings=True).tolist()
-        result: Any = self.collection.query(
-            query_embeddings=vectors,
-            n_results=min(top_k, self.collection.count()),
-            include=["documents", "metadatas", "distances"],
-        )
-        return [
-            {
-                "text": text,
+        """The *top_k* best sections for *question*, best first.
+
+        ``score`` is the best chunk's similarity; ``chunk_index`` is the section's position
+        in its document.
+        """
+        return search(self.collection, self.model, self.sections, question, top_k)
+
+
+def search(
+    collection: Any, model: Any, sections: dict[str, Any], question: str, top_k: int
+) -> list[dict[str, Any]]:
+    """Match small chunks, return the distinct sections they belong to (best chunk first)."""
+    vectors = model.encode([question], normalize_embeddings=True).tolist()
+    result: Any = collection.query(
+        query_embeddings=vectors,
+        n_results=min(top_k * CHUNKS_PER_PASSAGE, collection.count()),
+        include=["metadatas", "distances"],
+    )
+    hits: dict[tuple[str, int], dict[str, Any]] = {}
+    for meta, distance in zip(result["metadatas"][0], result["distances"][0]):
+        key = (meta["source"], meta["section"])
+        if key not in hits:  # results come best first, so the first chunk of a section is its best
+            hits[key] = {
+                "text": sections[meta["source"]][meta["section"]]["text"],
                 "source": meta["source"],
                 "score": float(1 - distance),
                 "language": meta["language"],
-                "chunk_index": meta["chunk_index"],
+                "chunk_index": meta["section"],
             }
-            for text, meta, distance in zip(
-                result["documents"][0], result["metadatas"][0], result["distances"][0]
-            )
-        ]
+    return list(hits.values())[:top_k]
 
 
 # ---------------------------------------------------------------------------
@@ -162,6 +183,40 @@ def _detect_language(text: str) -> str:
     words = set(re.findall(r"\b[a-zàâéèêëïîôùûüç]+\b", text.lower()))
     score = len(words & french_markers)
     return "fr" if score >= 5 else "en"
+
+
+# ---------------------------------------------------------------------------
+# Sections
+# ---------------------------------------------------------------------------
+
+_DATE_LINE = re.compile(r"^\*(Last updated|Dernière mise à jour)[^*]*\*$")
+
+
+def split_sections(text: str) -> list[dict[str, str]]:
+    """Split a Markdown policy into sections: each "## " heading and everything under it.
+
+    Text before the first heading, apart from the title and the date line, becomes an
+    "Introduction" section; a document without "## " headings is that one section. Every
+    section carries its document's title, and its ``text`` starts with its heading line.
+    """
+    title_match = re.match(r"#\s+(.+)", text)
+    title = title_match.group(1).strip() if title_match else ""
+    first, *rest = re.split(r"(?m)^(?=## )", text)
+    intro = "\n".join(
+        line
+        for line in first.splitlines()
+        if not line.startswith("# ") and not _DATE_LINE.match(line.strip())
+    ).strip()
+    sections = []
+    if intro:
+        sections.append(
+            {"title": title, "heading": "Introduction", "text": f"## Introduction\n{intro}"}
+        )
+    for part in rest:
+        part = part.strip()
+        heading = part.splitlines()[0].lstrip("# ").strip()
+        sections.append({"title": title, "heading": heading, "text": part})
+    return sections
 
 
 # ---------------------------------------------------------------------------
@@ -291,25 +346,34 @@ def build_index(
     all_ids: list[str] = []
     all_texts: list[str] = []
     all_metas: list[Any] = []
+    all_sections: dict[str, list[dict[str, str]]] = {}
 
     for md_path in md_files:
         text = md_path.read_text(encoding="utf-8")
         source = md_path.name
         language = _detect_language(text)
-        chunks = chunk_text(text, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
-        logger.info("  %s → %d chunks (%s)", source, len(chunks), language)
-
-        for idx, chunk in enumerate(chunks):
-            doc_id = hashlib.sha256(f"{source}:{idx}".encode()).hexdigest()[:16]
-            all_ids.append(doc_id)
-            all_texts.append(chunk)
-            all_metas.append(
-                {
-                    "source": source,
-                    "chunk_index": idx,
-                    "language": language,
-                }
-            )
+        sections = split_sections(text)
+        all_sections[source] = sections
+        count = 0
+        for position, section in enumerate(sections):
+            body = section["text"].split("\n", 1)[1] if "\n" in section["text"] else ""
+            # The title and heading go in front of every chunk, so a table row or a list item
+            # still says which policy and section it belongs to.
+            head = f"{section['title']} — {section['heading']}\n"
+            for piece in chunk_text(body, chunk_size=chunk_size, chunk_overlap=chunk_overlap):
+                doc_id = hashlib.sha256(f"{source}:{count}".encode()).hexdigest()[:16]
+                all_ids.append(doc_id)
+                all_texts.append(head + piece)
+                all_metas.append(
+                    {
+                        "source": source,
+                        "chunk_index": count,
+                        "section": position,
+                        "language": language,
+                    }
+                )
+                count += 1
+        logger.info("  %s → %d sections, %d chunks (%s)", source, len(sections), count, language)
 
     # Embed all chunks in one batch.
     logger.info("Embedding %d chunks…", len(all_texts))
@@ -327,6 +391,9 @@ def build_index(
         )
 
     total = collection.count()
+    (db_dir / SECTIONS_FILE).write_text(
+        json.dumps(all_sections, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
     (db_dir / "manifest.json").write_text(
         json.dumps(
             {
@@ -334,6 +401,8 @@ def build_index(
                 "corpus_sha256": corpus_hash(corpus_dir),
                 "chunk_count": total,
                 "document_count": len(md_files),
+                "section_count": sum(len(v) for v in all_sections.values()),
+                "layout": SECTION_LAYOUT,
                 "chunk_size": chunk_size,
                 "chunk_overlap": chunk_overlap,
             },
@@ -351,10 +420,10 @@ def query_index(
     n_results: int | None = None,
     model_name: str | None = None,
 ) -> list[dict[str, Any]]:
-    """Retrieve the top-*n* chunks most similar to *question*.
+    """Retrieve the top-*n* sections most similar to *question*.
 
     Returns a list of dicts with keys ``text``, ``source``, ``score``,
-    ``language``, and ``chunk_index``.
+    ``language``, and ``chunk_index`` (the section's position in its document).
     """
     cfg = _load_assistant_config()
     n_results = n_results or cfg.get("max_chunks_per_query", 5)
@@ -362,38 +431,10 @@ def query_index(
 
     import chromadb
 
-    client = chromadb.PersistentClient(path=str(db_dir))
-    collection = client.get_collection(COLLECTION_NAME)
-
-    model = embedding_model(model_name)
-    q_emb = model.encode([question], normalize_embeddings=True).tolist()
-
-    results: Any = collection.query(
-        query_embeddings=q_emb,
-        n_results=n_results,
-        include=["documents", "metadatas", "distances"],
-    )
-
-    hits: list[dict[str, Any]] = []
-    for doc, meta, dist in zip(
-        results["documents"][0],
-        results["metadatas"][0],
-        results["distances"][0],
-    ):
-        # ChromaDB returns cosine *distance* (0 = identical); convert to
-        # similarity for the rest of the pipeline.
-        score = 1.0 - dist
-        hits.append(
-            {
-                "text": doc,
-                "source": meta["source"],
-                "chunk_index": meta["chunk_index"],
-                "language": meta["language"],
-                "score": round(score, 4),
-            }
-        )
-
-    return hits
+    collection = chromadb.PersistentClient(path=str(db_dir)).get_collection(COLLECTION_NAME)
+    sections = json.loads((Path(db_dir) / SECTIONS_FILE).read_text(encoding="utf-8"))
+    hits = search(collection, embedding_model(model_name), sections, question, n_results)
+    return [{**hit, "score": round(hit["score"], 4)} for hit in hits]
 
 
 # ---------------------------------------------------------------------------

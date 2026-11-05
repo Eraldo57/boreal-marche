@@ -7,6 +7,7 @@ from collections import Counter
 from datetime import UTC, datetime
 
 import numpy as np
+import yaml
 from fastapi.testclient import TestClient
 
 from api.main import app
@@ -14,6 +15,15 @@ from src.contracts import PROJECT_ROOT
 from src.rag.guardrails import detect_language
 from src.rag.index import RagIndex
 from src.rag.providers import RegexProvider
+
+
+def token_cost(usage: dict | None, price: dict) -> float:
+    """USD for one call's measured tokens, at the config's price per million tokens."""
+    if not usage:
+        return 0.0
+    return (
+        usage["prompt_tokens"] * price["input"] + usage["completion_tokens"] * price["output"]
+    ) / 1e6
 
 
 def generation_check(client, questions, provider):
@@ -42,6 +52,8 @@ def generation_check(client, questions, provider):
                 "reply_language": detect_language(reply) if not done["refused"] else None,
                 "cited": bool(done["citations"]),
                 "figure_check": done.get("figure_check"),
+                "token_usage": done.get("token_usage"),  # the routing call
+                "generation_token_usage": done.get("generation_token_usage"),  # the answer
                 "seconds": time.perf_counter() - start,
                 "reply": reply,
             }
@@ -130,6 +142,20 @@ def main():
     index = RagIndex()
     french_query = "Quel est le délai pour retourner un produit non périssable ?"
     hits = index.query(french_query, top_k=5)
+    cost_per_query = rows[0]["cost_usd"] if rows else None
+    cost_per_streamed_answer = None
+    if args.provider == "openai":
+        config = yaml.safe_load((PROJECT_ROOT / "configs/pipeline.yaml").read_text())
+        price = config["assistant"]["openai"]["usd_per_million_tokens"]
+        # Measured tokens priced at the list price: a /chat question costs its routing call;
+        # a streamed policy answer costs its routing call plus the call that writes it.
+        cost_per_query = sum(token_cost(r["token_usage"], price) for r in rows) / len(rows)
+        written = [r for r in generation["questions"] if r["answer_written_by"] == args.provider]
+        if written:
+            cost_per_streamed_answer = sum(
+                token_cost(r["token_usage"], price) + token_cost(r["generation_token_usage"], price)
+                for r in written
+            ) / len(written)
     report = {
         "executed_at": datetime.now(UTC).isoformat(),
         "provider": args.provider,
@@ -146,7 +172,8 @@ def main():
         else None,
         "latency_p50_ms": float(np.median([r["latency_ms"] for r in rows])),
         "latency_p95_ms": float(np.percentile([r["latency_ms"] for r in rows], 95)),
-        "cost_usd_per_query": rows[0]["cost_usd"] if rows else None,
+        "cost_usd_per_query": cost_per_query,
+        "cost_usd_per_streamed_answer": cost_per_streamed_answer,
         "streamed_generation": generation,
         "multilingual_smoke": {
             "query_fr": french_query,
@@ -160,10 +187,12 @@ def main():
             "Extractive grounding proxy does not measure answer relevance or completeness",
             "/chat policy answers quote the source text, which may be English for a French "
             "question; with OpenAI or Ollama, /chat/stream has the model write the answer "
-            "(streamed_generation); its correctness is not scored here",
+            "(streamed_generation); this script does not score their correctness "
+            "(scripts/score_answers.py does)",
             "OpenAI and Ollama results are absent unless explicitly executed with --provider",
-            "Local providers cost nothing per query; OpenAI's cost is not estimated because "
-            "no price list is stored",
+            "Local providers cost nothing per query. OpenAI's cost is its measured tokens at the "
+            "list price in configs/pipeline.yaml: per_query is the routing call; "
+            "per_streamed_answer adds the call that writes the answer",
         ],
         "questions": rows,
     }

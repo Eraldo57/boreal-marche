@@ -1,15 +1,16 @@
 {
-  "executed_at": "2026-11-01T22:24:31.733006+00:00",
+  "executed_at": "2026-11-05T21:28:59.927018+00:00",
   "method": "Streamlit AppTest widgets using real localhost FastAPI; HTTP server health",
   "checks": [
     "initial render and API readiness",
     "Load historical customer features",
     "live what-if update",
     "Get recommendations",
+    "Get recommendations",
     "Ask assistant",
     "Refresh metrics"
   ],
-  "feature_widgets": 25,
+  "feature_widgets": 12,
   "exceptions": 0,
   "limitations": "Not a browser visual or multi-user concurrency test"
 }

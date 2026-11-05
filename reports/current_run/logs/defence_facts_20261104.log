@@ -1,0 +1,3 @@
+/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/src/rules.py:48: FutureWarning: Allowing arbitrary scalar fill_value in SparseDtype is deprecated. In a future version, the fill_value must be a valid value for the SparseDtype.subtype.
+  return pd.DataFrame.sparse.from_spmatrix(matrix, columns=encoder.columns_), report
+wrote reports/current_run/defence_facts.json

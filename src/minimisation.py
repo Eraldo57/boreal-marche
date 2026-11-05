@@ -1,4 +1,4 @@
-"""Data-minimisation audit: is each of the 25 features necessary? (brief section 3.7)
+"""Audit whether each currently served feature is necessary (brief section 3.7).
 
 Necessity test (drop-column): refit the selected pipeline without one feature, using the
 same hyperparameters, training rows and calibration method, and compare PR-AUC on the
@@ -186,7 +186,11 @@ def run(artifacts: Path = ARTIFACTS, processed: Path = PROCESSED) -> dict[str, A
         model_sha256=metadata["model_sha256"],
         decision_cutoff=", ".join(sorted(snapshots.loc[splits["decision"], "cutoff"].unique())),
         decision_rows=len(splits["decision"]),
-        note="Recommendation only; no feature has been removed from the model or the API.",
+        note=(
+            "Recommendation only for further removals. The original 13 unnecessary features "
+            "were removed before this 12-feature model was trained (contract 2.0). "
+            "Individual ablations do not justify jointly removing redundant signals."
+        ),
     )
     return report
 

@@ -29,6 +29,7 @@ from src.contracts import (
     PROCESSED,
     PROJECT_ROOT,
 )
+from src.envfile import load_env_file
 from src.ingest import load_config
 from src.recommend import RecommendationEngine
 from src.registry import CACHE_DIR, load_checked, resolve_champion
@@ -165,9 +166,11 @@ def _load_retention_model() -> tuple[Any, dict[str, Any], dict[str, Any]]:
 
 @asynccontextmanager
 async def lifespan(app: Any) -> AsyncIterator[None]:
+    load_env_file()  # so a native run sees .env (OPENAI_API_KEY, OLLAMA_HOST) like Compose does
     app.state.model = app.state.rule_engine = app.state.rag_index = None
     app.state.model_source = None
     app.state.customer_features = app.state.drift_reference = None
+    app.state.typical_values = None
     app.state.metadata, app.state.startup_errors = {}, {}
     app.state.threshold, app.state.feature_order = None, FEATURE_NAMES
     try:
@@ -206,6 +209,10 @@ async def lifespan(app: Any) -> AsyncIterator[None]:
     app.state.prediction_reference = None
     if ref.exists():
         app.state.drift_reference = pd.read_parquet(ref)
+        # The training median of each feature: what "typical" means in a customer explanation.
+        app.state.typical_values = {
+            name: float(app.state.drift_reference[name].median()) for name in FEATURE_NAMES
+        }
         if app.state.model is not None:
             # The model's scores on its own training reference: the baseline for prediction drift.
             reference_rows = app.state.drift_reference[FEATURE_NAMES]

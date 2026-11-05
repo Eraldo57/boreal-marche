@@ -6,6 +6,8 @@ One public-data pipeline supports retention prediction and basket recommendation
 
 ## Start here
 
+- [Defence walkthrough](docs/PRESENTATION_D7.md), [short cue card](docs/DEFENCE_CUE_CARD.md), and [Appendix C answers](docs/DEFENCE_PREPARATION.md).
+- [Original-brief requirements and next actions](docs/CAPSTONE_REQUIREMENTS_STATUS.md), with [2026-11-05 local verification](reports/current_run/DEFENCE_VERIFICATION_20261105.md).
 - [Reproduction runbook](reports/current_run/RUNBOOK.md): setup, pipeline, servers and checks.
 - [Executed validation](reports/current_run/VALIDATION_RESULTS.md): real results and their limitations.
 - [Remaining work](reports/current_run/REMAINING_ISSUES.md): prioritized, including the decisions that wait for the project owner.
@@ -62,22 +64,22 @@ The model, rules and index were measured on the real UCI workbook on 2026-09-30.
 | Component | Executed evidence |
 |---|---|
 | Data | 1,067,371 raw rows → 820,645 cleaned event rows, including returns |
-| Retention | 25 features; chronological holdout AP 0.7430 versus recency baseline 0.6711; isotonic calibration (reliability chart in reports/current_run/figures/) |
-| Fairness and minimisation | No region flagged. Five strong recall flags, all customers with a thin purchase history. 13 of 25 features show no reliable contribution (recommendation pending) |
+| Retention | 25 engineered / 12 serving features; chronological test AP 0.7596 versus recency baseline 0.6711; sigmoid calibration (reliability chart in reports/current_run/figures/) |
+| Fairness and minimisation | Five strong thin-history recall flags remain; a tiny unknown-region group is inconclusive. Original 13 unnecessary features removed; contract 2.0. |
 | Recommendations | 3,567 rules; later-basket Hit-rate@5 0.4867 versus popularity 0.1723 |
-| Assistant | Tool choice on 40 golden questions: rules 97.5%, Ollama `llama3.2:3b` 80%. Ollama answers stream in the requested language, with a figure check; OpenAI not evaluated |
+| Assistant | Tool choice on 40 golden questions: rules 97.5%, OpenAI `gpt-4o-mini` 95%, Ollama `llama3.2:3b` 92.5%. Of 18 model-written policy answers, OpenAI got 11 fully correct and Ollama 3 (one rater scored them). The passage with the answer reaches the model for 12 of 14 answerable questions (was 4); questions about deleting your data still fail |
 | Integration | API smoke 16/16 and interface smoke 6/6, including the live what-if and a streamed answer |
-| Operations | MLflow tracking and registry (version 1 a candidate, not promoted). Monitoring: drift, data quality and rule fire rate, with automated alerts. Docker stack verified locally; no cloud deployment |
+| Operations | MLflow tracking and registry (version 2 a candidate, not promoted). Monitoring: drift, data quality and rule fire rate, with automated alerts. Docker stack verified locally; no cloud deployment |
 
 Average precision here measures **will_return**, not churn. Recommendation evaluation masks half of each eligible later basket; it is not an online sales experiment. Repeated training runs reproduce the same holdout, not independent evidence.
 
 ## Current limitations
 
-- **Local gates pass, but CI has never run.** 273 tests; coverage 90% locally and 89% on a clean checkout, against the 80% gate; strict mypy with 0 errors. CI has not run because the repository has no remote yet.
+- **Local gates pass; current CI status is unverified.** On 2026-11-05, 428 tests passed across the non-integration and artifact integration suites; combined coverage is 90% against the 80% gate; mypy reports no issues in 33 source files. A GitHub remote is configured, but GitHub reads returned HTTP 401, so workflow status was not verified. The earlier 89% clean-checkout result is historical, not a new clean-clone check.
 - **No cloud.** The images were built and the Compose stack run locally on linux/arm64 only. Still to do: the linux/amd64 build, a fresh clone on another machine, CD, SageMaker on AWS and any cloud deployment.
 - **No champion yet.** Promoting one needs the project owner as approver.
 - **Decisions waiting for the owner.** Retraining without the 13 unnecessary features, a fairness mitigation, and the business numbers behind the threshold.
-- **Model-written answers are a demonstration, not a reliable channel.** The 3B model can contradict its source; the figure check flags such cases.
+- **Model-written answers are a demonstration, not a reliable channel.** Both models can contradict or invent: on the French bakery-allergen question both implied allergens that no policy states. The figure check flags some cases, and retrieval still misses some passages (see VALIDATION_RESULTS.md).
 - **Not built:** authenticated access and deletion enforcement.
 
 ## Provenance and safe use
@@ -85,3 +87,9 @@ Average precision here measures **will_return**, not churn. Recommendation evalu
 [UCI Online Retail II](https://archive.ics.uci.edu/dataset/502/online+retail+ii) is a public UK giftware dataset, re-skinned as fictional Boréal Marché. Original monetary values remain **GBP**, never silently CAD. The assistant's product lookup reads `artifacts/product_catalogue.csv`, exported from the same cleaned purchases by `python -m src.catalogue` (one row per StockCode, median observed unit price in GBP). The data has no categories, allergens or dietary tags, so the assistant cannot answer product questions about them.
 
 Governance documents describe actual controls and planned work; this repository makes **no Law 25 compliance certification**. Load only trusted joblib artifacts: serialization is executable, and a hash is an integrity check, not a trust guarantee.
+
+## Final submission materials
+
+See [current completion status](docs/CAPSTONE_REQUIREMENTS_STATUS.md), [final technical report](docs/FINAL_TECHNICAL_REPORT.md), [defence cue card](docs/DEFENCE_CUE_CARD.md), and [AI-use record](docs/AI_USE.md). Model 0.3.0 replaces the archived 25-feature model. Current AP is 0.7596 and threshold is 20.5%; historical run logs retain earlier results.
+
+[Download the editable defence PowerPoint](deliverables/Boreal_Marche_Defence.pptx) · [Complete presentation package](deliverables/Boreal_Marche_Presentation_Package.zip) · [Deck PDF](deliverables/Boreal_Marche_Defence.pdf)

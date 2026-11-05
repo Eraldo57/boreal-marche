@@ -1,0 +1,4 @@
+2026-11-05 16:58:09.394 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+element types: ['button', 'caption', 'column', 'dataframe', 'download_button', 'event', 'expander', 'flex_container', 'graphviz_chart', 'header', 'image', 'info', 'json', 'latex', 'main', 'markdown', 'metric', 'multiselect', 'root', 'selectbox', 'sidebar', 'subheader', 'success', 'tab', 'tab_container', 'table', 'text_area', 'text_input', 'title', 'vega_lite_chart']
+images: 3 0
+PASS four evaluation tabs, current threshold and sigmoid calibration

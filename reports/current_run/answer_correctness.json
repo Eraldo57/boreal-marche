@@ -1,0 +1,139 @@
+{
+  "executed_at": "2026-11-03T01:45:01.595935+00:00",
+  "rater": "AI evaluator (single rater, not independent); see the rubric's 'about'",
+  "judged_runs": {
+    "openai": "2026-11-03T01:41:48.324327+00:00",
+    "ollama": "2026-11-03T01:44:11.991942+00:00"
+  },
+  "verdict_meanings": {
+    "correct": "States the facts the question needs, and nothing the corpus contradicts or lacks.",
+    "partly_correct": "Says only true things but leaves out a fact the question asks for.",
+    "declined_appropriate": "Declines, and the corpus really does not answer the question.",
+    "declined_answerable": "Declines, although the corpus answers the question.",
+    "wrong": "Says something the corpus contradicts or does not contain.",
+    "no_answer": "No answer was produced (the routing step failed or refused)."
+  },
+  "retrieval": {
+    "answerable_questions": 14,
+    "fact_given_to_model": 12,
+    "fact_in_retrieved_top_k": 12,
+    "excerpts_given_to_model": 3,
+    "chunks_retrieved": 5,
+    "similarity_floor": 0.25,
+    "per_question": {
+      "1": {
+        "rank": 2,
+        "given_to_model": true
+      },
+      "2": {
+        "rank": 2,
+        "given_to_model": true
+      },
+      "3": {
+        "rank": 1,
+        "given_to_model": true
+      },
+      "5": {
+        "rank": 1,
+        "given_to_model": true
+      },
+      "6": {
+        "rank": 2,
+        "given_to_model": true
+      },
+      "7": {
+        "rank": 2,
+        "given_to_model": true
+      },
+      "9": {
+        "rank": 1,
+        "given_to_model": true
+      },
+      "10": {
+        "rank": 1,
+        "given_to_model": true
+      },
+      "12": {
+        "rank": null,
+        "given_to_model": false
+      },
+      "13": {
+        "rank": 2,
+        "given_to_model": true
+      },
+      "15": {
+        "rank": 1,
+        "given_to_model": true
+      },
+      "34": {
+        "rank": 1,
+        "given_to_model": true
+      },
+      "35": {
+        "rank": 2,
+        "given_to_model": true
+      },
+      "38": {
+        "rank": null,
+        "given_to_model": false
+      }
+    },
+    "note": "Searches with the golden question's own text. A provider may rephrase the question it sends to policy_search, so its excerpts can differ slightly."
+  },
+  "providers": {
+    "openai": {
+      "questions": 18,
+      "verdicts": {
+        "correct": 11,
+        "partly_correct": 2,
+        "declined_answerable": 1,
+        "declined_appropriate": 3,
+        "wrong": 1
+      },
+      "right_behaviour": 14,
+      "answered_wrongly": 1,
+      "by_retrieval": {
+        "fact_given": {
+          "correct": 11,
+          "partly_correct": 1
+        },
+        "fact_not_given": {
+          "declined_answerable": 1,
+          "partly_correct": 1
+        },
+        "unanswerable": {
+          "declined_appropriate": 3,
+          "wrong": 1
+        }
+      }
+    },
+    "ollama": {
+      "questions": 18,
+      "verdicts": {
+        "declined_answerable": 4,
+        "partly_correct": 4,
+        "correct": 3,
+        "wrong": 4,
+        "declined_appropriate": 3
+      },
+      "right_behaviour": 6,
+      "answered_wrongly": 4,
+      "by_retrieval": {
+        "fact_given": {
+          "declined_answerable": 3,
+          "partly_correct": 4,
+          "correct": 3,
+          "wrong": 2
+        },
+        "fact_not_given": {
+          "declined_answerable": 1,
+          "wrong": 1
+        },
+        "unanswerable": {
+          "declined_appropriate": 3,
+          "wrong": 1
+        }
+      }
+    }
+  }
+}

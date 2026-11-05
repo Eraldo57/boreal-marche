@@ -1,0 +1,4 @@
+["boreal-marche/api:local"] 555106585 arm64
+["boreal-marche/frontend:local"] 179446621 arm64
+["boreal-marche/api:amd64"] 597881773 amd64
+["boreal-marche/frontend:amd64"] 186556469 amd64

@@ -7,11 +7,13 @@ index in conftest.py (synthetic, not the real corpus).
 from __future__ import annotations
 
 import json
+from types import SimpleNamespace
 
 import pytest
 
 import api.routers.chat as chat_router
-from src.rag.providers import AssistantResult, answer_messages, ollama_piece
+from scripts.evaluate_assistant import token_cost
+from src.rag.providers import AssistantResult, OpenAIProvider, answer_messages, ollama_piece
 
 
 async def _events(client, payload):
@@ -120,3 +122,56 @@ async def test_written_answers_carry_the_figure_check(client, monkeypatch):
 def test_ollama_stream_lines_are_parsed():
     assert ollama_piece('{"message": {"content": "Bon"}, "done": false}') == ("Bon", False)
     assert ollama_piece('{"done": true}') == ("", True)
+
+
+@pytest.mark.asyncio
+async def test_written_answers_report_the_tokens_the_model_spent(client, monkeypatch):
+    llm = _StandInLLM(["Deliveries take ", "2 to 5 business days."])
+    llm.last_usage = {"prompt_tokens": 900, "completion_tokens": 40}
+    monkeypatch.setattr(chat_router, "get_provider", lambda *a, **k: llm)
+    events = await _events(client, {"message": "Delivery policy?", "provider": "ollama"})
+    assert events[-1]["generation_token_usage"] == {"prompt_tokens": 900, "completion_tokens": 40}
+
+
+@pytest.mark.asyncio
+async def test_openai_stream_records_the_usage_chunk(monkeypatch):
+    """OpenAI sends usage in a final chunk with no choices; the text chunks come before it."""
+    import openai
+
+    def chunk(text=None, usage=None):
+        delta = SimpleNamespace(content=text)
+        return SimpleNamespace(choices=[SimpleNamespace(delta=delta)] if text else [], usage=usage)
+
+    async def stream():
+        yield chunk("Bon")
+        yield chunk("jour")
+        yield chunk(usage=SimpleNamespace(prompt_tokens=700, completion_tokens=12))
+
+    requested = {}
+
+    class FakeCompletions:
+        async def create(self, **kwargs):
+            requested.update(kwargs)
+            return stream()
+
+    class FakeClient:
+        def __init__(self, api_key):
+            self.chat = SimpleNamespace(completions=FakeCompletions())
+
+    monkeypatch.setattr(openai, "AsyncOpenAI", FakeClient)
+    provider = OpenAIProvider(api_key="test-key")  # a placeholder: nothing leaves the process
+    pieces = [
+        p async for p in provider.stream_answer("Q?", [{"source": "s.md", "text": "t"}], "fr")
+    ]
+    assert "".join(pieces) == "Bonjour"
+    assert requested["stream_options"] == {"include_usage": True}
+    assert provider.last_usage == {"prompt_tokens": 700, "completion_tokens": 12}
+
+
+def test_token_cost_prices_measured_tokens_at_the_configured_rate():
+    price = {"input": 0.15, "output": 0.60}  # the shape of configs/pipeline.yaml
+    assert token_cost({"prompt_tokens": 1_000_000, "completion_tokens": 0}, price) == 0.15
+    assert token_cost({"prompt_tokens": 1000, "completion_tokens": 100}, price) == pytest.approx(
+        0.00021
+    )
+    assert token_cost(None, price) == 0.0  # a call that never reached the model

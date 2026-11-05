@@ -19,7 +19,7 @@ import pandas as pd
 import pytest
 
 from src import features, ingest
-from src.contracts import FEATURE_NAMES
+from src.contracts import ENGINEERED_FEATURE_NAMES, FEATURE_NAMES
 
 COLUMNS = [
     "Invoice",
@@ -105,7 +105,7 @@ def test_features_run_builds_contract_on_ingested_data(ingested, monkeypatch):
     root, *_ = ingested
     monkeypatch.setattr(features, "PROJECT_ROOT", root)
     matrix, y = features.run()
-    assert list(matrix.columns) == FEATURE_NAMES
+    assert list(matrix.columns) == ENGINEERED_FEATURE_NAMES
     assert matrix.index.equals(y.index) and set(y.unique()) <= {0, 1}
     processed = root / "data" / "processed"
     metadata = json.loads((processed / "feature_metadata.json").read_text())

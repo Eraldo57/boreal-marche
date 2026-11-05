@@ -1,0 +1,87 @@
+
+Fontconfig error: No writable cache directories
+	/opt/homebrew/var/cache/fontconfig
+	/Users/eraldoibrushi/.cache/fontconfig
+	/Users/eraldoibrushi/.fontconfig
+Matplotlib is building the font cache; this may take a moment.
+/Users/runner/work/crossbow/crossbow/arrow/cpp/src/arrow/util/cpu_info.cc:239: IOError: sysctlbyname failed for 'hw.l1dcachesize'. Detail: [errno 1] Operation not permitted
+/Users/runner/work/crossbow/crossbow/arrow/cpp/src/arrow/util/cpu_info.cc:239: IOError: sysctlbyname failed for 'hw.l2cachesize'. Detail: [errno 1] Operation not permitted
+/Users/runner/work/crossbow/crossbow/arrow/cpp/src/arrow/util/cpu_info.cc:239: IOError: sysctlbyname failed for 'hw.l3cachesize'. Detail: [errno 1] Operation not permitted
+/Users/runner/work/crossbow/crossbow/arrow/cpp/src/arrow/util/cpu_info.cc:239: IOError: sysctlbyname failed for 'hw.optional.neon'. Detail: [errno 1] Operation not permitted
+[train] validation DummyClassifier_stratified: AP=0.3345
+[train] validation business_heuristic_recency: AP=0.5116
+[train] validation LogisticRegression: AP=0.6694
+[train] validation RidgeClassifier: AP=0.6059
+[train] validation DecisionTreeClassifier: AP=0.5946
+[train] validation RandomForestClassifier: AP=0.6730
+[train] validation GradientBoostingClassifier: AP=0.6623
+/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/context.py:134: UserWarning: Could not find the number of physical cores for the following reason:
+invalid literal for int() with base 10: ''
+Returning the number of logical cores instead. You can silence this warning by setting LOKY_MAX_CPU_COUNT to the number of cores you want to use.
+  warnings.warn(
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/context.py", line 264, in _count_physical_cores
+    cpu_count_physical = _count_physical_cores_darwin()
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/context.py", line 420, in _count_physical_cores_darwin
+    return int(cpu_info)
+           ^^^^^^^^^^^^^
+[train] validation HistGradientBoostingClassifier: AP=0.6534
+[train] validation KNeighborsClassifier: AP=0.6135
+[train] validation LinearSVC: AP=0.6598
+[I 2026-11-05 16:09:15,156] A new study created in memory with name: no-name-02c3100f-e4ff-4ed0-8891-dbadf154a5e4
+[I 2026-11-05 16:09:15,938] Trial 0 finished with value: 0.6713378339348497 and parameters: {'n_estimators': 156, 'max_depth': 12, 'min_samples_leaf': 19}. Best is trial 0 with value: 0.6713378339348497.
+[I 2026-11-05 16:09:16,613] Trial 1 finished with value: 0.6737858486870049 and parameters: {'n_estimators': 190, 'max_depth': 5, 'min_samples_leaf': 5}. Best is trial 1 with value: 0.6737858486870049.
+[I 2026-11-05 16:09:17,144] Trial 2 finished with value: 0.6698705512097727 and parameters: {'n_estimators': 108, 'max_depth': 11, 'min_samples_leaf': 16}. Best is trial 1 with value: 0.6737858486870049.
+[I 2026-11-05 16:09:17,762] Trial 3 finished with value: 0.673214730860878 and parameters: {'n_estimators': 206, 'max_depth': 4, 'min_samples_leaf': 25}. Best is trial 1 with value: 0.6737858486870049.
+[I 2026-11-05 16:09:18,530] Trial 4 finished with value: 0.6759671049458035 and parameters: {'n_estimators': 225, 'max_depth': 5, 'min_samples_leaf': 6}. Best is trial 4 with value: 0.6759671049458035.
+[I 2026-11-05 16:09:18,656] Trial 5 pruned. 
+[I 2026-11-05 16:09:19,295] Trial 6 finished with value: 0.6764117917510012 and parameters: {'n_estimators': 165, 'max_depth': 6, 'min_samples_leaf': 16}. Best is trial 6 with value: 0.6764117917510012.
+[I 2026-11-05 16:09:19,763] Trial 7 finished with value: 0.6754682520592363 and parameters: {'n_estimators': 121, 'max_depth': 6, 'min_samples_leaf': 10}. Best is trial 6 with value: 0.6764117917510012.
+[I 2026-11-05 16:09:19,977] Trial 8 pruned. 
+[I 2026-11-05 16:09:20,192] Trial 9 pruned. 
+[I 2026-11-05 16:09:21,188] Trial 10 finished with value: 0.6771799933802631 and parameters: {'n_estimators': 243, 'max_depth': 8, 'min_samples_leaf': 25}. Best is trial 10 with value: 0.6771799933802631.
+[I 2026-11-05 16:09:21,430] Trial 11 pruned. 
+[I 2026-11-05 16:09:21,431] A new study created in memory with name: no-name-2863c1c2-283a-4823-8fe5-4baad55aef45
+[I 2026-11-05 16:09:21,461] Trial 0 finished with value: 0.6636879388204318 and parameters: {'C': 0.04082331665966554}. Best is trial 0 with value: 0.6636879388204318.
+[I 2026-11-05 16:09:21,490] Trial 1 finished with value: 0.6697394701945019 and parameters: {'C': 12.275826710862326}. Best is trial 1 with value: 0.6697394701945019.
+[I 2026-11-05 16:09:21,518] Trial 2 finished with value: 0.669492115402651 and parameters: {'C': 1.4071095169064511}. Best is trial 1 with value: 0.6697394701945019.
+[I 2026-11-05 16:09:21,550] Trial 3 finished with value: 0.6689564414478959 and parameters: {'C': 0.37570597138026457}. Best is trial 1 with value: 0.6697394701945019.
+[I 2026-11-05 16:09:21,562] Trial 4 pruned. 
+[I 2026-11-05 16:09:21,574] Trial 5 pruned. 
+[I 2026-11-05 16:09:21,586] Trial 6 pruned. 
+[I 2026-11-05 16:09:21,615] Trial 7 finished with value: 0.6697120356127985 and parameters: {'C': 5.314343038625021}. Best is trial 1 with value: 0.6697394701945019.
+[I 2026-11-05 16:09:21,627] Trial 8 pruned. 
+[I 2026-11-05 16:09:21,640] Trial 9 pruned. 
+[I 2026-11-05 16:09:21,669] Trial 10 finished with value: 0.6697445467562048 and parameters: {'C': 14.907888012947872}. Best is trial 10 with value: 0.6697445467562048.
+[I 2026-11-05 16:09:21,698] Trial 11 finished with value: 0.6697429091814115 and parameters: {'C': 13.302768407132174}. Best is trial 10 with value: 0.6697445467562048.
+Traceback (most recent call last):
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3812, in get_loc
+    return self._engine.get_loc(casted_key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/index.pyx", line 167, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 196, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7096, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 'is_domestic'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/src/train.py", line 587, in <module>
+    main()
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/src/train.py", line 578, in main
+    run(
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/src/train.py", line 445, in run
+    "error_analysis": error_analysis(y.loc[te].to_numpy(), p_test, X.loc[te], threshold),
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/src/train.py", line 213, in error_analysis
+    for val in sorted(X[col].unique()):
+                      ~^^^^^
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/pandas/core/frame.py", line 4113, in __getitem__
+    indexer = self.columns.get_loc(key)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eraldoibrushi/Desktop/DataScience&ML_Vanier/AI_Development_Project/boreal-marche/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3819, in get_loc
+    raise KeyError(key) from err
+KeyError: 'is_domestic'

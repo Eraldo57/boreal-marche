@@ -72,7 +72,8 @@ class AssistantProvider(ABC):
         message : str
             The customer's question.
         context_chunks : list[str]
-            Retrieved policy chunks (may be empty).
+            Retrieved policy sections (may be empty). Only the rule-based provider uses them;
+            the language-model providers route on the message alone.
         tools : list[ToolDef]
             Available tool definitions.
         language : str
@@ -81,8 +82,7 @@ class AssistantProvider(ABC):
         Returns
         -------
         AssistantResult
-            Must set *tool_name* and *tool_args* when a tool should fire,
-            or *raw_text* for a direct answer assembled from context chunks.
+            Must set *tool_name* and *tool_args* when a tool should fire.
         """
 
 
@@ -222,15 +222,14 @@ You NEVER answer the customer directly. You NEVER invent data.
 Available tools:
 {tool_descriptions}
 
-Given the customer's message and the retrieved policy context, return EXACTLY
-one JSON object:
+Given the customer's message, return EXACTLY one JSON object:
 {{
   "tool": "<tool_name or null>",
   "args": {{ ... }}     // must match the tool's input schema
 }}
 
-If no tool is appropriate, return:
-{{ "tool": null, "args": {{}}, "direct_answer": "<answer using ONLY the context>" }}
+If no tool is appropriate, return {{ "tool": null, "args": {{}} }}. Never put an answer in
+the JSON: policy questions are answered from the excerpts that "policy_search" returns.
 
 Rules:
 - NEVER guess a probability, a price, or a product ID. Use the tools.
@@ -291,6 +290,7 @@ class OpenAIProvider(AssistantProvider):
     def __init__(self, model: str = "gpt-4o-mini", api_key: str | None = None) -> None:
         self.model = model
         self.api_key = api_key or os.getenv("OPENAI_API_KEY", "")
+        self.last_usage: dict[str, int] | None = None  # tokens of the last streamed answer
 
     async def answer(
         self,
@@ -307,8 +307,9 @@ class OpenAIProvider(AssistantProvider):
             language="French" if language == "fr" else "English",
         )
 
-        context_text = "\n---\n".join(context_chunks) if context_chunks else "(no context)"
-        user_content = f"Customer message: {message}\n\nRetrieved policy context:\n{context_text}"
+        # Routing needs the question, not the policy text: policy_search retrieves its own
+        # excerpts. Given the excerpts, the model tended to answer instead of routing.
+        user_content = f"Customer message: {message}"
 
         resp = await client.chat.completions.create(
             model=self.model,
@@ -330,7 +331,6 @@ class OpenAIProvider(AssistantProvider):
         result = AssistantResult(
             tool_name=parsed.get("tool"),
             tool_args=parsed.get("args", {}),
-            raw_text=parsed.get("direct_answer", ""),
             language=language,
             token_usage={
                 "prompt_tokens": resp.usage.prompt_tokens,
@@ -349,15 +349,23 @@ class OpenAIProvider(AssistantProvider):
     ) -> AsyncIterator[str]:
         """Write a grounded policy answer token by token (used only by /chat/stream)."""
         from openai import AsyncOpenAI
+        from openai.types.chat import ChatCompletionStreamOptionsParam
 
         client = AsyncOpenAI(api_key=self.api_key)
         stream: Any = await client.chat.completions.create(  # an AsyncStream when stream=True
             model=self.model,
             temperature=0,
             stream=True,
+            # The last chunk then reports the tokens spent.
+            stream_options=ChatCompletionStreamOptionsParam(include_usage=True),
             messages=answer_messages(question, excerpts, language),  # type: ignore[arg-type]
         )
         async for chunk in stream:
+            if chunk.usage:
+                self.last_usage = {
+                    "prompt_tokens": chunk.usage.prompt_tokens,
+                    "completion_tokens": chunk.usage.completion_tokens,
+                }
             piece = chunk.choices[0].delta.content if chunk.choices else None
             if piece:
                 yield piece
@@ -392,8 +400,9 @@ class OllamaProvider(AssistantProvider):
             tool_descriptions=_build_tool_desc(tools),
             language="French" if language == "fr" else "English",
         )
-        context_text = "\n---\n".join(context_chunks) if context_chunks else "(no context)"
-        user_content = f"Customer message: {message}\n\nRetrieved policy context:\n{context_text}"
+        # Routing needs the question, not the policy text: policy_search retrieves its own
+        # excerpts. Given the excerpts, the model tended to answer instead of routing.
+        user_content = f"Customer message: {message}"
 
         async with httpx.AsyncClient(timeout=90.0) as client:
             resp = await client.post(
@@ -421,7 +430,6 @@ class OllamaProvider(AssistantProvider):
         result = AssistantResult(
             tool_name=parsed.get("tool"),
             tool_args=parsed.get("args", {}),
-            raw_text=parsed.get("direct_answer", ""),
             language=language,
         )
         if result.tool_name in (None, "null", ""):

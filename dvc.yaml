@@ -4,6 +4,7 @@ stages:
     deps:
       - src/ingest.py
       - configs/pipeline.yaml
+      - data/raw/online_retail_II.xlsx
     outs:
       - data/processed/transactions.parquet
       - data/processed/manifest.json
@@ -35,7 +36,8 @@ stages:
       - configs/pipeline.yaml
     outs:
       - artifacts/retention_model.joblib
-      - artifacts/retention_model_metadata.json
+      - artifacts/retention_model_metadata.json:
+          cache: false  # small provenance document remains versioned by Git
       - artifacts/drift_reference.parquet
       - artifacts/test_predictions.parquet
     metrics:
@@ -52,7 +54,8 @@ stages:
       - configs/pipeline.yaml
     outs:
       - artifacts/rules.json
-      - artifacts/popularity.json
+      - artifacts/popularity.json:
+          cache: false
     metrics:
       - reports/current_run/recommendation_metrics.json:
           cache: false
@@ -65,7 +68,8 @@ stages:
       - data/processed/transactions.parquet
     outs:
       - artifacts/product_catalogue.csv
-      - artifacts/product_catalogue_meta.json
+      - artifacts/product_catalogue_meta.json:
+          cache: false
 
   index:
     cmd: python -m src.rag.index --force

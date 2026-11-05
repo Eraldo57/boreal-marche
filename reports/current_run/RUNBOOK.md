@@ -1,3 +1,6 @@
+> Current local stack (5 November 2026): API http://127.0.0.1:18000, UI http://127.0.0.1:18501.
+> Model 0.3.0 / contract 2.0 / 12 inputs; 20.5% policy threshold. Earlier port examples remain configurable.
+
 # Reproduce the local milestone
 
 Run from the repository root. Python **3.12** was used; allow disk space for workbook, Parquet, models, embedding cache, DVC and MLflow. Internet is required on the first dataset/embedding download. No paid provider is needed for the regex path.
@@ -51,6 +54,7 @@ With both servers running:
 .venv/bin/python -m scripts.run_logged api_smoke .venv/bin/python -m scripts.smoke_api
 .venv/bin/python -m scripts.run_logged ui_smoke .venv/bin/python -m scripts.smoke_ui
 .venv/bin/python -m scripts.run_logged assistant .venv/bin/python -m scripts.evaluate_assistant
+.venv/bin/python -m scripts.run_logged retrieval .venv/bin/python -m scripts.evaluate_retrieval
 .venv/bin/python -m scripts.run_logged monitoring .venv/bin/python -m scripts.simulate_traffic --count 120 --shifted
 .venv/bin/python -m scripts.run_logged tests .venv/bin/coverage run --source=src,api -m pytest -q
 .venv/bin/coverage report --fail-under=80
@@ -61,11 +65,11 @@ With both servers running:
 
 `smoke_api` takes `--base-url` and `smoke_ui` takes `--streamlit-url` when the servers use other ports. For `smoke_ui`, also set `API_BASE_URL`.
 
-**Gates, 2026-11-01.**
+**Gates, 2026-11-04.**
 
-- 273 tests passed locally, with 90% coverage. On a clean checkout, 7 integration tests skip and coverage is 89%.
-- ruff is clean, and mypy reports 0 errors in 31 files.
-- Re-run on 2026-11-02 with the same result: logs/tests_20261102.log, logs/tests_clean_checkout_20261102.log.
+- 410 tests passed locally, with 91% coverage (logs/tests_20261104.log, logs/coverage_20261104.log). On a clean checkout, 402 pass, 8 integration tests skip and coverage is 89% (logs/tests_clean_checkout_20261104.log).
+- ruff is clean, and mypy reports 0 errors in 32 files.
+- On 2026-11-01 the counts were 273 and 266; the difference is the tests added since for CI data quality, answer scoring, the `.env` loader, retrieval, token cost, recommendation wording, relevance bands and customer explanations.
 - No CI run has happened yet.
 
 **What the tests are and are not.**
@@ -84,9 +88,12 @@ With both servers running:
 
 **Assistant providers are optional.**
 
-- **To evaluate one:** configure OPENAI_API_KEY, or start the configured Ollama server and model. Then run `evaluate_assistant --provider openai|ollama`.
+- **To evaluate one:** put OPENAI_API_KEY in `.env`, or start the configured Ollama server and model. Then run `evaluate_assistant --provider openai|ollama`.
+- **Where the key goes.** Copy `.env.example` to `.env` (git ignores it) and fill in the key. Docker Compose reads that file, and so do the API at startup and `scripts/sagemaker_jobs.py` (`src/envfile.py`). A variable already set in the shell wins over the file. The tests switch the loading off (`BOREAL_NO_DOTENV=1`), so a real key never reaches them.
 - **Ollama:** evaluated on 2026-11-01 with the native app (VALIDATION_RESULTS.md), including the streamed, model-written answers and their figure check.
-- **OpenAI:** not evaluated.
+- **OpenAI:** evaluated on 2026-11-02 with `gpt-4o-mini`: about a cent per full run.
+- **Retrieval after a corpus or chunking change.** Rebuild the index (`python -m src.rag.index --force`; an index with another layout is refused), then run `python -m scripts.evaluate_retrieval`. It reports how often the passage that answers reaches the model, on the golden questions and on the hold-out set in `tests/golden/retrieval_holdout.json`. Compare with `retrieval_metrics_baseline.json`.
+- **Scoring the written answers.** `python -m scripts.score_answers` checks each answer against `tests/golden/policy_answer_rubric.json`, whose verdicts are hand-made. It refuses an answer that changed since it was judged, so after any new evaluation run, re-judge the changed answers first.
 
 Do not send private information to this demo.
 
@@ -131,6 +138,8 @@ make down
 - **SageMaker** has its own image and launcher (docs/SAGEMAKER.md). No AWS command has been run.
 
 ## Five-minute screen share
+
+For the 15-minute final defence (D7), follow `docs/PRESENTATION_D7.md` instead: it orders the demo, the numbers to quote and the weaknesses to volunteer, and maps the question bank to each step.
 
 1. 0:00–0:45: architecture and configs/pipeline.yaml; distinguish UCI events from fictional policy corpus.
 2. 0:45–1:30: manifest + cleaning_report; show preserved cancellations and fixed caps.

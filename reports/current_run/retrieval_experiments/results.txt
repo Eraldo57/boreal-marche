@@ -1,0 +1,11 @@
+A0 plain chunks (the layout before the change) golden  4/14 ( 6 in 5) | direct 23/26 (24) | indirect 10/20 (12) | top-3 total 37/60 | avg chars given 982
+A1 + title and heading on each chunk           golden  8/14 (11 in 5) | direct 22/26 (22) | indirect 12/20 (14) | top-3 total 42/60 | avg chars given 1093
+A2 + the whole section handed over (adopted)   golden 12/14 (12 in 5) | direct 24/26 (24) | indirect 18/20 (18) | top-3 total 54/60 | avg chars given 2251
+A3 = A2 + keyword fusion (RRF)                 golden  9/14 (12 in 5) | direct 22/26 (25) | indirect 17/20 (20) | top-3 total 48/60 | avg chars given 2306
+A3b = A3, keyword search over the titled text  golden 11/14 (13 in 5) | direct 23/26 (25) | indirect 16/20 (20) | top-3 total 50/60 | avg chars given 2344
+A4 = A3, 5 excerpts given                      golden 12/14 (12 in 5) | direct 25/26 (25) | indirect 20/20 (20) | top-5 total 57/60 | avg chars given 3771
+A5 = A2, 5 excerpts given                      golden 12/14 (12 in 5) | direct 24/26 (24) | indirect 18/20 (18) | top-5 total 54/60 | avg chars given 3444
+B1 plain chunks, 5 excerpts given              golden  6/14 ( 6 in 5) | direct 24/26 (24) | indirect 12/20 (12) | top-5 total 42/60 | avg chars given 1558
+F1 = A2 with one chunk per item, row or paragraph golden 13/14 (13 in 5) | direct 23/26 (25) | indirect 19/20 (19) | top-3 total 55/60 | avg chars given 2347
+F2 = F1 + keyword fusion                       golden 11/14 (12 in 5) | direct 23/26 (24) | indirect 18/20 (20) | top-3 total 52/60 | avg chars given 2324
+F3 = F1, 5 excerpts given                      golden 13/14 (13 in 5) | direct 25/26 (25) | indirect 19/20 (19) | top-5 total 57/60 | avg chars given 3372

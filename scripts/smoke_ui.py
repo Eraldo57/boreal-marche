@@ -10,7 +10,7 @@ from datetime import UTC, datetime
 import httpx
 from streamlit.testing.v1 import AppTest
 
-from src.contracts import PROJECT_ROOT
+from src.contracts import FEATURE_NAMES, PROJECT_ROOT
 
 
 def main():
@@ -34,7 +34,8 @@ def main():
 
     check("initial render and API readiness")
     click("Load historical customer features")
-    assert len(app.number_input) == 25
+    assert len(app.number_input) == len(FEATURE_NAMES)
+    assert any("Why this score" in h.value for h in app.subheader), "must explain this customer"
     assert any(m.label == "Probability of purchase within 90 days" for m in app.metric)
     before = next(m.value for m in app.metric if m.label.startswith("Probability"))
     app.number_input[0].set_value(app.number_input[0].value + 365).run()  # what-if: recency
@@ -42,6 +43,15 @@ def main():
     after = next(m.value for m in app.metric if m.label.startswith("Probability"))
     assert after != before, "changing recency must update the probability without a button"
     click("Get recommendations")
+    shown = " ".join(m.value for m in app.markdown)
+    assert "because you added" in shown, "a rule-based list must say which item triggered each"
+    basket = next(t for t in app.text_area if t.label.startswith("One item per line"))
+    if app.multiselect:
+        app.multiselect[0].set_value([]).run()
+        basket = next(t for t in app.text_area if t.label.startswith("One item per line"))
+    basket.set_value("never-seen-item").run()
+    click("Get recommendations")
+    assert any("No rule matches" in w.value for w in app.warning), "fallback must be announced"
     click("Ask assistant")
     assert len(app.expander) >= 2
     click("Refresh metrics")

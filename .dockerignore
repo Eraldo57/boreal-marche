@@ -24,12 +24,24 @@ mlruns/
 mlartifacts/
 mlflow.db*
 outputs/
+deliverables/
 node_modules/
 data/model_cache/
 data/chromadb/
 data/processed/
 data/logs/
-reports/
+reports/**
+!reports/current_run/
+reports/current_run/**
+!reports/current_run/retention_metrics.json
+!reports/current_run/retention_diagnostics.json
+!reports/current_run/recommendation_metrics.json
+!reports/current_run/rules_scaling.json
+!reports/current_run/figures/
+reports/current_run/figures/**
+!reports/current_run/figures/precision_recall_curve.png
+!reports/current_run/figures/roc_curve.png
+!reports/current_run/figures/reliability_curve.png
 # Evaluation output from training (per-customer test scores); the API never reads it
 artifacts/test_predictions.parquet
 

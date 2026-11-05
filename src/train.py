@@ -42,9 +42,17 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.svm import LinearSVC
 from sklearn.tree import DecisionTreeClassifier
 
-from src.contracts import ARTIFACTS, CONTRACT_VERSION, FEATURE_NAMES, PROCESSED, PROJECT_ROOT
+from src.contracts import (
+    ARTIFACTS,
+    CONTRACT_VERSION,
+    ENGINEERED_FEATURE_NAMES,
+    FEATURE_NAMES,
+    PROCESSED,
+    PROJECT_ROOT,
+)
 from src.ingest import _sha256, load_config
 from src.plots import FIGURES
+from src.ranking_plots import save_ranking_figures
 from src.registry import register_run
 
 REPORTS = PROJECT_ROOT / "reports" / "current_run"
@@ -202,6 +210,8 @@ def select_threshold(
 def error_analysis(y: Any, p: Any, X: Any, threshold: float) -> dict[str, Any]:
     result = {}
     for col in ["is_one_time_buyer", "is_domestic"]:
+        if col not in X.columns:
+            continue  # A synthetic/serving feature matrix may omit offline audit-only columns.
         for val in sorted(X[col].unique()):
             mask = (X[col] == val).to_numpy()
             truth, pred = y[mask].astype(bool), p[mask] >= threshold
@@ -224,12 +234,13 @@ def _load(data_dir: Path) -> tuple[pd.DataFrame, pd.Series, pd.DataFrame]:
     y = pd.read_parquet(data_dir / "y.parquet")["will_return"]
     snapshots = pd.read_parquet(data_dir / "snapshots.parquet")
     if (
-        list(X.columns) != FEATURE_NAMES
+        not set(FEATURE_NAMES).issubset(X.columns)
+        or not set(X.columns).issubset(ENGINEERED_FEATURE_NAMES)
         or not X.index.equals(y.index)
         or not X.index.equals(snapshots.index)
     ):
         raise ValueError("Feature/target/snapshot contract mismatch; rerun features")
-    return X, y, snapshots
+    return X[FEATURE_NAMES], y, snapshots
 
 
 def _git_state() -> tuple[str, bool | None]:
@@ -320,27 +331,53 @@ def run(
             name = row["model"]
 
             def objective(trial: Any) -> float:
-                model = trial_model(name, trial, seed)
-                model.fit(X.loc[tr], y.loc[tr])
-                score = float(average_precision_score(y.loc[va], _get_probas(model, X.loc[va])))
-                trials_log.append(
-                    {
-                        "family": name,
-                        "trial": trial.number,
-                        "validation_pr_auc": score,
-                        "params": trial.params,
-                    }
-                )
+                # Actual learning-curve resources, not fabricated intermediate scores.
+                # All subsets are earlier training rows; the fixed validation period is unchanged.
+                steps = []
                 with mlflow.start_run(run_name=f"tune-{name}-{trial.number}", nested=True):
+                    for step, fraction in enumerate((0.5, 0.75, 1.0)):
+                        subset = tr[: max(2, int(len(tr) * fraction))]
+                        model = trial_model(name, trial, seed)
+                        model.fit(X.loc[subset], y.loc[subset])
+                        score = float(
+                            average_precision_score(y.loc[va], _get_probas(model, X.loc[va]))
+                        )
+                        trial.report(score, step)
+                        steps.append({"training_rows": len(subset), "validation_pr_auc": score})
+                        mlflow.log_metric("validation_pr_auc", score, step=step)
+                        if step < 2 and trial.should_prune():
+                            trials_log.append(
+                                {
+                                    "family": name,
+                                    "trial": trial.number,
+                                    "state": "pruned",
+                                    "validation_pr_auc": score,
+                                    "params": trial.params,
+                                    "learning_curve": steps,
+                                }
+                            )
+                            mlflow.log_params(trial.params)
+                            mlflow.set_tag("trial_state", "pruned")
+                            raise optuna.TrialPruned()
+                    trials_log.append(
+                        {
+                            "family": name,
+                            "trial": trial.number,
+                            "state": "complete",
+                            "validation_pr_auc": score,
+                            "params": trial.params,
+                            "learning_curve": steps,
+                        }
+                    )
                     mlflow.log_params(trial.params)
-                    mlflow.log_metric("validation_pr_auc", score)
+                    mlflow.set_tag("trial_state", "complete")
                 return score
 
             if n_trials:
                 study = optuna.create_study(
                     direction="maximize",
                     sampler=optuna.samplers.TPESampler(seed=seed),
-                    pruner=optuna.pruners.NopPruner(),
+                    pruner=optuna.pruners.MedianPruner(n_startup_trials=4),
                 )
                 study.optimize(objective, n_trials=n_trials)
                 if study.best_value > best_score:
@@ -395,14 +432,24 @@ def run(
             "splits": split_report,
             "model_comparison_validation": comparison,
             "optuna_trials": trials_log,
-            "pruning": False,
+            "pruning": {
+                "method": "MedianPruner",
+                "resource": "earlier training rows",
+                "fractions": [0.5, 0.75, 1.0],
+                "startup_trials": 4,
+            },
             "selected_model": best_name,
             "selected_calibration": cal_method,
             "calibration_decision_period": calibration_data,
             "threshold_selection": analysis,
             "final_test": final_metrics,
             "final_test_baselines": baseline_test,
-            "error_analysis": error_analysis(y.loc[te].to_numpy(), p_test, X.loc[te], threshold),
+            "error_analysis": error_analysis(
+                y.loc[te].to_numpy(),
+                p_test,
+                pd.read_parquet(data_dir / "X.parquet").loc[te],
+                threshold,
+            ),
         }
         (reports_dir / "retention_metrics.json").write_text(json.dumps(report, indent=2))
         feature_meta = json.loads((data_dir / "feature_metadata.json").read_text())
@@ -411,7 +458,7 @@ def run(
         git_commit, git_dirty = _git_state()
         metadata = {
             "contract_version": CONTRACT_VERSION,
-            "model_version": "0.2.0",
+            "model_version": "0.3.0",
             "trained_at": datetime.now(UTC).isoformat(),
             "model_family": best_name,
             "calibration_method": cal_method,
@@ -419,6 +466,8 @@ def run(
             "label_window_days": 90,
             "feature_names": FEATURE_NAMES,
             "feature_count": len(FEATURE_NAMES),
+            "engineered_feature_count": len(ENGINEERED_FEATURE_NAMES),
+            "minimisation_basis": "June 2011 decision-period audit; original model archived",
             "training_row_count": len(fit_rows),
             "calibration_row_count": len(ca),
             "decision_threshold": threshold,
@@ -470,6 +519,16 @@ def run(
         )
         for name, draw in FIGURES.items():
             mlflow.log_figure(draw(report), f"plots/{name}")
+        for path in save_ranking_figures(
+            reports_dir / "figures",
+            y_true=y.loc[te].to_numpy(),
+            probabilities=p_test,
+            recency_scores=_get_probas(models["business_heuristic_recency"], X.loc[te]),
+            threshold=threshold,
+            model_name=best_name,
+            snapshot=", ".join(split_report["test"]["cutoffs"]),
+        ):
+            mlflow.log_artifact(str(path), "plots")
         mlflow.log_artifact(str(reports_dir / "retention_metrics.json"))
         mlflow.log_artifact(str(output_dir / "retention_model_metadata.json"))
         mlflow.sklearn.log_model(final, "model", input_example=X.loc[te].head(1))

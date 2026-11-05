@@ -51,6 +51,7 @@ dev = [
     "mypy==2.3.1",
     "coverage>=7.5",
     "dvc>=3,<4",
+    "ipython>=8,<10",  # executable notebook display helpers
 ]
 # scripts/sagemaker_jobs.py talks to SageMaker, S3 and ECR through boto3 directly; the
 # training and endpoint image is docker/Dockerfile, target "sagemaker".

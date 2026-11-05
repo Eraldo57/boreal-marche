@@ -91,10 +91,12 @@ class RecommendationEngine:
         rules: list[_Rule],
         popularity: list[str],
         default_k: int = 5,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         self._rules = rules
         self._popularity = popularity
         self._default_k = default_k
+        self._metadata = metadata or {}
 
         # Build the inverted index: item → list of rules
         self._by_item: dict[str, list[_Rule]] = defaultdict(list)
@@ -155,7 +157,7 @@ class RecommendationEngine:
         with open(pop_path) as f:
             popularity = json.load(f)["items"]
 
-        return cls(rules, popularity, default_k)
+        return cls(rules, popularity, default_k, metadata=data.get("header", {}))
 
     @classmethod
     def from_records(cls, rules: list[dict], popularity: list[str]) -> RecommendationEngine:
@@ -263,6 +265,18 @@ class RecommendationEngine:
     def n_rules(self) -> int:
         """Number of loaded rules."""
         return len(self._rules)
+
+    def describe(self) -> dict[str, Any]:
+        """Public training descriptions and loaded rules for the demonstration UI."""
+        items = set(self._popularity)
+        for rule in self._rules:
+            items.update(rule.antecedent)
+            items.update(rule.consequent)
+        return {
+            "items": sorted(items),
+            "rules": [rule.to_dict() for rule in self._rules],
+            "metadata": self._metadata,
+        }
 
     @property
     def n_indexed_items(self) -> int:

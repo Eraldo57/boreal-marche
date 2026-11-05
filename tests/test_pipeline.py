@@ -10,7 +10,13 @@ from pydantic import ValidationError
 from sklearn.linear_model import LogisticRegression
 
 from api.schemas import PredictionRequest
-from src.contracts import FEATURE_NAMES, PROJECT_ROOT, validate_metadata
+from src.contracts import (
+    CONTRACT_VERSION,
+    ENGINEERED_FEATURE_NAMES,
+    FEATURE_NAMES,
+    PROJECT_ROOT,
+    validate_metadata,
+)
 from src.features import build_features, create_labels
 from src.ingest import clean, load_config, verify_checksum
 from src.recommend import RecommendationEngine
@@ -86,7 +92,7 @@ def test_future_events_cannot_change_features():
     changed.loc[changed["InvoiceDate"] >= "2011-06-01", "Quantity"] = -9999
     actual = build_features(obs, changed, "2011-06-01")
     pd.testing.assert_frame_equal(original, actual)
-    assert list(actual.columns) == FEATURE_NAMES
+    assert list(actual.columns) == ENGINEERED_FEATURE_NAMES
     assert actual.loc[101, "frequency"] == 1
     assert actual.loc[101, "has_ever_cancelled"] == 1
     assert actual.loc[101, "cancellation_rate"] == 0.5
@@ -125,7 +131,7 @@ def test_features_reject_non_numeric_or_non_finite(sample_features, bad):
 
 def test_metadata_contract_and_order():
     metadata = {
-        "contract_version": "1.0",
+        "contract_version": CONTRACT_VERSION,
         "target": "will_return",
         "feature_names": FEATURE_NAMES,
         "decision_threshold": 0.3,

@@ -29,6 +29,8 @@ from pydantic import ValidationError
 from api.schemas import ChatRequest, ChatResponse, Citation, ToolCall
 from src.ingest import load_config
 from src.rag.guardrails import (
+    HANDOFF_NOTICE,
+    UNCERTAIN_NOTICE,
     check_no_cross_customer,
     check_out_of_scope,
     check_require_citations,
@@ -162,10 +164,7 @@ async def _orchestrate(req: ChatRequest, request: Request) -> _Outcome:
         arguments["customer_id"] = cid.removeprefix("BM-")
     if tool.name == "policy_search":
         if not chunks:
-            return refusal(
-                "No policy source meets the relevance threshold. / "
-                "Aucune source suffisamment pertinente."
-            )
+            return refusal(HANDOFF_NOTICE[language])
         arguments["question"] = req.message
     try:
         validated = tool.input_model.model_validate(arguments)
@@ -183,11 +182,15 @@ async def _orchestrate(req: ChatRequest, request: Request) -> _Outcome:
     calls = [ToolCall(tool_name=tool.name, arguments=arguments, result=data)]
     citations = []
     grounded: list[dict[str, Any]] = []
+    uncertain = False
     if tool.name == "policy_search":
         grounded = [c for c in data["chunks"] if c["score"] >= cfg["similarity_floor"]]
         if not grounded:
-            return refusal("No relevant policy evidence found. / Aucune source pertinente.")
+            return refusal(HANDOFF_NOTICE[language])
+        uncertain = grounded[0]["score"] < cfg["confident_score"]
         reply = _generate_regex(req.message, _format_context(grounded), grounded, language)
+        if uncertain:
+            reply = UNCERTAIN_NOTICE["fr" if language == "fr" else "en"] + reply
         citations = [
             Citation(
                 source=grounded[0]["source"], chunk=grounded[0]["text"], score=grounded[0]["score"]
@@ -246,6 +249,7 @@ async def _orchestrate(req: ChatRequest, request: Request) -> _Outcome:
         citations=citations,
         tool_calls=calls,
         provider_used=provider_name,
+        passage_confidence=(("uncertain" if uncertain else "confident") if grounded else None),
         language=language,
         provider_latency_ms=latency,
         token_usage=decision.token_usage,
@@ -332,6 +336,9 @@ async def _events(outcome: _Outcome) -> AsyncIterator[str]:
     )
     if generated:
         final["figure_check"] = figure_check(reply, outcome.excerpts)
+        # Tokens the model spent writing this answer, when the provider reports them; the
+        # routing call's tokens are already in token_usage.
+        final["generation_token_usage"] = getattr(outcome.provider, "last_usage", None)
     yield _line(final)
 
 

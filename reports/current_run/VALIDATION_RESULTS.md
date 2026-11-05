@@ -1,3 +1,6 @@
+> Latest completion verification: 428 tests pass (421 unit, 7 artifact integration), 90% source/API coverage; 16 HTTP and 7 Streamlit checks against rebuilt local stack.
+> See completion_coverage_summary.txt and logs/completion_*. Historical entries below retain their original model/version dates.
+
 # Executed validation results
 
 Report generated 2026-09-30T22:40:14.370538+00:00. Sources below are executed outputs.
@@ -84,23 +87,55 @@ The retention model, rules and index are unchanged from 2026-09-30. Everything b
   - The current model is version 1 of `boreal-retention`, a candidate.
   - Its gate check on the test snapshot passes: PR-AUC 0.7430 against 0.6711 for the recency heuristic. Five fairness flags await acknowledgement.
   - It is not promoted, so the API serves `artifacts/` and reports the fallback in `/version`.
-- **Assistant providers.** Measured on the 40 golden questions, a development set rather than an unseen benchmark. OpenAI was not evaluated (no key).
+- **Assistant providers.** Measured on the 40 golden questions, a development set rather than an unseen benchmark. There are two rounds. The first used the original index, and the router also handed the retrieved text to the language models. The second (2026-11-02, after the retrieval and routing changes described below) is the one the reports now describe. OpenAI is `gpt-4o-mini`; its files are stamped in UTC, so its 2026-11-02 evening runs read 2026-11-03.
 
-  | | Rules (regex) | Ollama `llama3.2:3b` (native app, Apple GPU) |
-  |---|---|---|
-  | Tool-choice accuracy | 97.5% | 80.0% |
-  | Out-of-scope refusal | 100% | 100% |
-  | Expected source cited | 83.3% | 72.2% |
-  | In-scope refusals | 1 | 4 |
-  | Latency p50 / p95 | 29 / 65 ms | 4,163 / 4,931 ms |
-  | Cost per question | $0 | $0 (local) |
+  | | Rules (regex) | Ollama `llama3.2:3b` (native app, Apple GPU) | OpenAI `gpt-4o-mini` |
+  |---|---|---|---|
+  | Tool-choice accuracy | 97.5% (same) | 80.0% → **92.5%** | 90.0% → **95.0%** |
+  | Out-of-scope refusal | 100% | 100% | 100% |
+  | Expected source cited | 83.3% → 77.8% | 72.2% → 77.8% | 77.8% (same) |
+  | In-scope refusals | 1 (same) | 4 → 2 | 3 → 1 |
+  | Latency p50 / p95 | 29 / 65 → 27 / 59 ms | 4,163 / 4,931 → 1,370 / 1,793 ms | 1,004 / 1,572 → 1,015 / 1,336 ms |
+  | Cost per question (routing only) | $0 | $0 (local) | $0.000107 → $0.000062 |
+  | Cost per streamed policy answer | n/a | $0 (local) | $0.000232 → $0.000220 |
+  | Policy answers written by the model (of 18) | n/a | 15 → 18 | 17 → 18 |
 
-  - **Ollama latency.** The table holds the final run (22:34 UTC), the one in `assistant_ollama_metrics.json`. An earlier run that afternoon, on the same questions, measured 2,386 / 2,711 ms; its file is in the git history. The cause of the difference was not investigated, so local LLM latency here is approximate.
-  - **Rules, re-run on today's code.** Its totals match 2026-09-30. Four product questions now answer "no matching product" from the real catalogue export (the invented catalogue was removed on 2026-10-21), while still choosing the right tool.
-  - **Streamed answers written by Ollama.**
-    - The model wrote 15 of the 18 policy answers, all in the requested language (3 in French), all cited, with no fallbacks.
-    - The figure check flags 7 answers that leave out a figure stated in their main excerpt; some are false alarms when that excerpt was off-topic. It flags none that add a figure.
-    - Answer correctness is not scored.
+  - **What changed between the rounds** (details below). The index now matches small titled chunks but returns the whole policy section. The routing prompt no longer includes retrieved text and no longer offers a "direct answer" option. **Both changes were made after looking at this development set**, so its tool-choice scores are partly tuned to it. The first round is kept in `assistant_*_metrics_before_sections.json`.
+  - **Rules provider.** Its source score fell because one English question (Q7) now returns the French twin of the same privacy notice first; the content is the same.
+  - **OpenAI cost.** It is measured tokens at the list price, $0.15 per million input and $0.60 per million output tokens (OpenAI's pricing page, read 2026-11-02; prices change). Second round: 31 routing calls used 11,935 input and 1,171 output tokens, and the 18 answers used 10,805 input and 1,428 output tokens. A full evaluation costs under a cent. Routing got cheaper because its prompt shrank.
+  - **OpenAI run-to-run variation.** Two first-round runs with identical settings (temperature 0) gave the same tool choices, refusals and sources, but changed the text of 8 of the 18 written answers (`assistant_openai_metrics_first_run.json`). Treat small differences between runs as noise.
+  - **Ollama latency varies between runs.** The first round was measured twice on the old prompt, at 2,386 and 4,163 ms; the cause was not investigated. The second round's 1,370 ms is one run on a shorter prompt.
+  - **Rules, re-run on today's code.** Four product questions answer "no matching product" from the real catalogue export (the invented catalogue was removed on 2026-10-21), while still choosing the right tool.
+  - **Streamed answers.** In the second round both models wrote all 18 policy answers in the requested language (4 in French), all cited, with no fallbacks. The figure check flags 11 (Ollama) and 9 (OpenAI) answers as leaving out a figure from their main excerpt, and none as adding one. Those flags rose because the main excerpt is now a whole section with many figures, so the check is a weaker signal than before.
+  - **Answer correctness** (`answer_correctness.json`; facts and verdicts in `tests/golden/policy_answer_rubric.json`, produced by `scripts/score_answers.py`). Each of the 18 written policy answers was scored against the policy text. **A single AI evaluator supplied the ratings, so the verdicts are not independent; please spot-check them.** Each verdict is tied to a hash of the exact answer it judged, and each fact to a phrase quoted from `docs/corpus`. The first round's verdicts are kept in `policy_answer_rubric_before_sections.json`.
+
+    | Verdict | OpenAI | Ollama |
+    |---|---|---|
+    | Correct | 2 → **11** | 1 → **3** |
+    | Partly correct (true, but leaves out a fact the question needs) | 5 → 2 | 1 → 4 |
+    | Declined, and the corpus really lacks the answer | 3 → 3 | 1 → 3 |
+    | Declined, although the corpus answers | 5 → 1 | 7 → 4 |
+    | Wrong (contradicts the corpus or states what it lacks) | 2 → 1 | 5 → 4 |
+    | No answer (the routing step failed or refused) | 1 → 0 | 3 → 0 |
+
+    - **With the passage in front of it** (12 of the 14 answerable questions), OpenAI was correct on 11 and partly correct on 1. Ollama was correct on 3, partly correct on 4, declined 3 and was wrong on 2.
+    - **Without it** (2 questions: Q12 and Q38, deleting an account and its data), OpenAI declined once and answered partly once; Ollama declined once and was wrong once.
+    - **Questions the corpus cannot answer (4).** Both declined 3 rightly. Both were wrong on the fourth, Q40, which asks about bakery allergens in French: OpenAI said bakery products "may therefore contain" the priority allergens, and Ollama listed allergens including ones the policy never names. That is a safety-relevant error in a French answer. OpenAI's English version, Q4, declined correctly.
+    - **Limits.** Eighteen questions are too few for percentages to mean much. The 3B model's errors are of two kinds: refusing when it has the answer, and garbling or inventing details.
+  - **Retrieval** (`retrieval_metrics.json`, from `scripts/evaluate_retrieval.py`; the unchanged index is in `retrieval_metrics_baseline.json`). The model is handed the first 3 retrieved passages. The table counts the questions whose answering passage was among them:
+
+    | Question set | Before | After |
+    |---|---|---|
+    | 14 answerable golden questions | 4 | **12** |
+    | 20 indirect (paraphrased) hold-out questions | 7 | **18** |
+    | 26 direct hold-out questions | 22 | 23 |
+
+    - **The hold-out set** (`tests/golden/retrieval_holdout.json`, 46 questions) was written by me, before any retrieval change, from the policy files, so changes were not tuned on the questions they are scored on. My first 26 questions turned out too easy to show any difference, so I added the 20 paraphrased ones before changing anything. One author and 46 questions make it a sanity check, not a benchmark.
+    - **The change.** The index splits each policy into sections, cuts them into small chunks that each begin with the policy and section title, and matches those. A match returns the whole section. The encoder reads only 128 tokens, so matching has to use small pieces, but a fact often sits in a table or list that a small piece would cut. The old index had 120 chunks from 6 documents; the new one has 130 chunks from 59 sections of the same 6.
+    - **What was tried and left out** (`retrieval_experiments/results.txt`, top-3 hits out of 60 questions): plain chunks 37; plus titles 42; plus whole sections (adopted) **54**; plus keyword search 48; one chunk per list item or table row 55; giving the model 5 passages instead of 3 54 for the adopted design, with keyword search 57 at 68% more text per question. The gains over the adopted design were within noise on a set this size, so they were not worth the extra complexity.
+    - **Still failing.** Questions phrased as "delete or erase my data" (Q12, Q38, I09), a pickup-location question (H09), a failed-delivery question (H10), the privacy-officer question (H23) and the Sapin-versus-Pousse comparison (I03) do not bring the answering passage into the first 3.
+    - **The routing side effect.** With better text in front of it, the routing model started answering questions itself, and the router discarded those answers as refusals (Q1, then Q9 and Q13 once the prompt was partly fixed). The router never needed the policy text, because `policy_search` retrieves its own, so the routing prompt now holds the question only.
+    - **A correction.** The index manifest quoted in the 2026-09-30 section above (144 chunks, 7 documents) describes an earlier corpus. The index on 2026-11-02, before this change, had 120 chunks from the current 6 documents.
   - **Prompt tuning.** An added instruction to "state deadlines exactly" made the model claim that frozen products can be returned "within 30 days"; they cannot be returned at all. The figure check flagged it. On the same 40 questions, 1 answer added a figure with the instruction and 0 without, so the instruction was removed.
 - **Monitoring demonstration** (`monitoring_demo.json`): a fresh local API, with alerts evaluated every 5 s, and two runs of `simulate_traffic`. The file records the second run; its `before` block is the state after the first.
   - **Real traffic** (first run, without `--shifted`: the `before` block). 120 historical rows (20 single requests, the rest in batches) and 40 real September–November 2011 baskets.
@@ -126,13 +161,15 @@ The retention model, rules and index are unchanged from 2026-09-30. Everything b
 
 The same code, plus the CI changes below. Logs are in `logs/` under the names given.
 
-- **Quality gates, unchanged.**
-  - 273 tests pass locally with 90% coverage (`tests_20261102.log`, `coverage_20261102.log`).
-  - On a clean checkout, 266 pass and 7 integration tests skip, with 89% coverage (`tests_clean_checkout_20261102.log`).
-  - ruff, formatting and mypy (0 errors in 31 files) are clean, and actionlint finds no problems in the three workflows (`actionlint_20261102.log`).
+- **Quality gates** (final run of the day, after the assistant and retrieval changes).
+  - 369 tests pass locally with 90% coverage (`tests_20261102d.log`, `coverage_20261102d.log`). Earlier that day, before those changes, the counts were 273 and 266.
+  - On a clean checkout, 362 pass and 7 integration tests skip, with 89% coverage (`tests_clean_checkout_20261102b.log`).
+  - ruff, formatting and mypy (0 errors in 32 files) are clean, and actionlint finds no problems in the three workflows (`actionlint_20261102.log`).
+  - The live checks were repeated on the rebuilt index: API smoke test 16 of 16 and interface smoke test 6 of 6 (`api_smoke_sections_20261102.log`, `ui_smoke_sections_20261102.log`).
 - **Data-quality suite.**
   - The assertions moved to `tests/test_data_quality.py`, which needs only the processed data. They now cover every cleaning rule and the bounds that the feature definitions imply. They pass on the real data.
   - CI's data-quality job used to skip every time, because CI has no data. It now rebuilds the processed data from the public workbook, checked against its pinned SHA-256, and runs the suite.
+- **Assistant, updated on 2026-11-02.** The assistant results in the 2026-11-01 section above were re-measured after two changes (a section-based index and a question-only routing prompt). OpenAI was evaluated for the first time, answer correctness was scored, and a hold-out set measured retrieval. See that section for the numbers.
 - **CI reproducibility.**
   - ruff, mypy and the secret scanner are pinned.
   - PyTorch is installed CPU-only, as in the Docker image.
@@ -140,3 +177,14 @@ The same code, plus the CI changes below. Logs are in `logs/` under the names gi
 - **Not yet verified:** CI itself, because the repository still has no remote.
 
 See REMAINING_ISSUES.md for the prioritized gaps and RUNBOOK.md for reproduction.
+
+### Re-run on 2026-11-04
+
+Defence-question review: each answer in `docs/DEFENCE_PREPARATION.md` was checked against the code and the saved results, and three gaps it exposed were fixed.
+
+- **Interface wording** (question 15). A recommendation list now says which strategy produced it, with a plain-language notice for popularity fallbacks and a "because you added X" line per rule-based item (`frontend/notes.py`). The interface smoke test now feeds an unknown item and asserts the notice.
+- **Relevance check** (question 19, `retrieval_floor.json`). No single similarity cutoff separates answerable from undocumented questions: on 60 answerable and 24 undocumented questions, a floor of 0.40 would decline 18 of 24 undocumented ones but wrongly decline 9 of 60 answerable ones. The assistant now has two thresholds, a floor of 0.25 (decline) and a confident score of 0.45 (below it, a passage is shown with a caution and the support contact). Of the 24 undocumented questions, 18 get the caution, 2 are declined and 4 pass as confident (before: 22 of 24 looked like plain answers). Of the 60 answerable ones, 46 are confident, 12 get a caution and 2 are declined (the same 2 as before). Both values are judgement values chosen from these sets.
+- **Per-customer explanation** (question 32). `/predict` returns `explanation`: the five largest effects of this customer's own feature values on their probability, against the training median, from the same single prediction call (the probability is unchanged, 0.711864 for customer 12347). With recency raised by 365 days, recency becomes the largest effect (−0.185), although it is 6th in the global importances. It is a one-at-a-time ablation, not SHAP, it is not stored with the decision, and its wording is unreviewed.
+- **Numbers behind the answers** (`defence_facts.json`, `rules_scaling.json`). Median gap between a customer's purchases: 32 days; 80.6% of repeat gaps are 90 days or less. At the model's operating point the model and a "most recent customers first" rule nearly tie (recall 0.814 and 0.810; precision 0.573 and 0.570). The lift filter removes 12 of 3,579 rules, none above confidence 0.17, so the brief's "high-confidence, low-lift" example does not exist in this data. Lookup time with 500,000 synthetic rules: median 3.1 ms, 95th percentile 14.8 ms.
+- **Live checks** repeated on the final code: API smoke test 16 of 16 and interface smoke test 7 of 7 (`api_smoke_fixes_20261104.log`, `ui_smoke_fixes_20261104.log`).
+- **Quality gates** on the final code: 410 tests pass with 91% coverage (`tests_20261104.log`, `coverage_20261104.log`); on a clean checkout 402 pass, 8 skip, 89% (`tests_clean_checkout_20261104.log`); ruff, formatting and mypy (0 errors in 32 files) are clean; actionlint finds no problems; gitleaks 8.30.1 finds no secrets in the files git would commit.

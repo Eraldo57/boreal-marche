@@ -109,6 +109,12 @@ RUN pip install -r frontend/requirements.txt
 COPY MODEL_CARD.md DATA_CARD.md ARCHITECTURE.md ./
 COPY governance/customer_notice_*.md ./governance/
 COPY docs/corpus/privacy_notice_*.md ./docs/corpus/
+COPY reports/current_run/retention_metrics.json ./reports/current_run/
+COPY reports/current_run/retention_diagnostics.json ./reports/current_run/
+COPY reports/current_run/recommendation_metrics.json ./reports/current_run/
+COPY reports/current_run/rules_scaling.json ./reports/current_run/
+COPY reports/current_run/figures/precision_recall_curve.png reports/current_run/figures/roc_curve.png ./reports/current_run/figures/
+COPY reports/current_run/figures/reliability_curve.png ./reports/current_run/figures/
 COPY frontend/ ./frontend/
 USER appuser
 
