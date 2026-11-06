@@ -13,5 +13,6 @@
   },
   "number": "482023376300",
   "workload_identity_provider": "projects/482023376300/locations/global/workloadIdentityPools/github-pipeline/providers/github-main",
-  "sql_connection": "boreal-marche-eraldo57:northamerica-northeast1:boreal-db"
+  "sql_connection": "boreal-marche-eraldo57:northamerica-northeast1:boreal-db",
+  "runtime_sha256": "7253213df847c316161c75ee6003d20d0e80d9f8ad166852a2401c021bc22c7d"
 }

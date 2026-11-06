@@ -370,7 +370,11 @@ def build(cfg: dict, *, publish_runtime: bool = False) -> dict:
         ):
             shutil.copyfile(ROOT / "reports/current_run" / name, reports / name)
         shutil.copytree(ROOT / "reports/current_run/figures", reports / "figures")
-        if publish_runtime and (ROOT / "artifacts/retention_model.joblib").exists():
+        if (
+            publish_runtime
+            and not cfg.get("runtime_sha256")
+            and (ROOT / "artifacts/retention_model.joblib").exists()
+        ):
             prepare_runtime(context / ".cloud-runtime")
             bundle = context / "runtime.tar.gz"
             with tarfile.open(bundle, "w:gz", dereference=True) as archive:
@@ -425,7 +429,7 @@ def build(cfg: dict, *, publish_runtime: bool = False) -> dict:
             "steps": steps,
             "images": list(images.values()),
             "timeout": "1800s",
-            "logsBucket": f"gs://{cfg['bucket']}/build-logs",
+            "logsBucket": f"gs://{cfg['bucket']}",
             "options": {"logging": "GCS_ONLY"},
             "serviceAccount": (
                 f"projects/{cfg['project']}/serviceAccounts/{cfg['accounts']['build']}"
@@ -434,6 +438,8 @@ def build(cfg: dict, *, publish_runtime: bool = False) -> dict:
         file = context / "cloudbuild.yaml"
         file.write_text(yaml.safe_dump(config, sort_keys=False))
         print("Building and pushing four SHA-tagged images.", flush=True)
+        cfg.update({"git_sha": sha, "images": images})
+        save("settings", cfg)
         result = gcloud(
             cfg,
             "builds",
@@ -442,9 +448,28 @@ def build(cfg: dict, *, publish_runtime: bool = False) -> dict:
             f"--config={file}",
             f"--region={cfg['region']}",
             f"--gcs-source-staging-dir=gs://{cfg['bucket']}/build-source",
+            "--async",
             as_json=True,
         )
         save("build", result)
+        deadline = time.monotonic() + 2100
+        while result["status"] in {"QUEUED", "PENDING", "WORKING"}:
+            print(f"Cloud Build {result['id']}: {result['status']}", flush=True)
+            if time.monotonic() > deadline:
+                gcloud(cfg, "builds", "cancel", result["id"], f"--region={cfg['region']}")
+                raise TimeoutError("Cloud Build exceeded its wall-clock budget")
+            time.sleep(20)
+            result = gcloud(
+                cfg,
+                "builds",
+                "describe",
+                result["id"],
+                f"--region={cfg['region']}",
+                as_json=True,
+            )
+            save("build", result)
+        if result["status"] != "SUCCESS":
+            raise RuntimeError(f"Cloud Build finished with {result['status']}; see saved evidence")
     cfg.update({"git_sha": sha, "images": images})
     save("settings", cfg)
     return cfg
