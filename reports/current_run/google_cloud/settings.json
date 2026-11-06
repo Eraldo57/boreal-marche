@@ -15,11 +15,11 @@
   "workload_identity_provider": "projects/482023376300/locations/global/workloadIdentityPools/github-pipeline/providers/github-main",
   "sql_connection": "boreal-marche-eraldo57:northamerica-northeast1:boreal-db",
   "runtime_sha256": "7253213df847c316161c75ee6003d20d0e80d9f8ad166852a2401c021bc22c7d",
-  "git_sha": "5ca62a1126c5f040e320655190c8fdf851c4951a",
+  "git_sha": "be3e8df7cf65473429543836c4ae0848cbfec1bc",
   "images": {
-    "api": "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/api:5ca62a1126c5f040e320655190c8fdf851c4951a",
-    "frontend": "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/frontend:5ca62a1126c5f040e320655190c8fdf851c4951a",
-    "vertex": "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/vertex:5ca62a1126c5f040e320655190c8fdf851c4951a",
-    "mlflow": "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/mlflow:5ca62a1126c5f040e320655190c8fdf851c4951a"
+    "api": "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/api:be3e8df7cf65473429543836c4ae0848cbfec1bc",
+    "frontend": "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/frontend:be3e8df7cf65473429543836c4ae0848cbfec1bc",
+    "vertex": "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/vertex:be3e8df7cf65473429543836c4ae0848cbfec1bc",
+    "mlflow": "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/mlflow:be3e8df7cf65473429543836c4ae0848cbfec1bc"
   }
 }

@@ -13,8 +13,11 @@ def main() -> None:
     if len(expected) != 64 or any(c not in "0123456789abcdef" for c in expected):
         raise ValueError("Missing runtime bundle checksum")
     with tempfile.TemporaryDirectory() as temporary:
-        archive = Path(temporary) / "runtime.tar.gz"
-        subprocess.run(["gcloud", "storage", "cp", uri, str(archive)], check=True)
+        if uri.startswith("gs://"):
+            archive = Path(temporary) / "runtime.tar.gz"
+            subprocess.run(["gcloud", "storage", "cp", uri, str(archive)], check=True)
+        else:
+            archive = Path(uri)
         digest = hashlib.sha256()
         with archive.open("rb") as stream:
             for chunk in iter(lambda: stream.read(1024 * 1024), b""):

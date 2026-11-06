@@ -10,6 +10,7 @@ import argparse
 import base64
 import hashlib
 import json
+import re
 import secrets
 import shutil
 import subprocess
@@ -400,16 +401,29 @@ def build(cfg: dict, *, publish_runtime: bool = False) -> dict:
             raise RuntimeError(
                 "Publish the verified runtime bundle from the development machine first"
             )
+        python_image = re.search(
+            r"^ARG PYTHON_IMAGE=(.+)$", (ROOT / "docker/Dockerfile").read_text(), re.M
+        ).group(1)
         steps = [
             {
                 "name": "gcr.io/google.com/cloudsdktool/google-cloud-cli:slim",
-                "entrypoint": "python3",
+                "entrypoint": "gcloud",
+                "args": [
+                    "storage",
+                    "cp",
+                    f"gs://{cfg['bucket']}/deployment/runtime.tar.gz",
+                    "/workspace/runtime.tar.gz",
+                ],
+            },
+            {
+                "name": python_image,
+                "entrypoint": "python",
                 "args": [
                     "scripts/cloud_build_runtime.py",
-                    f"gs://{cfg['bucket']}/deployment/runtime.tar.gz",
+                    "/workspace/runtime.tar.gz",
                     cfg["runtime_sha256"],
                 ],
-            }
+            },
         ]
         for name, target in (
             ("api", "cloudrun-api"),

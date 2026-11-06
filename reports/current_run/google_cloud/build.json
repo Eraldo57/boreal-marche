@@ -1,0 +1,187 @@
+{
+  "artifacts": {
+    "images": [
+      "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/api:be3e8df7cf65473429543836c4ae0848cbfec1bc",
+      "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/frontend:be3e8df7cf65473429543836c4ae0848cbfec1bc",
+      "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/vertex:be3e8df7cf65473429543836c4ae0848cbfec1bc",
+      "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/mlflow:be3e8df7cf65473429543836c4ae0848cbfec1bc"
+    ]
+  },
+  "createTime": "2026-11-06T05:59:04.278202207Z",
+  "failureInfo": {
+    "detail": "Build step failure: build step 0 \"gcr.io/google.com/cloudsdktool/google-cloud-cli:slim\" failed: starting step container failed: Error response from daemon: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: error during container init: exec: \"python3\": executable file not found in $PATH: unknown",
+    "type": "USER_BUILD_STEP"
+  },
+  "finishTime": "2026-11-06T05:59:41.539037Z",
+  "id": "2496499c-9e8b-40fc-824b-840b5e6eba89",
+  "images": [
+    "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/api:be3e8df7cf65473429543836c4ae0848cbfec1bc",
+    "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/frontend:be3e8df7cf65473429543836c4ae0848cbfec1bc",
+    "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/vertex:be3e8df7cf65473429543836c4ae0848cbfec1bc",
+    "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/mlflow:be3e8df7cf65473429543836c4ae0848cbfec1bc"
+  ],
+  "logUrl": "https://console.cloud.google.com/cloud-build/builds;region=northamerica-northeast1/2496499c-9e8b-40fc-824b-840b5e6eba89?project=482023376300",
+  "logsBucket": "gs://boreal-marche-eraldo57-artifacts",
+  "name": "projects/482023376300/locations/northamerica-northeast1/builds/2496499c-9e8b-40fc-824b-840b5e6eba89",
+  "options": {
+    "logging": "GCS_ONLY",
+    "pool": {},
+    "workerRelease": "legacy"
+  },
+  "projectId": "boreal-marche-eraldo57",
+  "queueTtl": "3600s",
+  "results": {
+    "buildStepImages": [
+      "sha256:8a50079dfc4b164aa5e83926bef5f9b305b93e80f82d40fabd836da4830dd08e",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "buildStepOutputs": [
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "resourceUsage": {
+      "averageCpuUtilization": 0.69212455,
+      "averageMemoryUtilization": 0.09240731,
+      "peakCpuUtilization": 0.9092857,
+      "peakMemoryUtilization": 0.100907646,
+      "totalCpuDuration": "35.019999999s"
+    }
+  },
+  "serviceAccount": "projects/boreal-marche-eraldo57/serviceAccounts/boreal-build@boreal-marche-eraldo57.iam.gserviceaccount.com",
+  "source": {
+    "storageSource": {
+      "bucket": "boreal-marche-eraldo57-artifacts",
+      "generation": "1793944744069176",
+      "object": "build-source/1793944742.24258-f7cfeb22f6f64ebcaee0bc93525fc680.tgz"
+    }
+  },
+  "sourceProvenance": {
+    "fileHashes": {
+      "gs://boreal-marche-eraldo57-artifacts/build-source/1793944742.24258-f7cfeb22f6f64ebcaee0bc93525fc680.tgz#1793944744069176": {
+        "fileHash": [
+          {
+            "type": "MD5",
+            "value": "kqJoYO8YV8lHE2g7wwu5Gw=="
+          },
+          {
+            "type": "SHA256",
+            "value": "Dv33YQc8t3JNO1yBkwVq_MCVDJAEF37IACrJSE00VXM="
+          }
+        ]
+      }
+    },
+    "resolvedStorageSource": {
+      "bucket": "boreal-marche-eraldo57-artifacts",
+      "generation": "1793944744069176",
+      "object": "build-source/1793944742.24258-f7cfeb22f6f64ebcaee0bc93525fc680.tgz"
+    }
+  },
+  "startTime": "2026-11-06T05:59:04.869684813Z",
+  "status": "FAILURE",
+  "steps": [
+    {
+      "args": [
+        "scripts/cloud_build_runtime.py",
+        "gs://boreal-marche-eraldo57-artifacts/deployment/runtime.tar.gz",
+        "7253213df847c316161c75ee6003d20d0e80d9f8ad166852a2401c021bc22c7d"
+      ],
+      "entrypoint": "python3",
+      "exitCode": 1,
+      "name": "gcr.io/google.com/cloudsdktool/google-cloud-cli:slim",
+      "pullTiming": {
+        "endTime": "2026-11-06T05:59:31.488868339Z",
+        "startTime": "2026-11-06T05:59:09.054477758Z"
+      },
+      "status": "FAILURE",
+      "timing": {
+        "endTime": "2026-11-06T05:59:32.033779333Z",
+        "startTime": "2026-11-06T05:59:09.054477758Z"
+      }
+    },
+    {
+      "args": [
+        "build",
+        "-f",
+        "docker/Dockerfile",
+        "--target",
+        "cloudrun-api",
+        "--build-arg",
+        "GIT_SHA=be3e8df7cf65473429543836c4ae0848cbfec1bc",
+        "-t",
+        "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/api:be3e8df7cf65473429543836c4ae0848cbfec1bc",
+        "."
+      ],
+      "name": "gcr.io/cloud-builders/docker",
+      "status": "QUEUED"
+    },
+    {
+      "args": [
+        "build",
+        "-f",
+        "docker/Dockerfile",
+        "--target",
+        "frontend",
+        "--build-arg",
+        "GIT_SHA=be3e8df7cf65473429543836c4ae0848cbfec1bc",
+        "-t",
+        "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/frontend:be3e8df7cf65473429543836c4ae0848cbfec1bc",
+        "."
+      ],
+      "name": "gcr.io/cloud-builders/docker",
+      "status": "QUEUED"
+    },
+    {
+      "args": [
+        "build",
+        "-f",
+        "docker/Dockerfile",
+        "--target",
+        "vertex",
+        "--build-arg",
+        "GIT_SHA=be3e8df7cf65473429543836c4ae0848cbfec1bc",
+        "-t",
+        "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/vertex:be3e8df7cf65473429543836c4ae0848cbfec1bc",
+        "."
+      ],
+      "name": "gcr.io/cloud-builders/docker",
+      "status": "QUEUED"
+    },
+    {
+      "args": [
+        "build",
+        "-f",
+        "docker/Dockerfile",
+        "--target",
+        "mlflow",
+        "--build-arg",
+        "GIT_SHA=be3e8df7cf65473429543836c4ae0848cbfec1bc",
+        "-t",
+        "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/mlflow:be3e8df7cf65473429543836c4ae0848cbfec1bc",
+        "."
+      ],
+      "name": "gcr.io/cloud-builders/docker",
+      "status": "QUEUED"
+    }
+  ],
+  "timeout": "1800s",
+  "timing": {
+    "BUILD": {
+      "endTime": "2026-11-06T05:59:32.034034724Z",
+      "startTime": "2026-11-06T05:59:08.511407033Z"
+    },
+    "FETCHSOURCE": {
+      "endTime": "2026-11-06T05:59:08.511188793Z",
+      "startTime": "2026-11-06T05:59:06.221336106Z"
+    },
+    "STORAGE_SOURCE": {
+      "endTime": "2026-11-06T05:59:08.511188793Z",
+      "startTime": "2026-11-06T05:59:06.221336106Z"
+    }
+  }
+}
