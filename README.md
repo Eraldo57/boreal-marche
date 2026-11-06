@@ -98,7 +98,7 @@ Average precision here measures **will_return**, not churn. Recommendation evalu
 
 ## Current limitations
 
-- **Local gates and published application CI pass.** On 2026-11-05, 428 tests passed across the local non-integration and artifact integration suites; combined coverage is 90% against the 80% gate; mypy reports no issues in 33 source files. [GitHub CI passed for application commit `2dda6ce`](https://github.com/Eraldo57/boreal-marche/actions/runs/42132384905). The earlier 89% clean-checkout result is historical, not a new clean-clone check.
+- **Validation.** On 2026-11-05, 428 tests passed across the local non-integration and artifact integration suites; combined coverage is 90% against the 80% gate; mypy reports no issues in 33 source files. Current remote checks are available in [GitHub CI](https://github.com/Eraldo57/boreal-marche/actions/workflows/ci.yml). The earlier 89% clean-checkout result is historical, not a new clean-clone check.
 - **Cloud execution remains pending.** Native arm64 and linux/amd64 API/frontend images were built locally, and amd64 inference was verified; see [completion verification](reports/current_run/COMPLETION_VERIFICATION_20261105.md). A fresh clone on another machine, CD, SageMaker jobs on AWS and hosted deployment remain outstanding. The deployment workflow is disabled until its AWS configuration is supplied.
 - **No champion yet.** Promoting one needs the project owner as approver.
 - **Decisions waiting for the owner.** A fairness mitigation and the business numbers behind the threshold. The current model has already been retrained without the 13 unnecessary features.
@@ -117,4 +117,4 @@ See [current completion status](docs/CAPSTONE_REQUIREMENTS_STATUS.md), [final te
 
 [Download the editable defence PowerPoint](deliverables/Boreal_Marche_Defence.pptx) · [Complete presentation package](deliverables/Boreal_Marche_Presentation_Package.zip) · [Deck PDF](deliverables/Boreal_Marche_Defence.pdf)
 
-[Complete project submission ZIP — 513 MB](https://github.com/Eraldo57/boreal-marche/releases/download/submission-2026-11-05/Boreal_Marche_Complete_Submission.zip) · [Bundle contents and reproduction guide](SUBMISSION.md)
+[Complete project submission ZIP](https://github.com/Eraldo57/boreal-marche/releases/download/submission-2026-11-05/Boreal_Marche_Complete_Submission.zip) · [Bundle contents and reproduction guide](SUBMISSION.md)
