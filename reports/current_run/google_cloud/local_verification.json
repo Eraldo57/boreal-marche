@@ -1,0 +1,11 @@
+{
+  "executed_at": "2026-11-06T01:32:19.698827+00:00",
+  "tests_passed": 433,
+  "test_command": "HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 pytest tests/ -q --disable-warnings",
+  "elapsed_seconds": 56.47,
+  "strict_typecheck": "passed, 34 source/API files",
+  "lint_and_format": "passed",
+  "workflow_validation": "passed for deployment and retraining",
+  "credential_scan": "passed for changed and added files",
+  "verification_note": "An earlier broad test run was interrupted during Hugging Face HTTP retries after 299 passing tests; using the existing cache offline completed the entire suite."
+}

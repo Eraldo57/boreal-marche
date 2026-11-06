@@ -1,0 +1,4 @@
+google-cloud-storage>=2.18,<4
+cloudml-hypertune==0.1.0.dev6
+google-auth>=2,<3
+psycopg[binary]>=3.2,<4

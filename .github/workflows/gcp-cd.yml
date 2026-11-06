@@ -1,0 +1,59 @@
+name: Google Cloud deployment
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: google-cloud-deployment
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: >-
+      vars.ENABLE_GCP_DEPLOYMENT == 'true' &&
+      (github.event_name == 'workflow_dispatch' ||
+       (github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_repository.full_name == github.repository))
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Authenticate with Google Workload Identity Federation
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v3
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install requests pyyaml
+
+      - name: Build immutable images from the verified runtime bundle
+        run: python -m scripts.gcp build
+
+      - name: Deploy API, interface and private tracking server
+        run: python -m scripts.gcp deploy
+
+      - name: Keep deployment and smoke-test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: google-cloud-deployment-${{ github.event.workflow_run.head_sha || github.sha }}
+          path: reports/current_run/google_cloud/

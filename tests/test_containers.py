@@ -57,7 +57,11 @@ def test_base_image_is_pinned_by_digest():
     base = next(a.split("=", 1)[1] for a in args if a.startswith("PYTHON_IMAGE="))
     assert DIGEST.search(base), base
     froms = [rest for keyword, rest in _instructions() if keyword == "FROM"]
-    assert froms and all(f.startswith("${PYTHON_IMAGE}") for f in froms)
+    stages = set()
+    for stage in froms:
+        source, _, name = stage.partition(" AS ")
+        assert source == "${PYTHON_IMAGE}" or source in stages, source
+        stages.add(name)
 
 
 def test_multi_stage_with_separate_api_and_frontend():

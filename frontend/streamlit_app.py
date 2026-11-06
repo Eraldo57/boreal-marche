@@ -13,12 +13,16 @@ from evaluation import show_ranking_plots
 from notes import effect_lines, reason_lines, strategy_note
 
 st.set_page_config(page_title="Boréal Marché", page_icon="🍁", layout="wide")
-API_BASE = st.sidebar.text_input(
-    "API URL", value=os.getenv("API_BASE_URL", "http://localhost:8000")
-)
+HOSTED_DEMO = os.getenv("HOSTED_DEMO", "").lower() == "true"
+API_BASE = os.getenv("API_BASE_URL", "http://localhost:8000")
+if not HOSTED_DEMO:
+    API_BASE = st.sidebar.text_input("API URL", value=API_BASE)
 language = st.sidebar.selectbox("Language / Langue", ["en", "fr"])
-provider = st.sidebar.selectbox("Assistant provider", ["regex", "openai", "ollama"])
-st.sidebar.caption("Local academic demonstration. No authenticated customer accounts.")
+providers = os.getenv("ASSISTANT_PROVIDERS", "regex,openai,ollama").split(",")
+provider = st.sidebar.selectbox("Assistant provider", providers)
+st.sidebar.caption(
+    "Academic demonstration using historical public data. No authenticated customer accounts."
+)
 
 
 def api_call(method, endpoint, payload=None):
@@ -378,7 +382,7 @@ with about:
             "Regex runs locally; Ollama requires its own configured server."
         )
         st.write(
-            "Not built yet: authenticated access, enforced retention and deletion, "
-            "and cloud deployment."
+            "Customer identity verification and enforced retention and deletion remain "
+            "outside this academic demonstration."
         )
         st.caption("Evidence: reports/current_run/VALIDATION_RESULTS.md and REMAINING_ISSUES.md")

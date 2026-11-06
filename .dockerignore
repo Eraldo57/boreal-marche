@@ -57,7 +57,9 @@ Thumbs.db
 # Docker (the Dockerfile is read separately; only the SageMaker stage's pip list is copied)
 docker/
 !docker/sagemaker-requirements.txt
+!docker/gcp-requirements.txt
 .dockerignore
+runtime.tar.gz
 
 # CI/CD
 .github/

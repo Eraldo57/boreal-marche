@@ -1,0 +1,33 @@
+{
+  "name": "billingAccounts/01C74D-500C2F-4B396F/budgets/ece1b7b3-3659-4430-ac21-faa49ec7cf5f",
+  "displayName": "Boreal capstone: 10 budget alert",
+  "budgetFilter": {
+    "projects": [
+      "projects/482023376300"
+    ],
+    "creditTypesTreatment": "EXCLUDE_ALL_CREDITS",
+    "calendarPeriod": "MONTH"
+  },
+  "amount": {
+    "specifiedAmount": {
+      "currencyCode": "CAD",
+      "units": "10"
+    }
+  },
+  "thresholdRules": [
+    {
+      "thresholdPercent": 0.5,
+      "spendBasis": "CURRENT_SPEND"
+    },
+    {
+      "thresholdPercent": 0.8,
+      "spendBasis": "CURRENT_SPEND"
+    },
+    {
+      "thresholdPercent": 1,
+      "spendBasis": "CURRENT_SPEND"
+    }
+  ],
+  "notificationsRule": {},
+  "etag": "1793927569546797"
+}

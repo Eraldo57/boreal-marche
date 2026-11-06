@@ -150,3 +150,24 @@ RUN printf '#!/bin/sh\nexec python -m scripts.sagemaker_entry train\n' > /usr/lo
     && printf '#!/bin/sh\nexec python -m scripts.sagemaker_entry serve\n' > /usr/local/bin/serve \
     && chmod +x /usr/local/bin/train /usr/local/bin/serve
 EXPOSE 8080
+
+# Google Cloud runtime: verified features, retrieval index and embedding weights are
+# supplied by scripts.gcp; raw transactions and credentials never enter the context.
+FROM api AS cloudrun-api
+USER root
+COPY --chown=appuser:appuser .cloud-runtime/data/ ./data/
+ENV HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 BOREAL_NO_DOTENV=1
+USER appuser
+
+# The same training implementation also runs as a Vertex AI custom/HP tuning job.
+FROM sagemaker AS vertex
+COPY docker/gcp-requirements.txt ./gcp-requirements.txt
+RUN pip install -r gcp-requirements.txt
+COPY scripts/vertex_entry.py scripts/gcp.py ./scripts/
+COPY scripts/__init__.py ./scripts/
+ENTRYPOINT ["python", "-m", "scripts.vertex_entry"]
+
+# Private, durable MLflow tracking: Cloud SQL backend and Cloud Storage artifacts.
+FROM vertex AS mlflow
+COPY scripts/mlflow_cloud.py ./scripts/
+ENTRYPOINT ["python", "-m", "scripts.mlflow_cloud"]
