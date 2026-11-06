@@ -41,7 +41,7 @@ def settings(project: str = DEFAULT_PROJECT, region: str = DEFAULT_REGION) -> di
         "database": "boreal-db",
         "accounts": {
             name: f"boreal-{name}@{project}.iam.gserviceaccount.com"
-            for name in ("api", "mlflow", "train", "build", "deploy")
+            for name in ("api", "frontend", "mlflow", "train", "build", "deploy")
         },
     }
 
@@ -176,12 +176,17 @@ def bootstrap(cfg: dict, billing_account: str) -> None:
     roles = {
         "api": ["roles/cloudsql.client"],
         "mlflow": ["roles/cloudsql.client"],
-        "build": ["roles/artifactregistry.writer", "roles/logging.logWriter"],
+        "build": [
+            "roles/artifactregistry.writer",
+            "roles/logging.logWriter",
+            "roles/serviceusage.serviceUsageConsumer",
+        ],
         "deploy": [
             "roles/run.admin",
             "roles/cloudbuild.builds.editor",
             "roles/artifactregistry.writer",
             "roles/aiplatform.user",
+            "roles/serviceusage.serviceUsageConsumer",
         ],
     }
     for name, names in roles.items():
@@ -206,7 +211,7 @@ def bootstrap(cfg: dict, billing_account: str) -> None:
             f"--member=serviceAccount:{cfg['accounts'][name]}",
             "--role=roles/storage.legacyBucketReader",
         )
-    for name in ("api", "mlflow", "train", "build"):
+    for name in ("api", "frontend", "mlflow", "train", "build"):
         gcloud(
             cfg,
             "iam",
@@ -546,6 +551,9 @@ def deploy_service(
 
 
 def deploy(cfg: dict) -> dict:
+    cfg["accounts"].setdefault(
+        "frontend", f"boreal-frontend@{cfg['project']}.iam.gserviceaccount.com"
+    )
     cfg["mlflow_url"] = deploy_service(
         cfg,
         "boreal-mlflow",
@@ -597,7 +605,7 @@ def deploy(cfg: dict) -> dict:
         cfg,
         "boreal-ui",
         cfg["images"]["frontend"],
-        cfg["accounts"]["api"],
+        cfg["accounts"]["frontend"],
         8501,
         "512Mi",
         {

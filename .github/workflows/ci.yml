@@ -164,7 +164,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        target: [api, frontend]
+        target: [api, frontend, vertex, mlflow]
     steps:
       - uses: actions/checkout@v4
 

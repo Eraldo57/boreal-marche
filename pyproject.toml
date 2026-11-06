@@ -61,7 +61,7 @@ sagemaker = [
 ]
 gcp = [
     "google-cloud-storage>=2.18,<4",
-    "cloudml-hypertune>=0.1",
+    "cloudml-hypertune==0.1.0.dev6",
 ]
 
 [tool.ruff]
