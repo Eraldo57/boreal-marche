@@ -184,6 +184,13 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.target }}
           cache-to: type=gha,mode=max,scope=${{ matrix.target }}
 
+      - name: Verify the training and tracking database backend starts
+        if: matrix.target == 'vertex' || matrix.target == 'mlflow'
+        run: |
+          docker run --rm --entrypoint python \
+            "boreal-marche/${{ matrix.target }}:ci-${{ github.sha }}" \
+            -c "from mlflow.store.tracking.sqlalchemy_store import SqlAlchemyStore; SqlAlchemyStore('sqlite:////tmp/mlflow-check.db', '/tmp/artifacts')"
+
       - name: Report image size (linux/amd64, uncompressed)
         run: |
           IMAGE=boreal-marche/${{ matrix.target }}:ci-${{ github.sha }}
