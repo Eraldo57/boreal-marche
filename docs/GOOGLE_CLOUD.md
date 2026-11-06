@@ -6,7 +6,7 @@ this provider substitution should be disclosed to the instructor.
 
 | Capstone component | Google Cloud implementation |
 |---|---|
-| SageMaker training and Bayesian managed-spot tuning | Vertex AI custom job and hyperparameter tuning job, Spot VMs, bounded execution/queue time |
+| SageMaker training and Bayesian managed-spot tuning | Vertex AI custom job and hyperparameter tuning job, Spot VMs, bounded execution and launcher deadlines |
 | Temporary real-time endpoint | Vertex AI Model Registry and a prediction endpoint invoked once, then removed in a `finally` block |
 | Lasting API and Streamlit links | Separate Cloud Run services; public application and OpenAPI documentation |
 | ECR and S3 | Artifact Registry and a private Cloud Storage bucket |
@@ -53,8 +53,9 @@ it still scales to zero after its idle period. MLflow and the interface use requ
 Open Streamlit WebSocket sessions count as active requests. Close the demo tabs when finished.
 The small PostgreSQL instance and stored images have ongoing charges even when the web
 services scale to zero. A budget alert is a notification, not an absolute spending guarantee.
-Training is limited to 600 seconds of execution and 600 seconds of queue time per worker;
-the tuning launcher also has an overall wall-clock cancellation deadline.
+Training is limited to 600 seconds of execution per worker. The launcher cancels a full
+job after 25 minutes or a tuning job after one hour, including queue time. Vertex's
+`maxWaitDuration` field applies to Flex-start scheduling and is omitted for Spot workers.
 
 The endpoint demo records creation, prediction and teardown evidence. If interrupted by the
 operator or machine, inspect Vertex AI endpoints before leaving the account unattended.

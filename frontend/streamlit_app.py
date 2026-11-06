@@ -1,4 +1,4 @@
-"""Local demonstration UI. All inference/retrieval and feature lookup go through FastAPI."""
+"""Demonstration UI. All inference/retrieval and feature lookup go through FastAPI."""
 
 import json
 import os
@@ -277,7 +277,7 @@ with assistant:
 with monitoring:
     st.header("Live monitoring")
     st.caption(
-        "Computed from the prediction_log table (SQLite locally, PostgreSQL in Docker Compose) "
+        "Computed from the prediction_log table (SQLite locally, PostgreSQL when hosted) "
         "against the training reference. Rules: configs/pipeline.yaml; design: docs/MONITORING.md."
     )
     if st.button("Refresh metrics"):

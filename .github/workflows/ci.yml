@@ -165,6 +165,20 @@ jobs:
     strategy:
       matrix:
         target: [api, frontend, vertex, mlflow]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: mlflow
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
 
@@ -190,6 +204,13 @@ jobs:
           docker run --rm --entrypoint python \
             "boreal-marche/${{ matrix.target }}:ci-${{ github.sha }}" \
             -c "from mlflow.store.tracking.sqlalchemy_store import SqlAlchemyStore; SqlAlchemyStore('sqlite:////tmp/mlflow-check.db', '/tmp/artifacts')"
+
+      - name: Verify MLflow can create a run in PostgreSQL
+        if: matrix.target == 'mlflow'
+        run: |
+          docker run --rm --network host --entrypoint python \
+            "boreal-marche/mlflow:ci-${{ github.sha }}" \
+            -c "from mlflow.store.tracking.sqlalchemy_store import SqlAlchemyStore; store=SqlAlchemyStore('postgresql+psycopg2://ci:ci@127.0.0.1:5432/mlflow', '/tmp/artifacts'); store.create_run(experiment_id='0', user_id='ci', start_time=0, tags=[], run_name='database-check')"
 
       - name: Report image size (linux/amd64, uncompressed)
         run: |

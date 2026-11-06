@@ -17,11 +17,12 @@ def configuration():
     }
 
 
-def test_training_has_spot_and_finite_compute_and_queue_budgets():
+def test_training_has_spot_and_finite_compute_budget():
     request = job_spec(configuration(), "gs://test-data/output")
     assert request["scheduling"]["strategy"] == "SPOT"
     assert request["scheduling"]["timeout"] == "600s"
-    assert request["scheduling"]["maxWaitDuration"] == "600s"
+    # Vertex accepts maxWaitDuration only for FLEX_START, not SPOT.
+    assert "maxWaitDuration" not in request["scheduling"]
     worker = request["workerPoolSpecs"][0]
     assert worker["replicaCount"] == "1"
     assert "gs://test-data/processed" in worker["containerSpec"]["args"]
