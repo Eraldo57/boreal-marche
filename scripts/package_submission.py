@@ -18,6 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 NAME = "Boreal_Marche_Complete_Submission"
 DATE = "2026-11-05"
 SKIP_DIRS = {
+    "outputs",
     ".git",
     ".venv",
     "venv",
