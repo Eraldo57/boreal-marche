@@ -6,6 +6,8 @@ Vanier College capstone by Eraldo Ibrushi. A Python application for retention pr
 
 One public-data pipeline supports retention prediction and basket recommendations. A separate fictional policy/product corpus supports the assistant. FastAPI exposes all three heads; Streamlit calls the API.
 
+**Live on Google Cloud:** [Streamlit application](https://boreal-ui-qaonyx3dda-nn.a.run.app) · [API documentation](https://boreal-api-qaonyx3dda-nn.a.run.app/docs). Use historical customer **12347**. The hosted assistant uses the credential-free regex provider. [Deployment runbook and evidence](docs/GOOGLE_CLOUD.md).
+
 ## Project structure
 
 | Directory | Contents |
@@ -17,7 +19,7 @@ One public-data pipeline supports retention prediction and basket recommendation
 | [tests/](tests/) | Unit, API, UI and real-artifact integration checks |
 | [docker/](docker/) | API, frontend and SageMaker image targets, plus the local Compose stack |
 | [scripts/](scripts/) | Evaluation, smoke checks, retraining, SageMaker jobs and submission packaging |
-| [.github/workflows/](.github/workflows/) | CI, optional AWS deployment through OIDC and scheduled retraining |
+| [.github/workflows/](.github/workflows/) | CI, Google Cloud deployment through Workload Identity Federation, scheduled retraining and retained AWS workflows |
 | [configs/](configs/) | Pipeline and application settings |
 | [docs/](docs/), [governance/](governance/) | Architecture walkthroughs, AWS setup, reports, notices and governance records |
 | [reports/](reports/) | Evaluation figures, measured results and dated verification evidence |
@@ -43,6 +45,7 @@ Clone this repository to work with the application. The [complete submission ZIP
   - [Containers](docs/CONTAINERS.md): Dockerfile choices, measured image sizes, Compose stack.
   - [Monitoring and alerts](docs/MONITORING.md), including the delayed-label backfill design.
   - [SageMaker](docs/SAGEMAKER.md): built and run locally, not yet on AWS.
+  - [Google Cloud](docs/GOOGLE_CLOUD.md): live Cloud Run services, persistent PostgreSQL and private MLflow tracking.
 
 ## Local quickstart
 
@@ -92,14 +95,14 @@ The model, rules and index were measured on the real UCI workbook on 2026-09-30.
 | Recommendations | 3,567 rules; later-basket Hit-rate@5 0.4867 versus popularity 0.1723 |
 | Assistant | Tool choice on 40 golden questions: rules 97.5%, OpenAI `gpt-4o-mini` 95%, Ollama `llama3.2:3b` 92.5%. Of 18 model-written policy answers, OpenAI got 11 fully correct and Ollama 3 (one rater scored them). The passage with the answer reaches the model for 12 of 14 answerable questions (was 4); questions about deleting your data still fail |
 | Integration | API smoke 16/16 and interface smoke 6/6, including the live what-if and a streamed answer |
-| Operations | MLflow tracking and registry (version 2 a candidate, not promoted). Monitoring: drift, data quality and rule fire rate, with automated alerts. Docker stack verified locally; no cloud deployment |
+| Operations | Local MLflow and Docker evidence is historical. The Google Cloud deployment now runs Cloud Run, Cloud SQL and private MLflow; cloud monitoring rejected 10/10 invalid requests and recorded six alerts on deliberately shifted demo traffic. See the cloud runbook for managed-job results. |
 
 Average precision here measures **will_return**, not churn. Recommendation evaluation masks half of each eligible later basket; it is not an online sales experiment. Repeated training runs reproduce the same holdout, not independent evidence.
 
 ## Current limitations
 
 - **Validation.** On 2026-11-05, 428 tests passed across the local non-integration and artifact integration suites; combined coverage is 90% against the 80% gate; mypy reports no issues in 33 source files. Current remote checks are available in [GitHub CI](https://github.com/Eraldo57/boreal-marche/actions/workflows/ci.yml). The earlier 89% clean-checkout result is historical, not a new clean-clone check.
-- **Cloud execution remains pending.** Native arm64 and linux/amd64 API/frontend images were built locally, and amd64 inference was verified; see [completion verification](reports/current_run/COMPLETION_VERIFICATION_20261105.md). A fresh clone on another machine, CD, SageMaker jobs on AWS and hosted deployment remain outstanding. The deployment workflow is disabled until its AWS configuration is supplied.
+- **Provider substitution.** The owner selected Google Cloud in place of the brief's AWS services. Merge-triggered cloud deployment and its smoke tests passed on 2026-11-06. AWS workflows remain disabled; earlier local completion reports are dated snapshots. See [Google Cloud](docs/GOOGLE_CLOUD.md) for current evidence and limitations.
 - **No champion yet.** Promoting one needs the project owner as approver.
 - **Decisions waiting for the owner.** A fairness mitigation and the business numbers behind the threshold. The current model has already been retrained without the 13 unnecessary features.
 - **Model-written answers are a demonstration, not a reliable channel.** Both models can contradict or invent: on the French bakery-allergen question both implied allergens that no policy states. The figure check flags some cases, and retrieval still misses some passages (see VALIDATION_RESULTS.md).

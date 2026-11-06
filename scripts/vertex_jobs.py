@@ -50,7 +50,6 @@ def job_spec(cfg: dict, output_uri: str, mode: str = "full") -> dict:
         "scheduling": {
             "strategy": "SPOT",
             "timeout": "600s",
-            "maxWaitDuration": "600s",
             "restartJobOnWorkerRestart": False,
         },
         "baseOutputDirectory": {"outputUriPrefix": output_uri.rsplit("/", 1)[0]},
