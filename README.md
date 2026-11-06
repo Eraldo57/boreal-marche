@@ -1,10 +1,31 @@
 # Boréal Marché — Customer Intelligence Platform
 
-Vanier College capstone, Eraldo Ibrushi. **Progress milestone: integration and validation**, not a production launch.
+Vanier College capstone by Eraldo Ibrushi. A Python application for retention prediction, basket recommendations and a grounded bilingual assistant, with a Streamlit interface and FastAPI backend.
+
+[![CI](https://github.com/Eraldo57/boreal-marche/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Eraldo57/boreal-marche/actions/workflows/ci.yml)
 
 One public-data pipeline supports retention prediction and basket recommendations. A separate fictional policy/product corpus supports the assistant. FastAPI exposes all three heads; Streamlit calls the API.
 
-## Start here
+## Project structure
+
+| Directory | Contents |
+|---|---|
+| [frontend/](frontend/) | Streamlit: Prediction, Recommendations, Assistant, Monitoring and About |
+| [api/](api/) | FastAPI routes, request contracts, logging, monitoring and SageMaker serving |
+| [src/](src/) | Ingestion, features, model training, basket rules, retrieval and registry integration |
+| [notebooks/](notebooks/) | Executed exploration, modelling and evaluation notebooks |
+| [tests/](tests/) | Unit, API, UI and real-artifact integration checks |
+| [docker/](docker/) | API, frontend and SageMaker image targets, plus the local Compose stack |
+| [scripts/](scripts/) | Evaluation, smoke checks, retraining, SageMaker jobs and submission packaging |
+| [.github/workflows/](.github/workflows/) | CI, optional AWS deployment through OIDC and scheduled retraining |
+| [configs/](configs/) | Pipeline and application settings |
+| [docs/](docs/), [governance/](governance/) | Architecture walkthroughs, AWS setup, reports, notices and governance records |
+| [reports/](reports/) | Evaluation figures, measured results and dated verification evidence |
+| [deliverables/](deliverables/) | Editable PowerPoint, speaker notes, Word reports and printable PDFs |
+
+Clone this repository to work with the application. The [complete submission ZIP](https://github.com/Eraldo57/boreal-marche/releases/tag/submission-2026-11-05) is an additional download containing the source, documents, data and generated artifacts together. Large datasets, trained binaries and embedding weights are distributed with that bundle; the source quickstart below rebuilds them.
+
+## Documentation
 
 - [Defence walkthrough](docs/PRESENTATION_D7.md), [short cue card](docs/DEFENCE_CUE_CARD.md), and [Appendix C answers](docs/DEFENCE_PREPARATION.md).
 - [Original-brief requirements and next actions](docs/CAPSTONE_REQUIREMENTS_STATUS.md), with [2026-11-05 local verification](reports/current_run/DEFENCE_VERIFICATION_20261105.md).
@@ -28,6 +49,8 @@ One public-data pipeline supports retention prediction and basket recommendation
 Use Python 3.12 (validated); Python 3.14 is not supported. Docker and paid LLM credentials are not needed.
 
 ```bash
+git clone https://github.com/Eraldo57/boreal-marche.git
+cd boreal-marche
 python3.12 -m venv .venv
 .venv/bin/python -m pip install -e '.[dev]'
 .venv/bin/python -m src.ingest
@@ -75,10 +98,10 @@ Average precision here measures **will_return**, not churn. Recommendation evalu
 
 ## Current limitations
 
-- **Local gates pass; current CI status is unverified.** On 2026-11-05, 428 tests passed across the non-integration and artifact integration suites; combined coverage is 90% against the 80% gate; mypy reports no issues in 33 source files. A GitHub remote is configured, but GitHub reads returned HTTP 401, so workflow status was not verified. The earlier 89% clean-checkout result is historical, not a new clean-clone check.
-- **No cloud.** The images were built and the Compose stack run locally on linux/arm64 only. Still to do: the linux/amd64 build, a fresh clone on another machine, CD, SageMaker on AWS and any cloud deployment.
+- **Local gates and published application CI pass.** On 2026-11-05, 428 tests passed across the local non-integration and artifact integration suites; combined coverage is 90% against the 80% gate; mypy reports no issues in 33 source files. [GitHub CI passed for application commit `2dda6ce`](https://github.com/Eraldo57/boreal-marche/actions/runs/42132384905). The earlier 89% clean-checkout result is historical, not a new clean-clone check.
+- **Cloud execution remains pending.** Native arm64 and linux/amd64 API/frontend images were built locally, and amd64 inference was verified; see [completion verification](reports/current_run/COMPLETION_VERIFICATION_20261105.md). A fresh clone on another machine, CD, SageMaker jobs on AWS and hosted deployment remain outstanding. The deployment workflow is disabled until its AWS configuration is supplied.
 - **No champion yet.** Promoting one needs the project owner as approver.
-- **Decisions waiting for the owner.** Retraining without the 13 unnecessary features, a fairness mitigation, and the business numbers behind the threshold.
+- **Decisions waiting for the owner.** A fairness mitigation and the business numbers behind the threshold. The current model has already been retrained without the 13 unnecessary features.
 - **Model-written answers are a demonstration, not a reliable channel.** Both models can contradict or invent: on the French bakery-allergen question both implied allergens that no policy states. The figure check flags some cases, and retrieval still misses some passages (see VALIDATION_RESULTS.md).
 - **Not built:** authenticated access and deletion enforcement.
 
@@ -93,3 +116,5 @@ Governance documents describe actual controls and planned work; this repository 
 See [current completion status](docs/CAPSTONE_REQUIREMENTS_STATUS.md), [final technical report](docs/FINAL_TECHNICAL_REPORT.md), [defence cue card](docs/DEFENCE_CUE_CARD.md), and [AI-use record](docs/AI_USE.md). Model 0.3.0 replaces the archived 25-feature model. Current AP is 0.7596 and threshold is 20.5%; historical run logs retain earlier results.
 
 [Download the editable defence PowerPoint](deliverables/Boreal_Marche_Defence.pptx) · [Complete presentation package](deliverables/Boreal_Marche_Presentation_Package.zip) · [Deck PDF](deliverables/Boreal_Marche_Defence.pdf)
+
+[Complete project submission ZIP — 513 MB](https://github.com/Eraldo57/boreal-marche/releases/download/submission-2026-11-05/Boreal_Marche_Complete_Submission.zip) · [Bundle contents and reproduction guide](SUBMISSION.md)
