@@ -196,6 +196,15 @@ def bootstrap(cfg: dict, billing_account: str) -> None:
             f"--member=serviceAccount:{cfg['accounts'][name]}",
             "--role=roles/storage.objectAdmin",
         )
+        gcloud(
+            cfg,
+            "storage",
+            "buckets",
+            "add-iam-policy-binding",
+            f"gs://{cfg['bucket']}",
+            f"--member=serviceAccount:{cfg['accounts'][name]}",
+            "--role=roles/storage.legacyBucketReader",
+        )
     for name in ("api", "mlflow", "train", "build"):
         gcloud(
             cfg,
