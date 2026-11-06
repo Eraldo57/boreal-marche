@@ -66,3 +66,7 @@ compose.override.yml
 .dvc/tmp/
 /data/raw/*.xlsx
 /data/raw/*.csv
+
+# Prepared Google Cloud build inputs (generated from verified local artifacts)
+.cloud-runtime/
+gha-creds-*.json

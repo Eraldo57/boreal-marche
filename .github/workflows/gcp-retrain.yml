@@ -1,0 +1,85 @@
+name: Google Cloud weekly retraining
+
+on:
+  schedule:
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+concurrency:
+  group: google-cloud-retraining
+  cancel-in-progress: false
+
+jobs:
+  candidate:
+    if: vars.ENABLE_GCP_RETRAINING == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      MLFLOW_TRACKING_URI: ${{ vars.GCP_MLFLOW_URL }}
+      MODEL_SOURCE: local
+      BOREAL_NO_DOTENV: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate without service-account keys
+        id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+          token_format: id_token
+          id_token_audience: ${{ vars.GCP_MLFLOW_URL }}
+
+      - uses: google-github-actions/setup-gcloud@v3
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install development dependencies
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu 'torch==2.15.0+cpu'
+          pip install '.[dev]'
+
+      - name: Rebuild data, features and basket rules
+        run: |
+          python -m src.ingest
+          python -m src.features
+          python -m src.rules
+
+      - name: Train a bounded Vertex AI candidate
+        run: python -m scripts.vertex_jobs train
+
+      - name: Download candidate evidence and evaluate promotion gates
+        id: gates
+        env:
+          MLFLOW_TRACKING_TOKEN: ${{ steps.auth.outputs.id_token }}
+        run: |
+          python -m scripts.gcp_candidate
+          python -m scripts.retrain_report
+
+      - name: Open a metrics pull request if all promotion gates pass
+        if: steps.gates.outputs.passed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: retrain/google-${{ github.run_id }}
+          add-paths: reports/retraining/**
+          commit-message: 'Google Cloud retraining candidate: metrics and promotion gates'
+          title: 'Google Cloud retraining candidate (${{ steps.gates.outputs.date }})'
+          body-path: ${{ steps.gates.outputs.summary }}
+
+      - name: Keep the job and gate evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: google-cloud-retraining-${{ github.run_id }}
+          path: |
+            reports/retraining/
+            reports/current_run/google_cloud/

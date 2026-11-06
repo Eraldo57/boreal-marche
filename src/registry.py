@@ -71,6 +71,9 @@ def _redacted(uri: str) -> str:
 
 
 def _client() -> Any:
+    from src.cloud_auth import configure_tracking_auth
+
+    configure_tracking_auth()
     import mlflow
     from mlflow import MlflowClient
 

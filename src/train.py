@@ -286,6 +286,9 @@ def run(
     register: bool = True,
 ) -> dict:
     """Lock selection/calibration/threshold decisions before scoring final test."""
+    from src.cloud_auth import configure_tracking_auth
+
+    configure_tracking_auth()
     cfg = load_config()
     seed = cfg["data"]["seed"]
     n_trials = n_trials if n_trials is not None else cfg["modelling"]["tuning"]["n_trials"]

@@ -1,0 +1,13 @@
+{
+  "insertTime": "2026-11-06T01:14:09.274Z",
+  "kind": "sql#operation",
+  "name": "8425328b-ec65-46a4-8947-f38200000038",
+  "operationType": "CREATE",
+  "selfLink": "https://sqladmin.googleapis.com/sql/v1beta4/projects/boreal-marche-eraldo57/operations/8425328b-ec65-46a4-8947-f38200000038",
+  "startTime": "2026-11-06T01:14:09.341Z",
+  "status": "RUNNING",
+  "targetId": "boreal-db",
+  "targetLink": "https://sqladmin.googleapis.com/sql/v1beta4/projects/boreal-marche-eraldo57/instances/boreal-db",
+  "targetProject": "boreal-marche-eraldo57",
+  "user": "eraldo.ibrushi@gmail.com"
+}

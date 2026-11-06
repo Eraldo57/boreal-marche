@@ -1,0 +1,17 @@
+{
+  "project": "boreal-marche-eraldo57",
+  "region": "northamerica-northeast1",
+  "bucket": "boreal-marche-eraldo57-artifacts",
+  "repository": "boreal",
+  "database": "boreal-db",
+  "accounts": {
+    "api": "boreal-api@boreal-marche-eraldo57.iam.gserviceaccount.com",
+    "mlflow": "boreal-mlflow@boreal-marche-eraldo57.iam.gserviceaccount.com",
+    "train": "boreal-train@boreal-marche-eraldo57.iam.gserviceaccount.com",
+    "build": "boreal-build@boreal-marche-eraldo57.iam.gserviceaccount.com",
+    "deploy": "boreal-deploy@boreal-marche-eraldo57.iam.gserviceaccount.com"
+  },
+  "number": "482023376300",
+  "workload_identity_provider": "projects/482023376300/locations/global/workloadIdentityPools/github-pipeline/providers/github-main",
+  "sql_connection": "boreal-marche-eraldo57:northamerica-northeast1:boreal-db"
+}
