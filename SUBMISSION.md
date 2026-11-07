@@ -3,6 +3,13 @@
 The complete ZIP combines the editable presentation and all files supporting the Streamlit
 demonstration, including the AWS/SageMaker implementation. Extract the whole folder first.
 
+The project is now also deployed on Google Cloud: [Streamlit](https://boreal-ui-qaonyx3dda-nn.a.run.app)
+and [API documentation](https://boreal-api-qaonyx3dda-nn.a.run.app/docs). Google Cloud replaces
+the assignment's AWS services at the owner's request. Current deployment status and execution
+evidence are in `project/docs/GOOGLE_CLOUD.md` and `project/reports/current_run/google_cloud/`.
+The November 5 reports and presentations are dated scientific/local verification snapshots;
+use the Google Cloud execution report for the subsequent deployment status.
+
 | Material | Location in the ZIP |
 |---|---|
 | Start guide and file checksums | `START_HERE.md`, `MANIFEST.json`, `SHA256SUMS.txt` |
@@ -14,6 +21,7 @@ demonstration, including the AWS/SageMaker implementation. Extract the whole fol
 | Assistant policy corpus, retrieval index and cached embedding weights | `project/docs/corpus/`, `project/data/chromadb/`, `project/data/model_cache/` |
 | Evaluation figures, notebooks, tests and execution evidence | `project/reports/`, `project/notebooks/`, `project/tests/` |
 | AWS/SageMaker, containers and deployment workflows | `AWS_READ_ME.md`, `project/docs/SAGEMAKER.md`, `project/docker/`, `project/.github/workflows/` |
+| Google Cloud runbook, source and execution evidence | `GOOGLE_CLOUD_READ_ME.md`, `project/docs/GOOGLE_CLOUD.md`, `project/scripts/gcp.py`, `project/scripts/vertex_jobs.py`, `project/reports/current_run/google_cloud/` |
 | Governance, notices, model/data cards and architecture | `project/governance/`, `project/GOVERNANCE_LOI25.md`, `project/*_CARD.md`, `project/ARCHITECTURE.md` |
 | Original assignment and earlier presentations, when available locally | `assignment_brief/`, `historical_presentations/` |
 
@@ -33,7 +41,7 @@ From the repository root, run:
 python3 scripts/package_submission.py
 ```
 
-The output is in the sibling `submissions/2026-11-05/` directory so that the ZIP cannot
+The output is in the sibling `submissions/2026-11-06/` directory so that the ZIP cannot
 recursively include itself. The packager checks required files, scans for credentials,
 backs up SQLite databases, materializes cached model symlinks for portability, and verifies
 every ZIP member against the manifest. The ZIP and its checksum are intended as GitHub
@@ -68,8 +76,9 @@ serves the included current artifact directly. See `reports/current_run/RUNBOOK.
 
 AWS material means the SageMaker launcher, container entry point, serving endpoint,
 Docker targets, configuration template, tests, deployment workflow and recorded local checks.
-No live AWS job, hosted URL, cloud cost or teardown record is present. This packaging step
-does not deploy resources. The AWS guide identifies the required account configuration.
+No live AWS job is claimed. Google Cloud hosting and its separate execution records are
+included as the owner-selected provider substitution. This packaging step does not create
+resources. The AWS guide remains available for reproducing the original provider approach.
 
 The reflection remains a draft requiring Eraldo's review. Current verification and remaining
 requirements are recorded in `reports/current_run/COMPLETION_VERIFICATION_20261105.md`

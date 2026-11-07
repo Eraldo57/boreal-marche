@@ -1,5 +1,8 @@
 # Boréal Marché — defence package
 
+> Deployment update, 2026-11-06: Google Cloud hosting, public GitHub CI and merge-triggered deployment were completed after this local report. See [the current Google Cloud runbook](https://github.com/Eraldo57/boreal-marche/blob/main/docs/GOOGLE_CLOUD.md) and reports/current_run/google_cloud/ for subsequent execution evidence. Earlier pending-cloud statements below describe the dated local snapshot.
+
+
 Open Boreal_Marche_Defence.pptx: 20 slides grouped by Head, all with speaker notes.
 Use Presenter View to read the notes; Defence_Cue_Card.md is the short rehearsal aid.
 Boreal_Marche_Defence.pdf is the printable deck. Text, bars and diagrams are editable in PowerPoint;

@@ -1,0 +1,37 @@
+{
+  "method": "Streamlit AppTest using the live Google Cloud API; not a browser screenshot",
+  "tabs": [
+    "Prediction",
+    "Recommendations",
+    "Data and timeline",
+    "Apriori vs FP-Growth",
+    "Measured conclusions",
+    "Explore all rules",
+    "Assistant",
+    "Monitoring",
+    "About",
+    "Customer notice / Avis",
+    "Model card",
+    "Precision\u2013Recall",
+    "ROC",
+    "Calibration",
+    "Threshold and uncertainty",
+    "Privacy notice / Confidentialit\u00e9",
+    "Data provenance",
+    "Architecture",
+    "Version"
+  ],
+  "initial_errors": [],
+  "Load historical customer features": {
+    "errors": []
+  },
+  "Get recommendations": {
+    "errors": []
+  },
+  "Ask assistant": {
+    "errors": []
+  },
+  "Refresh metrics": {
+    "errors": []
+  }
+}

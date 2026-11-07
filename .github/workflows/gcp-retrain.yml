@@ -6,6 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  actions: write
   contents: write
   pull-requests: write
   id-token: write
@@ -66,6 +67,7 @@ jobs:
           python -m scripts.retrain_report
 
       - name: Open a metrics pull request if all promotion gates pass
+        id: candidate_pr
         if: steps.gates.outputs.passed == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
@@ -74,6 +76,13 @@ jobs:
           commit-message: 'Google Cloud retraining candidate: metrics and promotion gates'
           title: 'Google Cloud retraining candidate (${{ steps.gates.outputs.date }})'
           body-path: ${{ steps.gates.outputs.summary }}
+
+      - name: Run CI for the generated candidate pull request
+        if: steps.candidate_pr.outputs.pull-request-number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE_BRANCH: retrain/google-${{ github.run_id }}
+        run: gh workflow run ci.yml --ref "$CANDIDATE_BRANCH"
 
       - name: Keep the job and gate evidence
         if: always()

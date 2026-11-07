@@ -56,9 +56,13 @@ def job_spec(cfg: dict, output_uri: str, mode: str = "full") -> dict:
     }
 
 
-def tuning_request(cfg: dict, output_uri: str, trials: int = 12) -> dict:
+def tuning_request(cfg: dict, output_uri: str, trials: int = 6) -> dict:
     if not 1 <= trials <= 12:
         raise ValueError("The capstone tuning budget permits 1–12 trials")
+    trial_spec = job_spec(cfg, output_uri, "hpo-trial")
+    # Allow startup/tracking delays and bounded Spot failures while the launcher
+    # still cancels the entire study after one hour with at most two workers.
+    trial_spec["scheduling"]["timeout"] = "1800s"
     return {
         "displayName": "boreal-bayesian-spot",
         # Omitted algorithm selects Vertex's default Bayesian optimisation.
@@ -79,8 +83,8 @@ def tuning_request(cfg: dict, output_uri: str, trials: int = 12) -> dict:
         },
         "maxTrialCount": trials,
         "parallelTrialCount": min(2, trials),
-        "maxFailedTrialCount": 1,
-        "trialJobSpec": job_spec(cfg, output_uri, "hpo-trial"),
+        "maxFailedTrialCount": min(4, trials),
+        "trialJobSpec": trial_spec,
     }
 
 
@@ -112,7 +116,7 @@ def upload_inputs(cfg: dict) -> None:
         )
 
 
-def train(cfg: dict, *, tune: bool = False, trials: int = 12) -> dict:
+def train(cfg: dict, *, tune: bool = False, trials: int = 6) -> dict:
     upload_inputs(cfg)
     stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
     name = "hpo" if tune else "full"
@@ -229,7 +233,7 @@ def endpoint_demo(cfg: dict) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("command", choices=["train", "tune", "endpoint-demo"])
-    parser.add_argument("--trials", type=int, default=12)
+    parser.add_argument("--trials", type=int, default=6)
     args = parser.parse_args()
     cfg = json.loads((EVIDENCE / "settings.json").read_text())
     cfg.update(

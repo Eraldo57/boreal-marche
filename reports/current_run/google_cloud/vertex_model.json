@@ -1,0 +1,5 @@
+{
+  "@type": "type.googleapis.com/google.cloud.aiplatform.v1.UploadModelResponse",
+  "model": "projects/482023376300/locations/northamerica-northeast1/models/5794597802193453056",
+  "modelVersionId": "1"
+}

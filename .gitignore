@@ -25,6 +25,7 @@ data/processed/
 *.pkl
 *.onnx
 artifacts/rules.json
+artifacts/candidates/
 
 # MLflow
 mlruns/

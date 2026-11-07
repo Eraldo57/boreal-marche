@@ -16,9 +16,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 NAME = "Boreal_Marche_Complete_Submission"
-DATE = "2026-11-05"
+DATE = "2026-11-06"
 SKIP_DIRS = {
     "outputs",
+    ".cloud-runtime",
     ".git",
     ".venv",
     "venv",
@@ -89,6 +90,8 @@ def excluded(path: Path) -> str | None:
         return "environment, tool cache or temporary profile"
     if parts[:2] in {(".dvc", "cache"), (".dvc", "tmp")}:
         return "redundant DVC cache or runtime state"
+    if path.name.startswith("gha-creds-") and path.suffix == ".json":
+        return "short-lived Google authentication configuration"
     if path.name in SKIP_FILES or path.suffix in {".pyc", ".pyo", ".swp"}:
         return "temporary file"
     if path.suffix == ".lock" and path.name != "dvc.lock":
@@ -234,6 +237,20 @@ def build(output: Path) -> None:
                     copy_file(item, target)
                     scan(target, known)
     shutil.copyfile(ROOT / "SUBMISSION.md", bundle / "START_HERE.md")
+    (bundle / "GOOGLE_CLOUD_READ_ME.md").write_text(
+        "# Google Cloud deployment\n\n"
+        "Streamlit: https://boreal-ui-qaonyx3dda-nn.a.run.app\n\n"
+        "API docs: https://boreal-api-qaonyx3dda-nn.a.run.app/docs\n\n"
+        "- Runbook: project/docs/GOOGLE_CLOUD.md\n"
+        "- Execution report and JSON evidence: project/reports/current_run/google_cloud/\n"
+        "- Provision/build/deploy: project/scripts/gcp.py\n"
+        "- Managed training, tuning and temporary endpoint: project/scripts/vertex_jobs.py\n"
+        "- Deployment/retraining: project/.github/workflows/gcp-*.yml\n\n"
+        "Google Cloud replaces the brief's AWS services at the owner's request. "
+        "Consult the execution report for completed operations and remaining limitations. "
+        "Credentials and service-account keys are excluded.\n",
+        encoding="utf-8",
+    )
     (bundle / "AWS_READ_ME.md").write_text(
         "# AWS / SageMaker materials\n\n"
         "Status: implementation and local evidence included; no live AWS execution recorded.\n\n"

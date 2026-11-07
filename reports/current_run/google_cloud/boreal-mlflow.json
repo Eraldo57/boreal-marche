@@ -1,0 +1,139 @@
+{
+  "@type": "type.googleapis.com/google.cloud.run.v1.Service",
+  "apiVersion": "serving.knative.dev/v1",
+  "kind": "Service",
+  "metadata": {
+    "annotations": {
+      "run.googleapis.com/client-name": "gcloud",
+      "run.googleapis.com/client-version": "591.0.0",
+      "run.googleapis.com/ingress": "all",
+      "run.googleapis.com/ingress-status": "all",
+      "run.googleapis.com/maxScale": "20",
+      "run.googleapis.com/operation-id": "05f6be90-a1c7-4dd9-bf39-94bc6964982f",
+      "run.googleapis.com/urls": "[\"https://boreal-mlflow-482023376300.northamerica-northeast1.run.app\",\"https://boreal-mlflow-qaonyx3dda-nn.a.run.app\"]",
+      "serving.knative.dev/creator": "eraldo.ibrushi@gmail.com",
+      "serving.knative.dev/lastModifier": "boreal-deploy@boreal-marche-eraldo57.iam.gserviceaccount.com"
+    },
+    "creationTimestamp": "2026-11-06T07:41:31.226257Z",
+    "generation": 3,
+    "labels": {
+      "cloud.googleapis.com/location": "northamerica-northeast1",
+      "run.googleapis.com/satisfiesPzs": "true"
+    },
+    "name": "boreal-mlflow",
+    "namespace": "482023376300",
+    "resourceVersion": "AAZfoGiz23M",
+    "selfLink": "/apis/serving.knative.dev/v1/namespaces/482023376300/services/boreal-mlflow",
+    "uid": "65146dff-8719-4494-a03e-7438c6e9d7bc"
+  },
+  "spec": {
+    "template": {
+      "metadata": {
+        "annotations": {
+          "autoscaling.knative.dev/maxScale": "1",
+          "run.googleapis.com/client-name": "gcloud",
+          "run.googleapis.com/client-version": "591.0.0",
+          "run.googleapis.com/cloudsql-instances": "boreal-marche-eraldo57:northamerica-northeast1:boreal-db",
+          "run.googleapis.com/execution-environment": "gen2",
+          "run.googleapis.com/startup-cpu-boost": "true"
+        },
+        "labels": {
+          "client.knative.dev/nonce": "dgmprkbgdh",
+          "run.googleapis.com/startupProbeType": "Default"
+        }
+      },
+      "spec": {
+        "containerConcurrency": 8,
+        "containers": [
+          {
+            "env": [
+              {
+                "name": "MLFLOW_ARTIFACTS_DESTINATION",
+                "value": "gs://boreal-marche-eraldo57-artifacts/mlflow"
+              },
+              {
+                "name": "MLFLOW_SQLALCHEMYSTORE_MAX_OVERFLOW",
+                "value": "1"
+              },
+              {
+                "name": "MLFLOW_SQLALCHEMYSTORE_POOL_SIZE",
+                "value": "2"
+              },
+              {
+                "name": "MLFLOW_BACKEND_STORE_URI",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "latest",
+                    "name": "boreal-mlflow-database-url"
+                  }
+                }
+              }
+            ],
+            "image": "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/mlflow:670f0c1ef270ea7765088e929101bcc6c9d3b7ad",
+            "ports": [
+              {
+                "containerPort": 8080,
+                "name": "http1"
+              }
+            ],
+            "resources": {
+              "limits": {
+                "cpu": "1",
+                "memory": "1Gi"
+              }
+            },
+            "startupProbe": {
+              "failureThreshold": 1,
+              "periodSeconds": 240,
+              "tcpSocket": {
+                "port": 8080
+              },
+              "timeoutSeconds": 240
+            }
+          }
+        ],
+        "serviceAccountName": "boreal-mlflow@boreal-marche-eraldo57.iam.gserviceaccount.com",
+        "timeoutSeconds": 300
+      }
+    },
+    "traffic": [
+      {
+        "latestRevision": true,
+        "percent": 100
+      }
+    ]
+  },
+  "status": {
+    "address": {
+      "url": "https://boreal-mlflow-qaonyx3dda-nn.a.run.app"
+    },
+    "conditions": [
+      {
+        "lastTransitionTime": "2026-11-06T19:13:36.287603Z",
+        "status": "True",
+        "type": "Ready"
+      },
+      {
+        "lastTransitionTime": "2026-11-06T19:13:22.271322Z",
+        "status": "True",
+        "type": "ConfigurationsReady"
+      },
+      {
+        "lastTransitionTime": "2026-11-06T19:13:36.254148Z",
+        "status": "True",
+        "type": "RoutesReady"
+      }
+    ],
+    "latestCreatedRevisionName": "boreal-mlflow-00003-vq5",
+    "latestReadyRevisionName": "boreal-mlflow-00003-vq5",
+    "observedGeneration": 3,
+    "traffic": [
+      {
+        "latestRevision": true,
+        "percent": 100,
+        "revisionName": "boreal-mlflow-00003-vq5"
+      }
+    ],
+    "url": "https://boreal-mlflow-qaonyx3dda-nn.a.run.app"
+  }
+}

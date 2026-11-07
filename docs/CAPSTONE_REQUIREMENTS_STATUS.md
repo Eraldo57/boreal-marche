@@ -1,6 +1,6 @@
 # Capstone completion — current status
 
-Updated 2026-11-05 against the original 31-page Capstone_Project1.pdf. This records evidence,
+Updated 2026-11-06 against the original 31-page Capstone_Project1.pdf. This records evidence,
 not a grade or certification. Source brief is in sibling Version_1; no historical tags are fabricated.
 
 | Requirement | Current local result | Remaining evidence |
@@ -10,11 +10,11 @@ not a grade or certification. Source brief is in sibling Version_1; no historica
 | Head B | Timed Apriori/FP-Growth, sweep, sparse matrix, indexed 3,567 rules, temporal Hit@5 and two coverage measures, fallback | SKU/category improvements; online impact test. No fabricated high-confidence/low-lift example |
 | Head C | Four typed tools, three providers, multilingual retrieval, streaming/citations, low-floor bilingual fictional-support handoff, 40 development questions | Independent answer evaluation; golden-set chronology proof; stronger French correctness |
 | Governance | Original 13 unnecessary model features removed; audit fields offline only; refreshed fairness audit, notice, human-review workflow | Verified identities, operational rights/retention, legal review; statistical fairness gaps remain |
-| API/UI | Versioned 12-feature contract, diagnostics, utility explanations, rule explorer, logging and monitoring | Native + linux/amd64 images built; amd64 inference verified. Hosted access and independent reproduction pending |
-| Cloud / registry | SageMaker scripts, local MLflow version 2 candidate, explicit promotion gates | Actual AWS training/HPO/cost/crossover and endpoint invoke/teardown; shared registry; owner promotion |
-| CI/CD | Workflow source and local checks | GitHub auth, green run, branch protection, OIDC deployment, retraining execution |
-| D6 package | Technical report, bilingual two-page summary, editable deck with notes, deck PDF | Owner content review, video/live links |
-| D7 | Defence cue card and reflection draft | Hosted system, public repo/access, reviewed v1.0 release, actual defence, owner-verified personal reflection |
+| API/UI | Five-tab Streamlit and FastAPI deployed publicly on Google Cloud; live API controls and shifted-cohort alerts verified | Independent fresh-machine reproduction |
+| Cloud / registry | Dedicated Google Cloud project, private shared MLflow, Cloud SQL, Artifact Registry, Storage and budget alert; original AWS source retained | See cloud execution report for managed training/HPO/endpoint results, cost estimates and remaining owner promotion |
+| CI/CD | Public repository, protected main, ten green required checks, keyless merge-triggered Cloud Run deployment with exact-SHA smoke | See cloud execution report for scheduled-retraining verification |
+| D6 package | Technical report, bilingual two-page summary, editable deck with notes, deck PDF and live links | Owner content review; required video |
+| D7 | Hosted system, public repository, defence cue card and reflection draft | Final release evidence, actual defence, owner-verified personal reflection |
 
 ## Decisions made locally
 
@@ -29,15 +29,15 @@ Five strong thin-history recall flags remain. A tiny unknown-region group is inc
 
 ## External blockers and owner tasks
 
-1. Authenticate GitHub (`gh auth login`); verify public access and workflow results before releasing.
-2. Supply an AWS account/profile, region ca-central-1 and maximum remaining spend. No paid jobs
-   or public deployment can be executed with absent credentials and an unspecified spend budget.
-3. Complete the documented cloud runs, endpoint cleanup, hosted demo, OIDC and cost evidence.
-4. Review personal reflection and AI attribution; record the required video and rehearse the live demo.
-5. Create reviewed release tags after green CI. Old milestone tags cannot truthfully be backdated.
+1. Disclose the owner-selected Google Cloud substitution for the assignment's AWS services.
+2. Review the current [cloud runbook](GOOGLE_CLOUD.md) and execution report; distinguish actual
+   managed-job evidence from configuration, and estimates from billed charges.
+3. Review personal reflection and AI attribution; record the required video and rehearse the demo.
+4. Review the final release after green CI. Old milestone tags cannot truthfully be backdated.
+5. Resolve the named human model-approval decision and remaining fairness/business assumptions.
 
-Authentication checks found invalid GitHub credentials and no AWS credentials. This is why the
-project cannot honestly be called fully deployed or submission-complete yet. A local Docker run,
-PowerPoint or report does not replace these external requirements.
+GitHub authentication and public hosting have been completed. The November 5 reports preserve
+the earlier local-only status; the Google Cloud execution report records the subsequent rollout.
+Owner review, the required video and an actual defence are not inferred from deployment.
 
 DVC captured the existing manually produced outputs with `dvc commit --force`, after separating small Git-versioned metadata as noncached outputs. This updates the local cache/lockfile; it is not a claim that a new machine reproduced every stage. Raw data is now an explicit ingestion dependency.

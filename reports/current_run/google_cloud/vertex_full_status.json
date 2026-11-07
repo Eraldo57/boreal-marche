@@ -1,0 +1,74 @@
+{
+  "name": "projects/482023376300/locations/northamerica-northeast1/customJobs/7363671538651889664",
+  "displayName": "boreal-full-20261106T191730Z",
+  "jobSpec": {
+    "workerPoolSpecs": [
+      {
+        "machineSpec": {
+          "machineType": "n1-standard-4"
+        },
+        "replicaCount": "1",
+        "diskSpec": {
+          "bootDiskType": "pd-ssd",
+          "bootDiskSizeGb": 100
+        },
+        "containerSpec": {
+          "imageUri": "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/vertex:670f0c1ef270ea7765088e929101bcc6c9d3b7ad",
+          "command": [
+            "python",
+            "-m",
+            "scripts.vertex_entry"
+          ],
+          "args": [
+            "train",
+            "--mode",
+            "full",
+            "--trials",
+            "12",
+            "--data-uri",
+            "gs://boreal-marche-eraldo57-artifacts/processed",
+            "--output-uri",
+            "gs://boreal-marche-eraldo57-artifacts/training/full-20261106T191730Z/model"
+          ],
+          "env": [
+            {
+              "name": "MLFLOW_TRACKING_URI",
+              "value": "https://boreal-mlflow-qaonyx3dda-nn.a.run.app"
+            },
+            {
+              "name": "MLFLOW_GOOGLE_IAM_AUTH",
+              "value": "true"
+            },
+            {
+              "name": "GIT_SHA",
+              "value": "670f0c1ef270ea7765088e929101bcc6c9d3b7ad"
+            },
+            {
+              "name": "MLFLOW_HTTP_REQUEST_TIMEOUT",
+              "value": "60"
+            }
+          ]
+        }
+      }
+    ],
+    "scheduling": {
+      "timeout": "600s",
+      "strategy": "SPOT"
+    },
+    "serviceAccount": "boreal-train@boreal-marche-eraldo57.iam.gserviceaccount.com",
+    "baseOutputDirectory": {
+      "outputUriPrefix": "gs://boreal-marche-eraldo57-artifacts/training/full-20261106T191730Z"
+    }
+  },
+  "state": "JOB_STATE_SUCCEEDED",
+  "createTime": "2026-11-06T19:17:31.274009Z",
+  "startTime": "2026-11-06T19:20:05Z",
+  "endTime": "2026-11-06T19:21:36Z",
+  "updateTime": "2026-11-06T19:21:36.593397Z",
+  "labels": {
+    "goog-vertex-ai-product": "vertex-ai-training",
+    "goog-originating-service-id": "c7e2-9256-1c43",
+    "goog-vertex-ai-image-uri": "6881034184166057777-vertex",
+    "goog-vertex-ai-reservation": ""
+  }
+}

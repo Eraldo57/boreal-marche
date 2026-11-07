@@ -26,7 +26,7 @@ Passwords are stored in Secret Manager. No service-account key is created.
 python -m scripts.gcp build
 python -m scripts.gcp deploy
 python -m scripts.vertex_jobs train
-python -m scripts.vertex_jobs tune --trials 12
+python -m scripts.vertex_jobs tune --trials 6
 python -m scripts.vertex_jobs endpoint-demo
 python -m scripts.gcp smoke
 ```
@@ -53,7 +53,8 @@ it still scales to zero after its idle period. MLflow and the interface use requ
 Open Streamlit WebSocket sessions count as active requests. Close the demo tabs when finished.
 The small PostgreSQL instance and stored images have ongoing charges even when the web
 services scale to zero. A budget alert is a notification, not an absolute spending guarantee.
-Training is limited to 600 seconds of execution per worker. The launcher cancels a full
+Full training is limited to 600 seconds per worker; tuning trials allow 1800 seconds and
+at most four failed trials. The launcher cancels a full
 job after 25 minutes or a tuning job after one hour, including queue time. Vertex's
 `maxWaitDuration` field applies to Flex-start scheduling and is omitted for Spot workers.
 
@@ -73,6 +74,7 @@ Never substitute an estimate for an actual billed-cost record.
 
 ## Verification status
 
-Provisioning and tests are recorded as they execute. A configuration file alone is not
-evidence of a successful job, live deployment, endpoint invocation or teardown. The final
-deployment report will identify which operations completed and which remain outstanding.
+See the [execution report](../reports/current_run/google_cloud/EXECUTION_REPORT.md) for live
+links, completed checks, managed-job results, cost evidence and remaining owner tasks.
+The JSON files beside it preserve actual cloud responses. A configuration file alone is
+not evidence of a successful job, endpoint invocation or teardown.

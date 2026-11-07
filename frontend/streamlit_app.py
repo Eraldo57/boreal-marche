@@ -28,13 +28,17 @@ st.sidebar.caption(
 def api_call(method, endpoint, payload=None):
     """Display actionable backend errors, never fabricate a fallback prediction."""
     try:
-        response = httpx.request(method, API_BASE + endpoint, json=payload, timeout=45)
+        timeout = 180 if HOSTED_DEMO and endpoint == "/ready" else 45
+        response = httpx.request(method, API_BASE + endpoint, json=payload, timeout=timeout)
         response.raise_for_status()
         return response.json()
     except httpx.HTTPStatusError as exc:
         st.error(f"API {exc.response.status_code}: {exc.response.text[:500]}")
     except httpx.HTTPError as exc:
-        st.error(f"Backend unavailable at {API_BASE}: {exc}. Start FastAPI using the runbook.")
+        if HOSTED_DEMO:
+            st.error("The service is taking longer to respond. Refresh the page to retry.")
+        else:
+            st.error(f"Backend unavailable at {API_BASE}: {exc}. Start FastAPI using the runbook.")
     return None
 
 
@@ -61,7 +65,8 @@ def stream_chat(payload, final):
 
 st.title("Boréal Marché — Customer Intelligence")
 st.caption("Vanier capstone • Integration and validation milestone")
-ready = api_call("GET", "/ready")
+with st.spinner("Connecting to the service…"):
+    ready = api_call("GET", "/ready")
 if ready and ready["ready"]:
     st.success("Backend ready: retention, recommendations and document index loaded.")
 else:

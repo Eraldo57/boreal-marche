@@ -1,0 +1,68 @@
+{
+  "purpose": "Fresh local RF comparison; same objective, ranges and split as Vertex",
+  "trials": [
+    {
+      "params": {
+        "n_estimators": 156,
+        "max_depth": 12,
+        "min_samples_leaf": 19
+      },
+      "validation_pr_auc": 0.6713378339348497,
+      "fit_seconds": 0.16512233391404152
+    },
+    {
+      "params": {
+        "n_estimators": 190,
+        "max_depth": 5,
+        "min_samples_leaf": 5
+      },
+      "validation_pr_auc": 0.6737858486870049,
+      "fit_seconds": 0.14588254224509
+    },
+    {
+      "params": {
+        "n_estimators": 108,
+        "max_depth": 11,
+        "min_samples_leaf": 16
+      },
+      "validation_pr_auc": 0.6698705512097727,
+      "fit_seconds": 0.10305379098281264
+    },
+    {
+      "params": {
+        "n_estimators": 206,
+        "max_depth": 4,
+        "min_samples_leaf": 25
+      },
+      "validation_pr_auc": 0.673214730860878,
+      "fit_seconds": 0.153265125118196
+    },
+    {
+      "params": {
+        "n_estimators": 225,
+        "max_depth": 5,
+        "min_samples_leaf": 6
+      },
+      "validation_pr_auc": 0.6759671049458035,
+      "fit_seconds": 0.16751258401200175
+    },
+    {
+      "params": {
+        "n_estimators": 127,
+        "max_depth": 6,
+        "min_samples_leaf": 14
+      },
+      "validation_pr_auc": 0.6748691254739404,
+      "fit_seconds": 0.09892104100435972
+    }
+  ],
+  "seed": 42,
+  "wall_seconds": 1.1725907502695918,
+  "best_validation_pr_auc": 0.6759671049458035,
+  "best_params": {
+    "n_estimators": 225,
+    "max_depth": 5,
+    "min_samples_leaf": 6
+  },
+  "additional_compute_spend": "Existing laptop; electricity not measured"
+}
