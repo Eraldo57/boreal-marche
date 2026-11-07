@@ -14,7 +14,9 @@ def elapsed(start: str, end: str) -> float:
     return (datetime.fromisoformat(end) - datetime.fromisoformat(start)).total_seconds()
 
 
-def measure_local() -> None:
+def measure_local(n_trials: int = 6) -> None:
+    if not 1 <= n_trials <= 12:
+        raise ValueError("Comparison permits 1–12 trials")
     import optuna
 
     from src.train import hpo_trial
@@ -35,7 +37,7 @@ def measure_local() -> None:
             return score
 
         start = time.perf_counter()
-        study.optimize(objective, n_trials=12)
+        study.optimize(objective, n_trials=n_trials)
         duration = time.perf_counter() - start
     save(
         "local_optuna_comparison",
@@ -132,5 +134,6 @@ def compare() -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("command", choices=["local", "compare"])
+    parser.add_argument("--trials", type=int, default=6)
     args = parser.parse_args()
-    measure_local() if args.command == "local" else compare()
+    measure_local(args.trials) if args.command == "local" else compare()

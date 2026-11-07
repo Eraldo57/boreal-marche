@@ -26,7 +26,7 @@ Passwords are stored in Secret Manager. No service-account key is created.
 python -m scripts.gcp build
 python -m scripts.gcp deploy
 python -m scripts.vertex_jobs train
-python -m scripts.vertex_jobs tune --trials 12
+python -m scripts.vertex_jobs tune --trials 6
 python -m scripts.vertex_jobs endpoint-demo
 python -m scripts.gcp smoke
 ```

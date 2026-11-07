@@ -1,6 +1,6 @@
 # Google Cloud execution report
 
-Updated 2026-11-06T23:53:10.272002+00:00. Owner: Eraldo Ibrushi / Eraldo57.
+Updated 2026-11-07T01:59:39.124812+00:00. Owner: Eraldo Ibrushi / Eraldo57.
 
 The owner selected Google Cloud in place of the original brief's AWS services. This report
 records actual operations; it does not claim that the instructor approved the substitution or
@@ -63,11 +63,11 @@ was counted as successful training evidence.
 
 ## Bayesian tuning and local comparison
 
-Managed job `7219556350576033792`: **JOB_STATE_RUNNING**.
-The request is Bayesian (Vertex default), uses Spot workers, 12 trials and at most two
+Managed job `2180591317501870080`: **JOB_STATE_SUCCEEDED**.
+The request is Bayesian (Vertex default), uses Spot workers, six trials and at most two
 parallel workers. It optimises validation average precision, leaving the final test out of HPO.
 
-Fresh local Optuna comparison: 12 trials, the same RF objective/ranges and matrices,
+Fresh local Optuna comparison: six trials, the same RF objective/ranges and matrices,
 seed 42. Local results are in `local_optuna_comparison.json`. Run:
 
 ```bash
@@ -75,8 +75,10 @@ python -m scripts.vertex_comparison local
 python -m scripts.vertex_comparison compare
 ```
 
-Comparison completion: waiting for the managed tuning job; no cloud result is claimed yet.
-The local and managed optimisers/hardware differ. The crossover calculation is an illustrative
+Comparison completion: completed; see comparison_optuna_vs_vertex.json.
+
+Six local trials took 1.1725907502695918 seconds and achieved validation AP 0.6759671049458035. Six completed managed trials took 1367.2262 seconds including queue time, with best validation AP 0.6773866544138769. The estimate for that managed pilot is USD 0.09908826887871598; it excludes the interrupted attempts and other project services. Its illustrative crossover is 227.87103333333334 local seconds per trial at the observed cloud overhead.
+Larger twelve-trial attempts were interrupted after two and eight successful trials; their raw records are preserved separately and are not labelled completed studies. The six-trial pilot matches the local comparison budget. The local and managed optimisers/hardware differ. The crossover calculation is an illustrative
 fixed-overhead model for this small run, not an extrapolated speedup claim.
 
 ## Temporary endpoint
@@ -94,9 +96,10 @@ execution, not an AWS endpoint claim.
 **success**.
 The Monday workflow rebuilds data/features/rules, trains a bounded Vertex candidate,
 evaluates the existing promotion gates, and opens a metrics PR only when they pass.
-It never promotes a model, merges a PR or deploys a candidate. Main remains protected.
+It never promotes a model, merges a PR or deploys a candidate. Main remains protected. The verified workflow opened candidate PR #4:
+https://github.com/Eraldo57/boreal-marche/pull/4.
 The repository allows Actions to create PRs; default workflow permissions stay read-only,
-with explicit writes only in the retraining workflow.
+with explicit writes only in the retraining workflow. The workflow explicitly dispatches CI on its generated candidate branch, because token-created PRs do not automatically run CI without an approval step. No model is approved or merged by this dispatch.
 
 ## Budget, costs and teardown
 
@@ -108,7 +111,7 @@ scales to zero when idle. Open Streamlit sessions keep requests active.
 
 Cloud SQL is the small `db-f1-micro` PostgreSQL 16 instance with a 10 GB HDD and daily backup.
 It has continuing compute/storage charges. Private artifacts and registry images also incur
-storage charges. Training workers have 600-second execution limits; launchers cancel full
+storage charges. Full-training workers have 600-second execution limits and tuning workers allow 1800 seconds; launchers cancel full
 jobs after 25 minutes and tuning after one hour, including queue time. Spot queue time does
 not use Vertex's Flex-start-only `maxWaitDuration` field.
 

@@ -1,5 +1,5 @@
 {
-  "name": "projects/482023376300/locations/northamerica-northeast1/hyperparameterTuningJobs/3546026429525262336",
+  "name": "projects/482023376300/locations/northamerica-northeast1/hyperparameterTuningJobs/2180591317501870080",
   "displayName": "boreal-bayesian-spot",
   "studySpec": {
     "metrics": [
@@ -35,7 +35,7 @@
       }
     ]
   },
-  "maxTrialCount": 12,
+  "maxTrialCount": 6,
   "parallelTrialCount": 2,
   "maxFailedTrialCount": 4,
   "trialJobSpec": {
@@ -65,7 +65,7 @@
             "--data-uri",
             "gs://boreal-marche-eraldo57-artifacts/processed",
             "--output-uri",
-            "gs://boreal-marche-eraldo57-artifacts/training/hpo-20261106T235154Z/model"
+            "gs://boreal-marche-eraldo57-artifacts/training/hpo-20261107T011907Z/model"
           ],
           "env": [
             {
@@ -94,12 +94,12 @@
     },
     "serviceAccount": "boreal-train@boreal-marche-eraldo57.iam.gserviceaccount.com",
     "baseOutputDirectory": {
-      "outputUriPrefix": "gs://boreal-marche-eraldo57-artifacts/training/hpo-20261106T235154Z"
+      "outputUriPrefix": "gs://boreal-marche-eraldo57-artifacts/training/hpo-20261107T011907Z"
     }
   },
   "state": "JOB_STATE_PENDING",
-  "createTime": "2026-11-06T23:51:55.469322Z",
-  "updateTime": "2026-11-06T23:51:55.469322Z",
+  "createTime": "2026-11-07T01:19:08.773800Z",
+  "updateTime": "2026-11-07T01:19:08.773800Z",
   "labels": {
     "goog-vertex-ai-product": "vertex-ai-training",
     "goog-originating-service-id": "c7e2-9256-1c43",

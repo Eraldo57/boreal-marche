@@ -8,7 +8,7 @@
         "min_samples_leaf": 19
       },
       "validation_pr_auc": 0.6713378339348497,
-      "fit_seconds": 0.14251629100181162
+      "fit_seconds": 0.16512233391404152
     },
     {
       "params": {
@@ -17,7 +17,7 @@
         "min_samples_leaf": 5
       },
       "validation_pr_auc": 0.6737858486870049,
-      "fit_seconds": 0.13589854119345546
+      "fit_seconds": 0.14588254224509
     },
     {
       "params": {
@@ -26,7 +26,7 @@
         "min_samples_leaf": 16
       },
       "validation_pr_auc": 0.6698705512097727,
-      "fit_seconds": 0.105287125101313
+      "fit_seconds": 0.10305379098281264
     },
     {
       "params": {
@@ -35,7 +35,7 @@
         "min_samples_leaf": 25
       },
       "validation_pr_auc": 0.673214730860878,
-      "fit_seconds": 0.1424352501053363
+      "fit_seconds": 0.153265125118196
     },
     {
       "params": {
@@ -44,7 +44,7 @@
         "min_samples_leaf": 6
       },
       "validation_pr_auc": 0.6759671049458035,
-      "fit_seconds": 0.15316533390432596
+      "fit_seconds": 0.16751258401200175
     },
     {
       "params": {
@@ -53,70 +53,16 @@
         "min_samples_leaf": 14
       },
       "validation_pr_auc": 0.6748691254739404,
-      "fit_seconds": 0.09817937505431473
-    },
-    {
-      "params": {
-        "n_estimators": 165,
-        "max_depth": 6,
-        "min_samples_leaf": 16
-      },
-      "validation_pr_auc": 0.6764117917510012,
-      "fit_seconds": 0.1297798331361264
-    },
-    {
-      "params": {
-        "n_estimators": 121,
-        "max_depth": 6,
-        "min_samples_leaf": 10
-      },
-      "validation_pr_auc": 0.6754682520592363,
-      "fit_seconds": 0.0967073340434581
-    },
-    {
-      "params": {
-        "n_estimators": 168,
-        "max_depth": 11,
-        "min_samples_leaf": 6
-      },
-      "validation_pr_auc": 0.6678797939577626,
-      "fit_seconds": 0.15490474994294345
-    },
-    {
-      "params": {
-        "n_estimators": 177,
-        "max_depth": 9,
-        "min_samples_leaf": 3
-      },
-      "validation_pr_auc": 0.6718688169293661,
-      "fit_seconds": 0.15159391704946756
-    },
-    {
-      "params": {
-        "n_estimators": 243,
-        "max_depth": 8,
-        "min_samples_leaf": 25
-      },
-      "validation_pr_auc": 0.6771799933802631,
-      "fit_seconds": 0.1809889581054449
-    },
-    {
-      "params": {
-        "n_estimators": 240,
-        "max_depth": 8,
-        "min_samples_leaf": 23
-      },
-      "validation_pr_auc": 0.6778058309958872,
-      "fit_seconds": 0.17646183399483562
+      "fit_seconds": 0.09892104100435972
     }
   ],
   "seed": 42,
-  "wall_seconds": 2.2260594579856843,
-  "best_validation_pr_auc": 0.6778058309958872,
+  "wall_seconds": 1.1725907502695918,
+  "best_validation_pr_auc": 0.6759671049458035,
   "best_params": {
-    "n_estimators": 240,
-    "max_depth": 8,
-    "min_samples_leaf": 23
+    "n_estimators": 225,
+    "max_depth": 5,
+    "min_samples_leaf": 6
   },
   "additional_compute_spend": "Existing laptop; electricity not measured"
 }
