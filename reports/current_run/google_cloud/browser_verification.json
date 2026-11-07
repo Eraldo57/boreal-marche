@@ -1,0 +1,35 @@
+{
+  "method": "Clean headless Chrome against the hosted Cloud Run interface",
+  "pages": {
+    "Prediction": {
+      "rendered": true,
+      "streamlit_exceptions": 0,
+      "screenshot": "browser/prediction.png"
+    },
+    "Recommendations": {
+      "rendered": true,
+      "streamlit_exceptions": 0,
+      "screenshot": "browser/recommendations.png"
+    },
+    "Assistant": {
+      "rendered": true,
+      "streamlit_exceptions": 0,
+      "screenshot": "browser/assistant.png"
+    },
+    "Monitoring": {
+      "rendered": true,
+      "streamlit_exceptions": 0,
+      "screenshot": "browser/monitoring.png"
+    },
+    "About": {
+      "rendered": true,
+      "streamlit_exceptions": 0,
+      "screenshot": "browser/about.png"
+    }
+  },
+  "browser_errors": [],
+  "api_docs": {
+    "http_status": 200,
+    "rendered": true
+  }
+}

@@ -1,6 +1,6 @@
 # Google Cloud execution report
 
-Updated 2026-11-07T01:59:39.124812+00:00. Owner: Eraldo Ibrushi / Eraldo57.
+Updated 2026-11-07T04:42:32.065846+00:00. Owner: Eraldo Ibrushi / Eraldo57.
 
 The owner selected Google Cloud in place of the original brief's AWS services. This report
 records actual operations; it does not claim that the instructor approved the substitution or
@@ -34,8 +34,12 @@ Private MLflow run creation, metric logging and run completion passed
 
 Streamlit's official AppTest exercised all rendered tabs and the prediction, recommendation,
 assistant and monitoring buttons against the live cloud API without exceptions
-(`interface_verification.json`). Browser automation was unavailable; this is functional
-interface evidence, not a screenshot or an independent browser visual inspection.
+(`interface_verification.json`). A separate clean headless Chrome session also rendered all five hosted tabs and the API
+documentation, exercised the public controls, and recorded no browser errors
+(`browser_verification.json`, screenshots in `browser/`). An initial cold API startup
+exceeded the old 45-second UI wait; the hosted readiness wait now allows 180 seconds and
+shows a connecting indicator. This is a browser check on the development machine, not
+independent fresh-machine reproduction.
 
 The shifted-cohort demo sent 120 historical feature rows, 20 real historical baskets,
 20 deliberately unknown-item baskets and 10 invalid requests. All 10 invalid requests were
