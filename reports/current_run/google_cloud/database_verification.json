@@ -1,0 +1,12 @@
+[
+  {
+    "database": "boreal",
+    "user": "boreal",
+    "schema_write": true
+  },
+  {
+    "database": "mlflow",
+    "user": "mlflow",
+    "schema_write": true
+  }
+]

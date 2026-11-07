@@ -1,0 +1,563 @@
+{
+  "service": {
+    "name": "services/C7E2-9256-1C43",
+    "serviceId": "C7E2-9256-1C43",
+    "displayName": "Vertex AI",
+    "businessEntityName": "businessEntities/GCP"
+  },
+  "region": "northamerica-northeast1",
+  "skus": [
+    {
+      "name": "services/C7E2-9256-1C43/skus/0060-27D3-6537",
+      "skuId": "0060-27D3-6537",
+      "description": "Vertex AI: Online/Batch Prediction N1 Predefined Instance Ram running in Montreal for AI Platform",
+      "category": {
+        "serviceDisplayName": "Vertex AI",
+        "resourceFamily": "ApplicationServices",
+        "resourceGroup": "AiPlatform",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": [
+        "northamerica-northeast1"
+      ],
+      "pricingInfo": [
+        {
+          "summary": "",
+          "pricingExpression": {
+            "usageUnit": "GiBy.h",
+            "displayQuantity": 1,
+            "tieredRates": [
+              {
+                "startUsageAmount": 0,
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "units": "0",
+                  "nanos": 5000000
+                }
+              }
+            ],
+            "usageUnitDescription": "gibibyte hour",
+            "baseUnit": "By.s",
+            "baseUnitDescription": "byte second",
+            "baseUnitConversionFactor": 3865470566400
+          },
+          "currencyConversionRate": 1,
+          "effectiveTime": "2026-11-06T08:00:00Z"
+        }
+      ],
+      "serviceProviderName": "Google",
+      "geoTaxonomy": {
+        "type": "REGIONAL",
+        "regions": [
+          "northamerica-northeast1"
+        ]
+      }
+    },
+    {
+      "name": "services/C7E2-9256-1C43/skus/3226-4058-0BDF",
+      "skuId": "3226-4058-0BDF",
+      "description": "Vertex AI: Training/Pipelines Management fee on N1 Instance Core in Montreal",
+      "category": {
+        "serviceDisplayName": "Vertex AI",
+        "resourceFamily": "ApplicationServices",
+        "resourceGroup": "AiPlatform",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": [
+        "northamerica-northeast1"
+      ],
+      "pricingInfo": [
+        {
+          "summary": "",
+          "pricingExpression": {
+            "usageUnit": "h",
+            "displayQuantity": 1,
+            "tieredRates": [
+              {
+                "startUsageAmount": 0,
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "units": "0",
+                  "nanos": 5220300
+                }
+              }
+            ],
+            "usageUnitDescription": "hour",
+            "baseUnit": "s",
+            "baseUnitDescription": "second",
+            "baseUnitConversionFactor": 3600
+          },
+          "currencyConversionRate": 1,
+          "effectiveTime": "2026-11-06T08:00:00Z"
+        }
+      ],
+      "serviceProviderName": "Google",
+      "geoTaxonomy": {
+        "type": "REGIONAL",
+        "regions": [
+          "northamerica-northeast1"
+        ]
+      }
+    },
+    {
+      "name": "services/C7E2-9256-1C43/skus/3446-B7F3-34BE",
+      "skuId": "3446-B7F3-34BE",
+      "description": "Vertex AI: Training/Pipelines Management fee on N1 Instance RAM in Montreal",
+      "category": {
+        "serviceDisplayName": "Vertex AI",
+        "resourceFamily": "ApplicationServices",
+        "resourceGroup": "AiPlatform",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": [
+        "northamerica-northeast1"
+      ],
+      "pricingInfo": [
+        {
+          "summary": "",
+          "pricingExpression": {
+            "usageUnit": "GiBy.h",
+            "displayQuantity": 1,
+            "tieredRates": [
+              {
+                "startUsageAmount": 0,
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "units": "0",
+                  "nanos": 699600
+                }
+              }
+            ],
+            "usageUnitDescription": "gibibyte hour",
+            "baseUnit": "By.s",
+            "baseUnitDescription": "byte second",
+            "baseUnitConversionFactor": 3865470566400
+          },
+          "currencyConversionRate": 1,
+          "effectiveTime": "2026-11-06T08:00:00Z"
+        }
+      ],
+      "serviceProviderName": "Google",
+      "geoTaxonomy": {
+        "type": "REGIONAL",
+        "regions": [
+          "northamerica-northeast1"
+        ]
+      }
+    },
+    {
+      "name": "services/C7E2-9256-1C43/skus/5ACE-9B89-75E0",
+      "skuId": "5ACE-9B89-75E0",
+      "description": "Vertex AI: Training/Pipelines on Memory-optimized Instance Core running in Montreal",
+      "category": {
+        "serviceDisplayName": "Vertex AI",
+        "resourceFamily": "ApplicationServices",
+        "resourceGroup": "AiPlatform",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": [
+        "northamerica-northeast1"
+      ],
+      "pricingInfo": [
+        {
+          "summary": "",
+          "pricingExpression": {
+            "usageUnit": "h",
+            "displayQuantity": 1,
+            "tieredRates": [
+              {
+                "startUsageAmount": 0,
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "units": "0",
+                  "nanos": 42023415
+                }
+              }
+            ],
+            "usageUnitDescription": "hour",
+            "baseUnit": "s",
+            "baseUnitDescription": "second",
+            "baseUnitConversionFactor": 3600
+          },
+          "currencyConversionRate": 1,
+          "effectiveTime": "2026-11-06T08:00:00Z"
+        }
+      ],
+      "serviceProviderName": "Google",
+      "geoTaxonomy": {
+        "type": "REGIONAL",
+        "regions": [
+          "northamerica-northeast1"
+        ]
+      }
+    },
+    {
+      "name": "services/C7E2-9256-1C43/skus/84B4-B42C-7353",
+      "skuId": "84B4-B42C-7353",
+      "description": "Vertex AI: Training/Pipelines on N1 Predefined Instance Ram running in Montreal",
+      "category": {
+        "serviceDisplayName": "Vertex AI",
+        "resourceFamily": "ApplicationServices",
+        "resourceGroup": "AiPlatform",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": [
+        "northamerica-northeast1"
+      ],
+      "pricingInfo": [
+        {
+          "summary": "",
+          "pricingExpression": {
+            "usageUnit": "GiBy.h",
+            "displayQuantity": 1,
+            "tieredRates": [
+              {
+                "startUsageAmount": 0,
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "units": "0",
+                  "nanos": 5363600
+                }
+              }
+            ],
+            "usageUnitDescription": "gibibyte hour",
+            "baseUnit": "By.s",
+            "baseUnitDescription": "byte second",
+            "baseUnitConversionFactor": 3865470566400
+          },
+          "currencyConversionRate": 1,
+          "effectiveTime": "2026-11-06T08:00:00Z"
+        }
+      ],
+      "serviceProviderName": "Google",
+      "geoTaxonomy": {
+        "type": "REGIONAL",
+        "regions": [
+          "northamerica-northeast1"
+        ]
+      }
+    },
+    {
+      "name": "services/C7E2-9256-1C43/skus/A0EB-0D7E-D663",
+      "skuId": "A0EB-0D7E-D663",
+      "description": "Vertex AI: Online/Batch Prediction N1 Predefined Instance Core running in Montreal for AI Platform",
+      "category": {
+        "serviceDisplayName": "Vertex AI",
+        "resourceFamily": "ApplicationServices",
+        "resourceGroup": "AiPlatform",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": [
+        "northamerica-northeast1"
+      ],
+      "pricingInfo": [
+        {
+          "summary": "",
+          "pricingExpression": {
+            "usageUnit": "h",
+            "displayQuantity": 1,
+            "tieredRates": [
+              {
+                "startUsageAmount": 0,
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "units": "0",
+                  "nanos": 40000000
+                }
+              }
+            ],
+            "usageUnitDescription": "hour",
+            "baseUnit": "s",
+            "baseUnitDescription": "second",
+            "baseUnitConversionFactor": 3600
+          },
+          "currencyConversionRate": 1,
+          "effectiveTime": "2026-11-06T08:00:00Z"
+        }
+      ],
+      "serviceProviderName": "Google",
+      "geoTaxonomy": {
+        "type": "REGIONAL",
+        "regions": [
+          "northamerica-northeast1"
+        ]
+      }
+    },
+    {
+      "name": "services/C7E2-9256-1C43/skus/A6B7-A2EA-2643",
+      "skuId": "A6B7-A2EA-2643",
+      "description": "Vertex AI: Online/Batch Prediction Management fee on N1 Instance Core in Montreal",
+      "category": {
+        "serviceDisplayName": "Vertex AI",
+        "resourceFamily": "ApplicationServices",
+        "resourceGroup": "AiPlatform",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": [
+        "northamerica-northeast1"
+      ],
+      "pricingInfo": [
+        {
+          "summary": "",
+          "pricingExpression": {
+            "usageUnit": "h",
+            "displayQuantity": 1,
+            "tieredRates": [
+              {
+                "startUsageAmount": 0,
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "units": "0",
+                  "nanos": 5217400
+                }
+              }
+            ],
+            "usageUnitDescription": "hour",
+            "baseUnit": "s",
+            "baseUnitDescription": "second",
+            "baseUnitConversionFactor": 3600
+          },
+          "currencyConversionRate": 1,
+          "effectiveTime": "2026-11-06T08:00:00Z"
+        }
+      ],
+      "serviceProviderName": "Google",
+      "geoTaxonomy": {
+        "type": "REGIONAL",
+        "regions": [
+          "northamerica-northeast1"
+        ]
+      }
+    },
+    {
+      "name": "services/C7E2-9256-1C43/skus/C946-EE1B-199F",
+      "skuId": "C946-EE1B-199F",
+      "description": "Vertex AI: Training/Pipelines on Memory-optimized Instance Ram running in Montreal",
+      "category": {
+        "serviceDisplayName": "Vertex AI",
+        "resourceFamily": "ApplicationServices",
+        "resourceGroup": "AiPlatform",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": [
+        "northamerica-northeast1"
+      ],
+      "pricingInfo": [
+        {
+          "summary": "",
+          "pricingExpression": {
+            "usageUnit": "GiBy.h",
+            "displayQuantity": 1,
+            "tieredRates": [
+              {
+                "startUsageAmount": 0,
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "units": "0",
+                  "nanos": 6168140
+                }
+              }
+            ],
+            "usageUnitDescription": "gibibyte hour",
+            "baseUnit": "By.s",
+            "baseUnitDescription": "byte second",
+            "baseUnitConversionFactor": 3865470566400
+          },
+          "currencyConversionRate": 1,
+          "effectiveTime": "2026-11-06T08:00:00Z"
+        }
+      ],
+      "serviceProviderName": "Google",
+      "geoTaxonomy": {
+        "type": "REGIONAL",
+        "regions": [
+          "northamerica-northeast1"
+        ]
+      }
+    },
+    {
+      "name": "services/C7E2-9256-1C43/skus/DA31-FDA2-E2EE",
+      "skuId": "DA31-FDA2-E2EE",
+      "description": "Vertex AI: Training/Pipelines on Memory Optimized Upgrade Premium for Memory-optimized Instance Core running in Montreal",
+      "category": {
+        "serviceDisplayName": "Vertex AI",
+        "resourceFamily": "ApplicationServices",
+        "resourceGroup": "AiPlatform",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": [
+        "northamerica-northeast1"
+      ],
+      "pricingInfo": [
+        {
+          "summary": "",
+          "pricingExpression": {
+            "usageUnit": "h",
+            "displayQuantity": 1,
+            "tieredRates": [
+              {
+                "startUsageAmount": 0,
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "units": "0",
+                  "nanos": 5463043
+                }
+              }
+            ],
+            "usageUnitDescription": "hour",
+            "baseUnit": "s",
+            "baseUnitDescription": "second",
+            "baseUnitConversionFactor": 3600
+          },
+          "currencyConversionRate": 1,
+          "effectiveTime": "2026-11-06T08:00:00Z"
+        }
+      ],
+      "serviceProviderName": "Google",
+      "geoTaxonomy": {
+        "type": "REGIONAL",
+        "regions": [
+          "northamerica-northeast1"
+        ]
+      }
+    },
+    {
+      "name": "services/C7E2-9256-1C43/skus/DD05-C4F6-C1B1",
+      "skuId": "DD05-C4F6-C1B1",
+      "description": "Vertex AI: Online/Batch Prediction Management fee on N1 Instance RAM in Montreal",
+      "category": {
+        "serviceDisplayName": "Vertex AI",
+        "resourceFamily": "ApplicationServices",
+        "resourceGroup": "AiPlatform",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": [
+        "northamerica-northeast1"
+      ],
+      "pricingInfo": [
+        {
+          "summary": "",
+          "pricingExpression": {
+            "usageUnit": "GiBy.h",
+            "displayQuantity": 1,
+            "tieredRates": [
+              {
+                "startUsageAmount": 0,
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "units": "0",
+                  "nanos": 652200
+                }
+              }
+            ],
+            "usageUnitDescription": "gibibyte hour",
+            "baseUnit": "By.s",
+            "baseUnitDescription": "byte second",
+            "baseUnitConversionFactor": 3865470566400
+          },
+          "currencyConversionRate": 1,
+          "effectiveTime": "2026-11-06T08:00:00Z"
+        }
+      ],
+      "serviceProviderName": "Google",
+      "geoTaxonomy": {
+        "type": "REGIONAL",
+        "regions": [
+          "northamerica-northeast1"
+        ]
+      }
+    },
+    {
+      "name": "services/C7E2-9256-1C43/skus/F7F3-953B-4766",
+      "skuId": "F7F3-953B-4766",
+      "description": "Vertex AI: Training/Pipelines on N1 Predefined Instance Core running in Montreal",
+      "category": {
+        "serviceDisplayName": "Vertex AI",
+        "resourceFamily": "ApplicationServices",
+        "resourceGroup": "AiPlatform",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": [
+        "northamerica-northeast1"
+      ],
+      "pricingInfo": [
+        {
+          "summary": "",
+          "pricingExpression": {
+            "usageUnit": "h",
+            "displayQuantity": 1,
+            "tieredRates": [
+              {
+                "startUsageAmount": 0,
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "units": "0",
+                  "nanos": 40022300
+                }
+              }
+            ],
+            "usageUnitDescription": "hour",
+            "baseUnit": "s",
+            "baseUnitDescription": "second",
+            "baseUnitConversionFactor": 3600
+          },
+          "currencyConversionRate": 1,
+          "effectiveTime": "2026-11-06T08:00:00Z"
+        }
+      ],
+      "serviceProviderName": "Google",
+      "geoTaxonomy": {
+        "type": "REGIONAL",
+        "regions": [
+          "northamerica-northeast1"
+        ]
+      }
+    },
+    {
+      "name": "services/C7E2-9256-1C43/skus/FAF2-C1F7-786F",
+      "skuId": "FAF2-C1F7-786F",
+      "description": "Vertex AI: Training/Pipelines on Memory Optimized Upgrade Premium for Memory-optimized Instance Ram running in Montreal",
+      "category": {
+        "serviceDisplayName": "Vertex AI",
+        "resourceFamily": "ApplicationServices",
+        "resourceGroup": "AiPlatform",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": [
+        "northamerica-northeast1"
+      ],
+      "pricingInfo": [
+        {
+          "summary": "",
+          "pricingExpression": {
+            "usageUnit": "GiBy.h",
+            "displayQuantity": 1,
+            "tieredRates": [
+              {
+                "startUsageAmount": 0,
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "units": "0",
+                  "nanos": 801858
+                }
+              }
+            ],
+            "usageUnitDescription": "gibibyte hour",
+            "baseUnit": "By.s",
+            "baseUnitDescription": "byte second",
+            "baseUnitConversionFactor": 3865470566400
+          },
+          "currencyConversionRate": 1,
+          "effectiveTime": "2026-11-06T08:00:00Z"
+        }
+      ],
+      "serviceProviderName": "Google",
+      "geoTaxonomy": {
+        "type": "REGIONAL",
+        "regions": [
+          "northamerica-northeast1"
+        ]
+      }
+    }
+  ]
+}

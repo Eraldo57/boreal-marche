@@ -1,0 +1,109 @@
+{
+  "name": "projects/482023376300/locations/northamerica-northeast1/hyperparameterTuningJobs/3546026429525262336",
+  "displayName": "boreal-bayesian-spot",
+  "studySpec": {
+    "metrics": [
+      {
+        "metricId": "validation_pr_auc",
+        "goal": "MAXIMIZE"
+      }
+    ],
+    "parameters": [
+      {
+        "parameterId": "n-estimators",
+        "integerValueSpec": {
+          "minValue": "100",
+          "maxValue": "250"
+        },
+        "scaleType": "UNIT_LINEAR_SCALE"
+      },
+      {
+        "parameterId": "max-depth",
+        "integerValueSpec": {
+          "minValue": "4",
+          "maxValue": "12"
+        },
+        "scaleType": "UNIT_LINEAR_SCALE"
+      },
+      {
+        "parameterId": "min-samples-leaf",
+        "integerValueSpec": {
+          "minValue": "2",
+          "maxValue": "25"
+        },
+        "scaleType": "UNIT_LINEAR_SCALE"
+      }
+    ]
+  },
+  "maxTrialCount": 12,
+  "parallelTrialCount": 2,
+  "maxFailedTrialCount": 4,
+  "trialJobSpec": {
+    "workerPoolSpecs": [
+      {
+        "machineSpec": {
+          "machineType": "n1-standard-4"
+        },
+        "replicaCount": "1",
+        "diskSpec": {
+          "bootDiskType": "pd-ssd",
+          "bootDiskSizeGb": 100
+        },
+        "containerSpec": {
+          "imageUri": "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/vertex:670f0c1ef270ea7765088e929101bcc6c9d3b7ad",
+          "command": [
+            "python",
+            "-m",
+            "scripts.vertex_entry"
+          ],
+          "args": [
+            "train",
+            "--mode",
+            "hpo-trial",
+            "--trials",
+            "12",
+            "--data-uri",
+            "gs://boreal-marche-eraldo57-artifacts/processed",
+            "--output-uri",
+            "gs://boreal-marche-eraldo57-artifacts/training/hpo-20261106T235154Z/model"
+          ],
+          "env": [
+            {
+              "name": "MLFLOW_TRACKING_URI",
+              "value": "https://boreal-mlflow-qaonyx3dda-nn.a.run.app"
+            },
+            {
+              "name": "MLFLOW_GOOGLE_IAM_AUTH",
+              "value": "true"
+            },
+            {
+              "name": "GIT_SHA",
+              "value": "670f0c1ef270ea7765088e929101bcc6c9d3b7ad"
+            },
+            {
+              "name": "MLFLOW_HTTP_REQUEST_TIMEOUT",
+              "value": "60"
+            }
+          ]
+        }
+      }
+    ],
+    "scheduling": {
+      "timeout": "1800s",
+      "strategy": "SPOT"
+    },
+    "serviceAccount": "boreal-train@boreal-marche-eraldo57.iam.gserviceaccount.com",
+    "baseOutputDirectory": {
+      "outputUriPrefix": "gs://boreal-marche-eraldo57-artifacts/training/hpo-20261106T235154Z"
+    }
+  },
+  "state": "JOB_STATE_PENDING",
+  "createTime": "2026-11-06T23:51:55.469322Z",
+  "updateTime": "2026-11-06T23:51:55.469322Z",
+  "labels": {
+    "goog-vertex-ai-product": "vertex-ai-training",
+    "goog-originating-service-id": "c7e2-9256-1c43",
+    "goog-vertex-ai-image-uri": "6881034184166057777-vertex",
+    "goog-vertex-ai-reservation": ""
+  }
+}

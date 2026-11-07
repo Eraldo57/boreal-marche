@@ -1,28 +1,24 @@
 {
   "artifacts": {
     "images": [
-      "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/api:d3492014350b80d4942d163b63c79e850eba38ab",
-      "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/frontend:d3492014350b80d4942d163b63c79e850eba38ab",
-      "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/vertex:d3492014350b80d4942d163b63c79e850eba38ab",
-      "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/mlflow:d3492014350b80d4942d163b63c79e850eba38ab"
+      "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/api:670f0c1ef270ea7765088e929101bcc6c9d3b7ad",
+      "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/frontend:670f0c1ef270ea7765088e929101bcc6c9d3b7ad",
+      "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/vertex:670f0c1ef270ea7765088e929101bcc6c9d3b7ad",
+      "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/mlflow:670f0c1ef270ea7765088e929101bcc6c9d3b7ad"
     ]
   },
-  "createTime": "2026-11-06T06:55:41.351300523Z",
-  "failureInfo": {
-    "detail": "Build step failure: build step 4 \"gcr.io/cloud-builders/docker\" failed: step exited with non-zero status: 1",
-    "type": "USER_BUILD_STEP"
-  },
-  "finishTime": "2026-11-06T07:03:22.527647Z",
-  "id": "99157c81-d6da-4939-ace6-cc38049c3456",
+  "createTime": "2026-11-06T19:04:18.252056318Z",
+  "finishTime": "2026-11-06T19:12:42.173794Z",
+  "id": "dc96043a-ef23-41a2-9884-9b5459b4b727",
   "images": [
-    "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/api:d3492014350b80d4942d163b63c79e850eba38ab",
-    "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/frontend:d3492014350b80d4942d163b63c79e850eba38ab",
-    "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/vertex:d3492014350b80d4942d163b63c79e850eba38ab",
-    "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/mlflow:d3492014350b80d4942d163b63c79e850eba38ab"
+    "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/api:670f0c1ef270ea7765088e929101bcc6c9d3b7ad",
+    "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/frontend:670f0c1ef270ea7765088e929101bcc6c9d3b7ad",
+    "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/vertex:670f0c1ef270ea7765088e929101bcc6c9d3b7ad",
+    "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/mlflow:670f0c1ef270ea7765088e929101bcc6c9d3b7ad"
   ],
-  "logUrl": "https://console.cloud.google.com/cloud-build/builds;region=northamerica-northeast1/99157c81-d6da-4939-ace6-cc38049c3456?project=482023376300",
+  "logUrl": "https://console.cloud.google.com/cloud-build/builds;region=northamerica-northeast1/dc96043a-ef23-41a2-9884-9b5459b4b727?project=482023376300",
   "logsBucket": "gs://boreal-marche-eraldo57-artifacts",
-  "name": "projects/482023376300/locations/northamerica-northeast1/builds/99157c81-d6da-4939-ace6-cc38049c3456",
+  "name": "projects/482023376300/locations/northamerica-northeast1/builds/dc96043a-ef23-41a2-9884-9b5459b4b727",
   "options": {
     "logging": "GCS_ONLY",
     "pool": {},
@@ -37,7 +33,7 @@
       "sha256:fbc05705e6f24467e40ae8a4097ab9b8fae1116551f838fa2c55f4367427fc36",
       "sha256:fbc05705e6f24467e40ae8a4097ab9b8fae1116551f838fa2c55f4367427fc36",
       "sha256:fbc05705e6f24467e40ae8a4097ab9b8fae1116551f838fa2c55f4367427fc36",
-      ""
+      "sha256:fbc05705e6f24467e40ae8a4097ab9b8fae1116551f838fa2c55f4367427fc36"
     ],
     "buildStepOutputs": [
       "",
@@ -47,45 +43,83 @@
       "",
       ""
     ],
+    "images": [
+      {
+        "artifactRegistryPackage": "projects/boreal-marche-eraldo57/locations/northamerica-northeast1/repositories/boreal/packages/api/versions/sha256:2030428006f04895efe7de239aafcec00fe541a6ca85c7d588704ee202d6554d",
+        "digest": "sha256:2030428006f04895efe7de239aafcec00fe541a6ca85c7d588704ee202d6554d",
+        "name": "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/api:670f0c1ef270ea7765088e929101bcc6c9d3b7ad",
+        "pushTiming": {
+          "endTime": "2026-11-06T19:11:33.787827196Z",
+          "startTime": "2026-11-06T19:10:02.328257063Z"
+        }
+      },
+      {
+        "artifactRegistryPackage": "projects/boreal-marche-eraldo57/locations/northamerica-northeast1/repositories/boreal/packages/frontend/versions/sha256:fb16313a8ef2e1256621e4b9f0db565f07ac852d90576473d554446a324ba402",
+        "digest": "sha256:fb16313a8ef2e1256621e4b9f0db565f07ac852d90576473d554446a324ba402",
+        "name": "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/frontend:670f0c1ef270ea7765088e929101bcc6c9d3b7ad",
+        "pushTiming": {
+          "endTime": "2026-11-06T19:11:57.879975457Z",
+          "startTime": "2026-11-06T19:11:33.791140274Z"
+        }
+      },
+      {
+        "artifactRegistryPackage": "projects/boreal-marche-eraldo57/locations/northamerica-northeast1/repositories/boreal/packages/vertex/versions/sha256:cdde9a4ed23fbaa67ad19c7209c593b04d777bf67aeb89325d0fdcf2c8de4df0",
+        "digest": "sha256:cdde9a4ed23fbaa67ad19c7209c593b04d777bf67aeb89325d0fdcf2c8de4df0",
+        "name": "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/vertex:670f0c1ef270ea7765088e929101bcc6c9d3b7ad",
+        "pushTiming": {
+          "endTime": "2026-11-06T19:12:40.520223680Z",
+          "startTime": "2026-11-06T19:11:57.881918536Z"
+        }
+      },
+      {
+        "artifactRegistryPackage": "projects/boreal-marche-eraldo57/locations/northamerica-northeast1/repositories/boreal/packages/mlflow/versions/sha256:198a322e0a932e928d56ae81feb8bcbc6390d33800e4c289a274d0edc6233ce2",
+        "digest": "sha256:198a322e0a932e928d56ae81feb8bcbc6390d33800e4c289a274d0edc6233ce2",
+        "name": "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/mlflow:670f0c1ef270ea7765088e929101bcc6c9d3b7ad",
+        "pushTiming": {
+          "endTime": "2026-11-06T19:12:41.939397216Z",
+          "startTime": "2026-11-06T19:12:40.521744851Z"
+        }
+      }
+    ],
     "resourceUsage": {
-      "averageCpuUtilization": 0.56011903,
-      "averageMemoryUtilization": 0.11867998,
-      "peakCpuUtilization": 0.92780435,
-      "peakMemoryUtilization": 0.5029692,
-      "totalCpuDuration": "497.840s"
+      "averageCpuUtilization": 0.5535045,
+      "averageMemoryUtilization": 0.106073424,
+      "peakCpuUtilization": 0.985,
+      "peakMemoryUtilization": 0.13217591,
+      "totalCpuDuration": "547.960s"
     }
   },
   "serviceAccount": "projects/boreal-marche-eraldo57/serviceAccounts/boreal-build@boreal-marche-eraldo57.iam.gserviceaccount.com",
   "source": {
     "storageSource": {
       "bucket": "boreal-marche-eraldo57-artifacts",
-      "generation": "1793948141048509",
-      "object": "build-source/1793948139.593293-3e049012696d4e50ba3ff32eba392329.tgz"
+      "generation": "1793991857625775",
+      "object": "build-source/1793991856.567019-f14e1d2f7a4a4310a91e764762b3e137.tgz"
     }
   },
   "sourceProvenance": {
     "fileHashes": {
-      "gs://boreal-marche-eraldo57-artifacts/build-source/1793948139.593293-3e049012696d4e50ba3ff32eba392329.tgz#1793948141048509": {
+      "gs://boreal-marche-eraldo57-artifacts/build-source/1793991856.567019-f14e1d2f7a4a4310a91e764762b3e137.tgz#1793991857625775": {
         "fileHash": [
           {
             "type": "MD5",
-            "value": "gq4-cVwGLHFpcUsNTuqf6w=="
+            "value": "xojDZZni6CzhRLY5L_roSQ=="
           },
           {
             "type": "SHA256",
-            "value": "soLvRYQATwrr_meIQSFohJ3wHWgmC7JR1FplDSz8jqM="
+            "value": "nXFmB0MUSPDI3nCkoEeQaFTygRjbRXgsr0V7R7WkZgI="
           }
         ]
       }
     },
     "resolvedStorageSource": {
       "bucket": "boreal-marche-eraldo57-artifacts",
-      "generation": "1793948141048509",
-      "object": "build-source/1793948139.593293-3e049012696d4e50ba3ff32eba392329.tgz"
+      "generation": "1793991857625775",
+      "object": "build-source/1793991856.567019-f14e1d2f7a4a4310a91e764762b3e137.tgz"
     }
   },
-  "startTime": "2026-11-06T06:55:41.955189098Z",
-  "status": "FAILURE",
+  "startTime": "2026-11-06T19:04:18.834512440Z",
+  "status": "SUCCESS",
   "steps": [
     {
       "args": [
@@ -97,13 +131,13 @@
       "entrypoint": "gcloud",
       "name": "gcr.io/google.com/cloudsdktool/google-cloud-cli:slim",
       "pullTiming": {
-        "endTime": "2026-11-06T06:56:12.304047963Z",
-        "startTime": "2026-11-06T06:55:45.740428144Z"
+        "endTime": "2026-11-06T19:04:45.800575877Z",
+        "startTime": "2026-11-06T19:04:23.595089240Z"
       },
       "status": "SUCCESS",
       "timing": {
-        "endTime": "2026-11-06T06:56:18.559563594Z",
-        "startTime": "2026-11-06T06:55:45.740428144Z"
+        "endTime": "2026-11-06T19:04:50.761039380Z",
+        "startTime": "2026-11-06T19:04:23.595089240Z"
       }
     },
     {
@@ -115,13 +149,13 @@
       "entrypoint": "python",
       "name": "python:3.12-slim-bookworm@sha256:e697c81897302a4c4333bade000d98038fbb21eb064f8ee1fd42d02ebcd9d337",
       "pullTiming": {
-        "endTime": "2026-11-06T06:56:24.304301066Z",
-        "startTime": "2026-11-06T06:56:18.559735657Z"
+        "endTime": "2026-11-06T19:04:55.737298853Z",
+        "startTime": "2026-11-06T19:04:50.761161860Z"
       },
       "status": "SUCCESS",
       "timing": {
-        "endTime": "2026-11-06T06:56:32.661499160Z",
-        "startTime": "2026-11-06T06:56:18.559735657Z"
+        "endTime": "2026-11-06T19:05:01.847569849Z",
+        "startTime": "2026-11-06T19:04:50.761161860Z"
       }
     },
     {
@@ -132,20 +166,20 @@
         "--target",
         "cloudrun-api",
         "--build-arg",
-        "GIT_SHA=d3492014350b80d4942d163b63c79e850eba38ab",
+        "GIT_SHA=670f0c1ef270ea7765088e929101bcc6c9d3b7ad",
         "-t",
-        "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/api:d3492014350b80d4942d163b63c79e850eba38ab",
+        "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/api:670f0c1ef270ea7765088e929101bcc6c9d3b7ad",
         "."
       ],
       "name": "gcr.io/cloud-builders/docker",
       "pullTiming": {
-        "endTime": "2026-11-06T06:56:32.666903765Z",
-        "startTime": "2026-11-06T06:56:32.661665377Z"
+        "endTime": "2026-11-06T19:05:01.853263624Z",
+        "startTime": "2026-11-06T19:05:01.847750320Z"
       },
       "status": "SUCCESS",
       "timing": {
-        "endTime": "2026-11-06T07:02:54.702972802Z",
-        "startTime": "2026-11-06T06:56:32.661665377Z"
+        "endTime": "2026-11-06T19:09:35.265765701Z",
+        "startTime": "2026-11-06T19:05:01.847750320Z"
       }
     },
     {
@@ -156,20 +190,20 @@
         "--target",
         "frontend",
         "--build-arg",
-        "GIT_SHA=d3492014350b80d4942d163b63c79e850eba38ab",
+        "GIT_SHA=670f0c1ef270ea7765088e929101bcc6c9d3b7ad",
         "-t",
-        "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/frontend:d3492014350b80d4942d163b63c79e850eba38ab",
+        "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/frontend:670f0c1ef270ea7765088e929101bcc6c9d3b7ad",
         "."
       ],
       "name": "gcr.io/cloud-builders/docker",
       "pullTiming": {
-        "endTime": "2026-11-06T07:02:54.708046773Z",
-        "startTime": "2026-11-06T07:02:54.703548458Z"
+        "endTime": "2026-11-06T19:09:35.268587998Z",
+        "startTime": "2026-11-06T19:09:35.265979899Z"
       },
       "status": "SUCCESS",
       "timing": {
-        "endTime": "2026-11-06T07:03:01.877485121Z",
-        "startTime": "2026-11-06T07:02:54.703548458Z"
+        "endTime": "2026-11-06T19:09:41.067881927Z",
+        "startTime": "2026-11-06T19:09:35.265979899Z"
       }
     },
     {
@@ -180,21 +214,20 @@
         "--target",
         "vertex",
         "--build-arg",
-        "GIT_SHA=d3492014350b80d4942d163b63c79e850eba38ab",
+        "GIT_SHA=670f0c1ef270ea7765088e929101bcc6c9d3b7ad",
         "-t",
-        "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/vertex:d3492014350b80d4942d163b63c79e850eba38ab",
+        "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/vertex:670f0c1ef270ea7765088e929101bcc6c9d3b7ad",
         "."
       ],
-      "exitCode": 1,
       "name": "gcr.io/cloud-builders/docker",
       "pullTiming": {
-        "endTime": "2026-11-06T07:03:01.879356508Z",
-        "startTime": "2026-11-06T07:03:01.877693567Z"
+        "endTime": "2026-11-06T19:09:41.069347611Z",
+        "startTime": "2026-11-06T19:09:41.068070858Z"
       },
-      "status": "FAILURE",
+      "status": "SUCCESS",
       "timing": {
-        "endTime": "2026-11-06T07:03:12.044374825Z",
-        "startTime": "2026-11-06T07:03:01.877693567Z"
+        "endTime": "2026-11-06T19:09:56.603313772Z",
+        "startTime": "2026-11-06T19:09:41.068070858Z"
       }
     },
     {
@@ -205,28 +238,40 @@
         "--target",
         "mlflow",
         "--build-arg",
-        "GIT_SHA=d3492014350b80d4942d163b63c79e850eba38ab",
+        "GIT_SHA=670f0c1ef270ea7765088e929101bcc6c9d3b7ad",
         "-t",
-        "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/mlflow:d3492014350b80d4942d163b63c79e850eba38ab",
+        "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/mlflow:670f0c1ef270ea7765088e929101bcc6c9d3b7ad",
         "."
       ],
       "name": "gcr.io/cloud-builders/docker",
-      "status": "QUEUED"
+      "pullTiming": {
+        "endTime": "2026-11-06T19:09:56.604782684Z",
+        "startTime": "2026-11-06T19:09:56.603473733Z"
+      },
+      "status": "SUCCESS",
+      "timing": {
+        "endTime": "2026-11-06T19:10:02.174222592Z",
+        "startTime": "2026-11-06T19:09:56.603473733Z"
+      }
     }
   ],
   "timeout": "1800s",
   "timing": {
     "BUILD": {
-      "endTime": "2026-11-06T07:03:12.044639378Z",
-      "startTime": "2026-11-06T06:55:45.115838759Z"
+      "endTime": "2026-11-06T19:10:02.327986492Z",
+      "startTime": "2026-11-06T19:04:23.076191192Z"
     },
     "FETCHSOURCE": {
-      "endTime": "2026-11-06T06:55:45.115580586Z",
-      "startTime": "2026-11-06T06:55:42.231559364Z"
+      "endTime": "2026-11-06T19:04:23.075959462Z",
+      "startTime": "2026-11-06T19:04:20.969256794Z"
+    },
+    "PUSH": {
+      "endTime": "2026-11-06T19:12:41.941674528Z",
+      "startTime": "2026-11-06T19:10:02.328171219Z"
     },
     "STORAGE_SOURCE": {
-      "endTime": "2026-11-06T06:55:45.115580586Z",
-      "startTime": "2026-11-06T06:55:42.231559364Z"
+      "endTime": "2026-11-06T19:04:23.075959462Z",
+      "startTime": "2026-11-06T19:04:20.969256794Z"
     }
   }
 }

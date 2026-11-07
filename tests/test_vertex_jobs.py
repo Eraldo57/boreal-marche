@@ -36,6 +36,8 @@ def test_hpo_never_optimises_the_final_test_snapshot():
     ]
     assert request["maxTrialCount"] == 12
     assert request["parallelTrialCount"] == 2
+    assert request["trialJobSpec"]["scheduling"]["timeout"] == "1800s"
+    assert request["maxFailedTrialCount"] == 4
     assert "hpo-trial" in request["trialJobSpec"]["workerPoolSpecs"][0]["containerSpec"]["args"]
 
 

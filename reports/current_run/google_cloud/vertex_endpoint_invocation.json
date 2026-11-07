@@ -1,0 +1,16 @@
+{
+  "endpoint": "projects/482023376300/locations/northamerica-northeast1/endpoints/6533951202151890944",
+  "model": "projects/482023376300/locations/northamerica-northeast1/models/5794597802193453056",
+  "prediction": {
+    "deployedModelId": "4212609477033066496",
+    "model": "projects/482023376300/locations/northamerica-northeast1/models/5794597802193453056",
+    "modelDisplayName": "boreal-retention",
+    "modelVersionId": "1",
+    "predictions": [
+      {
+        "probability": 0.765599,
+        "will_return": true
+      }
+    ]
+  }
+}

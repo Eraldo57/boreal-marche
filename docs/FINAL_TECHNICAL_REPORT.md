@@ -1,5 +1,8 @@
 # Boréal Marché — final technical report
 
+> Deployment update, 2026-11-06: Google Cloud hosting, public GitHub CI and merge-triggered deployment were completed after this local report. See [the current Google Cloud runbook](https://github.com/Eraldo57/boreal-marche/blob/main/docs/GOOGLE_CLOUD.md) and reports/current_run/google_cloud/ for subsequent execution evidence. Earlier pending-cloud statements below describe the dated local snapshot.
+
+
 Eraldo Ibrushi · Vanier capstone · 5 November 2026
 
 ## 1. Purpose and completion boundary

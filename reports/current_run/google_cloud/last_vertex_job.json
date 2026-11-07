@@ -1,0 +1,284 @@
+{
+  "name": "projects/482023376300/locations/northamerica-northeast1/hyperparameterTuningJobs/3546026429525262336",
+  "displayName": "boreal-bayesian-spot",
+  "studySpec": {
+    "metrics": [
+      {
+        "metricId": "validation_pr_auc",
+        "goal": "MAXIMIZE"
+      }
+    ],
+    "parameters": [
+      {
+        "parameterId": "n-estimators",
+        "integerValueSpec": {
+          "minValue": "100",
+          "maxValue": "250"
+        },
+        "scaleType": "UNIT_LINEAR_SCALE"
+      },
+      {
+        "parameterId": "max-depth",
+        "integerValueSpec": {
+          "minValue": "4",
+          "maxValue": "12"
+        },
+        "scaleType": "UNIT_LINEAR_SCALE"
+      },
+      {
+        "parameterId": "min-samples-leaf",
+        "integerValueSpec": {
+          "minValue": "2",
+          "maxValue": "25"
+        },
+        "scaleType": "UNIT_LINEAR_SCALE"
+      }
+    ]
+  },
+  "maxTrialCount": 12,
+  "parallelTrialCount": 2,
+  "maxFailedTrialCount": 4,
+  "trialJobSpec": {
+    "workerPoolSpecs": [
+      {
+        "machineSpec": {
+          "machineType": "n1-standard-4"
+        },
+        "replicaCount": "1",
+        "diskSpec": {
+          "bootDiskType": "pd-ssd",
+          "bootDiskSizeGb": 100
+        },
+        "containerSpec": {
+          "imageUri": "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/vertex:670f0c1ef270ea7765088e929101bcc6c9d3b7ad",
+          "command": [
+            "python",
+            "-m",
+            "scripts.vertex_entry"
+          ],
+          "args": [
+            "train",
+            "--mode",
+            "hpo-trial",
+            "--trials",
+            "12",
+            "--data-uri",
+            "gs://boreal-marche-eraldo57-artifacts/processed",
+            "--output-uri",
+            "gs://boreal-marche-eraldo57-artifacts/training/hpo-20261106T235154Z/model"
+          ],
+          "env": [
+            {
+              "name": "MLFLOW_TRACKING_URI",
+              "value": "https://boreal-mlflow-qaonyx3dda-nn.a.run.app"
+            },
+            {
+              "name": "MLFLOW_GOOGLE_IAM_AUTH",
+              "value": "true"
+            },
+            {
+              "name": "GIT_SHA",
+              "value": "670f0c1ef270ea7765088e929101bcc6c9d3b7ad"
+            },
+            {
+              "name": "MLFLOW_HTTP_REQUEST_TIMEOUT",
+              "value": "60"
+            }
+          ]
+        }
+      }
+    ],
+    "scheduling": {
+      "timeout": "1800s",
+      "strategy": "SPOT"
+    },
+    "serviceAccount": "boreal-train@boreal-marche-eraldo57.iam.gserviceaccount.com",
+    "baseOutputDirectory": {
+      "outputUriPrefix": "gs://boreal-marche-eraldo57-artifacts/training/hpo-20261106T235154Z"
+    }
+  },
+  "trials": [
+    {
+      "id": "1",
+      "state": "SUCCEEDED",
+      "parameters": [
+        {
+          "parameterId": "max-depth",
+          "value": 8
+        },
+        {
+          "parameterId": "min-samples-leaf",
+          "value": 14
+        },
+        {
+          "parameterId": "n-estimators",
+          "value": 175
+        }
+      ],
+      "finalMeasurement": {
+        "stepCount": "1",
+        "metrics": [
+          {
+            "metricId": "validation_pr_auc",
+            "value": 0.6752958851669135
+          }
+        ]
+      },
+      "startTime": "2026-11-06T23:52:08.420512356Z",
+      "endTime": "2026-11-06T23:55:55Z"
+    },
+    {
+      "id": "2",
+      "state": "SUCCEEDED",
+      "parameters": [
+        {
+          "parameterId": "max-depth",
+          "value": 7
+        },
+        {
+          "parameterId": "min-samples-leaf",
+          "value": 18
+        },
+        {
+          "parameterId": "n-estimators",
+          "value": 143
+        }
+      ],
+      "finalMeasurement": {
+        "stepCount": "1",
+        "metrics": [
+          {
+            "metricId": "validation_pr_auc",
+            "value": 0.6763734396417823
+          }
+        ]
+      },
+      "startTime": "2026-11-06T23:52:08.420830935Z",
+      "endTime": "2026-11-06T23:55:43Z"
+    },
+    {
+      "id": "3",
+      "state": "SUCCEEDED",
+      "parameters": [
+        {
+          "parameterId": "max-depth",
+          "value": 6
+        },
+        {
+          "parameterId": "min-samples-leaf",
+          "value": 19
+        },
+        {
+          "parameterId": "n-estimators",
+          "value": 141
+        }
+      ],
+      "finalMeasurement": {
+        "stepCount": "1",
+        "metrics": [
+          {
+            "metricId": "validation_pr_auc",
+            "value": 0.676405328546368
+          }
+        ]
+      },
+      "startTime": "2026-11-07T00:00:12.261937610Z",
+      "endTime": "2026-11-07T00:03:30Z"
+    },
+    {
+      "id": "4",
+      "state": "SUCCEEDED",
+      "parameters": [
+        {
+          "parameterId": "max-depth",
+          "value": 6
+        },
+        {
+          "parameterId": "min-samples-leaf",
+          "value": 19
+        },
+        {
+          "parameterId": "n-estimators",
+          "value": 143
+        }
+      ],
+      "finalMeasurement": {
+        "stepCount": "1",
+        "metrics": [
+          {
+            "metricId": "validation_pr_auc",
+            "value": 0.6763054599926173
+          }
+        ]
+      },
+      "startTime": "2026-11-07T00:00:12.262216798Z",
+      "endTime": "2026-11-07T00:03:26Z"
+    },
+    {
+      "id": "5",
+      "state": "ACTIVE",
+      "parameters": [
+        {
+          "parameterId": "max-depth",
+          "value": 6
+        },
+        {
+          "parameterId": "min-samples-leaf",
+          "value": 20
+        },
+        {
+          "parameterId": "n-estimators",
+          "value": 128
+        }
+      ],
+      "finalMeasurement": {
+        "stepCount": "1",
+        "metrics": [
+          {
+            "metricId": "validation_pr_auc",
+            "value": 0.6737770987471565
+          }
+        ]
+      },
+      "startTime": "2026-11-07T00:07:06.567016762Z"
+    },
+    {
+      "id": "6",
+      "state": "ACTIVE",
+      "parameters": [
+        {
+          "parameterId": "max-depth",
+          "value": 11
+        },
+        {
+          "parameterId": "min-samples-leaf",
+          "value": 7
+        },
+        {
+          "parameterId": "n-estimators",
+          "value": 217
+        }
+      ],
+      "finalMeasurement": {
+        "stepCount": "1",
+        "metrics": [
+          {
+            "metricId": "validation_pr_auc",
+            "value": 0.6700306161474747
+          }
+        ]
+      },
+      "startTime": "2026-11-07T00:07:08.069913526Z"
+    }
+  ],
+  "state": "JOB_STATE_RUNNING",
+  "createTime": "2026-11-06T23:51:55.469322Z",
+  "startTime": "2026-11-06T23:52:02Z",
+  "updateTime": "2026-11-07T00:11:32.559158Z",
+  "labels": {
+    "goog-vertex-ai-product": "vertex-ai-training",
+    "goog-originating-service-id": "c7e2-9256-1c43",
+    "goog-vertex-ai-image-uri": "6881034184166057777-vertex",
+    "goog-vertex-ai-reservation": ""
+  }
+}

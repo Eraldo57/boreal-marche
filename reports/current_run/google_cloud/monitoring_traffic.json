@@ -1,0 +1,485 @@
+{
+  "executed_at": "2026-11-06T09:03:43.877367+00:00",
+  "purpose": "Google Cloud demonstration with historical rows and a synthetic shifted cohort; not production observations",
+  "prediction_rows_sent": 120,
+  "synthetic_recency_shift_days": 365,
+  "real_baskets_sent": 20,
+  "unknown_item_baskets_sent": 20,
+  "invalid_requests_sent": 10,
+  "invalid_requests_rejected": 10,
+  "before": {
+    "request_count": 3,
+    "error_rate": 0.0,
+    "latency_p50_ms": 174.38,
+    "latency_p95_ms": 625.65,
+    "latency_p99_ms": 665.76,
+    "drift_metrics": [],
+    "status": "green",
+    "drift_status": "insufficient_data_or_reference",
+    "window_description": "bounded local request log",
+    "log_write_failures": 0,
+    "requests_by_route": {
+      "/predict": 1,
+      "/recommend": 1,
+      "/chat": 1
+    },
+    "latency_p95_by_route_ms": {
+      "/predict": 174.38,
+      "/recommend": 3.54,
+      "/chat": 675.79
+    },
+    "prediction_drift": [],
+    "data_quality": {
+      "prediction_requests": 1,
+      "rejected_by_validation": 0,
+      "invalid_request_rate": null,
+      "out_of_range_share": {}
+    },
+    "recommendation": {
+      "requests": 1,
+      "by_strategy": {
+        "empty_basket": 1
+      },
+      "non_empty_baskets": 0,
+      "rule_fire_rate": null
+    },
+    "checks": [
+      {
+        "check": "error_rate",
+        "value": 0.0,
+        "rule": "yellow above 0.05, red above 0.1",
+        "level": "green",
+        "detail": ""
+      },
+      {
+        "check": "predict_latency_p95_ms",
+        "value": 174.38345300070068,
+        "rule": "yellow above 500 ms, single /predict requests",
+        "level": "green",
+        "detail": ""
+      },
+      {
+        "check": "input_drift",
+        "value": null,
+        "rule": "red when any PSI > 0.2 or KS p-value < 0.05; value is the largest PSI",
+        "level": "not_evaluated",
+        "detail": ""
+      },
+      {
+        "check": "prediction_drift",
+        "value": null,
+        "rule": "red when any PSI > 0.2 or KS p-value < 0.05; value is the largest PSI",
+        "level": "not_evaluated",
+        "detail": ""
+      },
+      {
+        "check": "invalid_request_rate",
+        "value": null,
+        "rule": "yellow above 0.05 (from 20 prediction requests)",
+        "level": "not_evaluated",
+        "detail": ""
+      },
+      {
+        "check": "out_of_range_share",
+        "value": null,
+        "rule": "yellow when any feature has more than 0.01 of its values outside the training range",
+        "level": "not_evaluated",
+        "detail": ""
+      },
+      {
+        "check": "rule_fire_rate",
+        "value": null,
+        "rule": "yellow below 0.5 (from 20 non-empty baskets)",
+        "level": "not_evaluated",
+        "detail": ""
+      }
+    ]
+  },
+  "after": {
+    "request_count": 78,
+    "error_rate": 0.1282,
+    "latency_p50_ms": 2.12,
+    "latency_p95_ms": 880.91,
+    "latency_p99_ms": 4839.7,
+    "drift_metrics": [
+      {
+        "feature": "recency_days",
+        "statistic": "psi",
+        "value": 4.594763194077634,
+        "threshold": 0.2,
+        "alert": true
+      },
+      {
+        "feature": "recency_days",
+        "statistic": "ks_pvalue",
+        "value": 2.3269419959240905e-250,
+        "threshold": 0.05,
+        "alert": true
+      },
+      {
+        "feature": "frequency",
+        "statistic": "psi",
+        "value": 0.08880845779784187,
+        "threshold": 0.2,
+        "alert": false
+      },
+      {
+        "feature": "frequency",
+        "statistic": "ks_pvalue",
+        "value": 0.03846817577877992,
+        "threshold": 0.05,
+        "alert": true
+      },
+      {
+        "feature": "monetary_mean",
+        "statistic": "psi",
+        "value": 0.038822991621260794,
+        "threshold": 0.2,
+        "alert": false
+      },
+      {
+        "feature": "monetary_mean",
+        "statistic": "ks_pvalue",
+        "value": 0.5207775761364042,
+        "threshold": 0.05,
+        "alert": false
+      },
+      {
+        "feature": "monetary_std",
+        "statistic": "psi",
+        "value": 0.09449123902903668,
+        "threshold": 0.2,
+        "alert": false
+      },
+      {
+        "feature": "monetary_std",
+        "statistic": "ks_pvalue",
+        "value": 0.009299659849009045,
+        "threshold": 0.05,
+        "alert": true
+      },
+      {
+        "feature": "avg_days_between_orders",
+        "statistic": "psi",
+        "value": 0.30577134351651886,
+        "threshold": 0.2,
+        "alert": true
+      },
+      {
+        "feature": "avg_days_between_orders",
+        "statistic": "ks_pvalue",
+        "value": 1.6959283277506675e-07,
+        "threshold": 0.05,
+        "alert": true
+      },
+      {
+        "feature": "std_days_between_orders",
+        "statistic": "psi",
+        "value": 0.21302573101244748,
+        "threshold": 0.2,
+        "alert": true
+      },
+      {
+        "feature": "std_days_between_orders",
+        "statistic": "ks_pvalue",
+        "value": 0.00024191769624629293,
+        "threshold": 0.05,
+        "alert": true
+      },
+      {
+        "feature": "is_one_time_buyer",
+        "statistic": "psi",
+        "value": 0.08995296262344156,
+        "threshold": 0.2,
+        "alert": false
+      },
+      {
+        "feature": "is_one_time_buyer",
+        "statistic": "ks_pvalue",
+        "value": 0.03846817577878601,
+        "threshold": 0.05,
+        "alert": true
+      },
+      {
+        "feature": "avg_basket_size",
+        "statistic": "psi",
+        "value": 0.065084678761619,
+        "threshold": 0.2,
+        "alert": false
+      },
+      {
+        "feature": "avg_basket_size",
+        "statistic": "ks_pvalue",
+        "value": 0.729598406277141,
+        "threshold": 0.05,
+        "alert": false
+      },
+      {
+        "feature": "single_item_basket_ratio",
+        "statistic": "psi",
+        "value": 0.00045015826812856664,
+        "threshold": 0.2,
+        "alert": false
+      },
+      {
+        "feature": "single_item_basket_ratio",
+        "statistic": "ks_pvalue",
+        "value": 0.9999999897455313,
+        "threshold": 0.05,
+        "alert": false
+      },
+      {
+        "feature": "top_category_share",
+        "statistic": "psi",
+        "value": 0.06081843002102334,
+        "threshold": 0.2,
+        "alert": false
+      },
+      {
+        "feature": "top_category_share",
+        "statistic": "ks_pvalue",
+        "value": 0.37290028610952475,
+        "threshold": 0.05,
+        "alert": false
+      },
+      {
+        "feature": "n_unique_categories",
+        "statistic": "psi",
+        "value": 0.0857766208132967,
+        "threshold": 0.2,
+        "alert": false
+      },
+      {
+        "feature": "n_unique_categories",
+        "statistic": "ks_pvalue",
+        "value": 0.19604796625004497,
+        "threshold": 0.05,
+        "alert": false
+      },
+      {
+        "feature": "morning_purchase_ratio",
+        "statistic": "psi",
+        "value": 0.04419113684604121,
+        "threshold": 0.2,
+        "alert": false
+      },
+      {
+        "feature": "morning_purchase_ratio",
+        "statistic": "ks_pvalue",
+        "value": 0.48266536307938435,
+        "threshold": 0.05,
+        "alert": false
+      }
+    ],
+    "status": "red",
+    "drift_status": "measured",
+    "window_description": "bounded local request log",
+    "log_write_failures": 0,
+    "requests_by_route": {
+      "/predict": 31,
+      "/recommend": 41,
+      "/chat": 2,
+      "/predict/batch": 4
+    },
+    "latency_p95_by_route_ms": {
+      "/predict": 172.29,
+      "/recommend": 2.84,
+      "/chat": 683.52,
+      "/predict/batch": 5217.01
+    },
+    "prediction_drift": [
+      {
+        "feature": "predicted_probability",
+        "statistic": "psi",
+        "value": 0.6587346516473105,
+        "threshold": 0.2,
+        "alert": true
+      },
+      {
+        "feature": "predicted_probability",
+        "statistic": "ks_pvalue",
+        "value": 6.32495174183978e-07,
+        "threshold": 0.05,
+        "alert": true
+      }
+    ],
+    "data_quality": {
+      "prediction_requests": 35,
+      "rejected_by_validation": 10,
+      "invalid_request_rate": 0.2857142857142857,
+      "out_of_range_share": {
+        "recency_days": 0.9917355371900827,
+        "frequency": 0.0,
+        "monetary_mean": 0.0,
+        "monetary_std": 0.0,
+        "avg_days_between_orders": 0.11570247933884298,
+        "std_days_between_orders": 0.008264462809917356,
+        "is_one_time_buyer": 0.0,
+        "avg_basket_size": 0.0,
+        "single_item_basket_ratio": 0.0,
+        "top_category_share": 0.0,
+        "n_unique_categories": 0.0,
+        "morning_purchase_ratio": 0.0
+      }
+    },
+    "recommendation": {
+      "requests": 41,
+      "by_strategy": {
+        "empty_basket": 1,
+        "rule_based": 15,
+        "popularity_fallback": 25
+      },
+      "non_empty_baskets": 40,
+      "rule_fire_rate": 0.375
+    },
+    "checks": [
+      {
+        "check": "error_rate",
+        "value": 0.1282051282051282,
+        "rule": "yellow above 0.05, red above 0.1",
+        "level": "red",
+        "detail": ""
+      },
+      {
+        "check": "predict_latency_p95_ms",
+        "value": 172.29254050016607,
+        "rule": "yellow above 500 ms, single /predict requests",
+        "level": "green",
+        "detail": ""
+      },
+      {
+        "check": "input_drift",
+        "value": 4.594763194077634,
+        "rule": "red when any PSI > 0.2 or KS p-value < 0.05; value is the largest PSI",
+        "level": "red",
+        "detail": "alerting: avg_days_between_orders, frequency, is_one_time_buyer, monetary_std, recency_days, std_days_between_orders"
+      },
+      {
+        "check": "prediction_drift",
+        "value": 0.6587346516473105,
+        "rule": "red when any PSI > 0.2 or KS p-value < 0.05; value is the largest PSI",
+        "level": "red",
+        "detail": "alerting: predicted_probability"
+      },
+      {
+        "check": "invalid_request_rate",
+        "value": 0.2857142857142857,
+        "rule": "yellow above 0.05 (from 20 prediction requests)",
+        "level": "yellow",
+        "detail": ""
+      },
+      {
+        "check": "out_of_range_share",
+        "value": 0.9917355371900827,
+        "rule": "yellow when any feature has more than 0.01 of its values outside the training range",
+        "level": "yellow",
+        "detail": "features: avg_days_between_orders, recency_days"
+      },
+      {
+        "check": "rule_fire_rate",
+        "value": 0.375,
+        "rule": "yellow below 0.5 (from 20 non-empty baskets)",
+        "level": "yellow",
+        "detail": ""
+      }
+    ]
+  },
+  "alerts": {
+    "active": [
+      "error_rate",
+      "input_drift",
+      "invalid_request_rate",
+      "out_of_range_share",
+      "prediction_drift",
+      "rule_fire_rate"
+    ],
+    "alerts": [
+      {
+        "at": "2026-11-06T09:03:42.563330Z",
+        "check": "rule_fire_rate",
+        "state": "raised",
+        "level": "yellow",
+        "value": 0.375,
+        "rule": "yellow below 0.5 (from 20 non-empty baskets)",
+        "detail": "",
+        "delivered_to": [
+          "log",
+          "database"
+        ]
+      },
+      {
+        "at": "2026-11-06T09:03:42.563321Z",
+        "check": "out_of_range_share",
+        "state": "raised",
+        "level": "yellow",
+        "value": 0.9917355371900827,
+        "rule": "yellow when any feature has more than 0.01 of its values outside the training range",
+        "detail": "features: avg_days_between_orders, recency_days",
+        "delivered_to": [
+          "log",
+          "database"
+        ]
+      },
+      {
+        "at": "2026-11-06T09:03:42.563311Z",
+        "check": "invalid_request_rate",
+        "state": "raised",
+        "level": "yellow",
+        "value": 0.2857142857142857,
+        "rule": "yellow above 0.05 (from 20 prediction requests)",
+        "detail": "",
+        "delivered_to": [
+          "log",
+          "database"
+        ]
+      },
+      {
+        "at": "2026-11-06T09:03:42.563302Z",
+        "check": "prediction_drift",
+        "state": "raised",
+        "level": "red",
+        "value": 0.6587346516473105,
+        "rule": "red when any PSI > 0.2 or KS p-value < 0.05; value is the largest PSI",
+        "detail": "alerting: predicted_probability",
+        "delivered_to": [
+          "log",
+          "database"
+        ]
+      },
+      {
+        "at": "2026-11-06T09:03:42.563289Z",
+        "check": "input_drift",
+        "state": "raised",
+        "level": "red",
+        "value": 4.594763194077634,
+        "rule": "red when any PSI > 0.2 or KS p-value < 0.05; value is the largest PSI",
+        "detail": "alerting: avg_days_between_orders, frequency, is_one_time_buyer, monetary_std, recency_days, std_days_between_orders",
+        "delivered_to": [
+          "log",
+          "database"
+        ]
+      },
+      {
+        "at": "2026-11-06T09:03:42.563246Z",
+        "check": "error_rate",
+        "state": "raised",
+        "level": "red",
+        "value": 0.1282051282051282,
+        "rule": "yellow above 0.05, red above 0.1",
+        "detail": "",
+        "delivered_to": [
+          "log",
+          "database"
+        ]
+      }
+    ],
+    "channels": [
+      "log",
+      "database",
+      "webhook"
+    ],
+    "webhook_configured": false,
+    "delivery_failures": 0
+  },
+  "caveat": "Metrics include earlier smoke-test traffic in the Cloud SQL durable log"
+}

@@ -1,0 +1,2214 @@
+{
+  "health": {
+    "status": "ok",
+    "message": "Bor\u00e9al March\u00e9 API is running."
+  },
+  "ready": {
+    "ready": true,
+    "models_loaded": [
+      "retention_model",
+      "recommendation_rules",
+      "rag_index"
+    ],
+    "errors": {}
+  },
+  "version": {
+    "version": "0.1.0",
+    "git_sha": "670f0c1ef270ea7765088e929101bcc6c9d3b7ad",
+    "model_version": "0.3.0",
+    "trained_at": "2026-11-05T21:10:31.146307+00:00",
+    "model_family": "RandomForestClassifier",
+    "calibration_method": "sigmoid",
+    "metrics": {
+      "pr_auc": 0.7596308206529796,
+      "roc_auc": 0.7863253832246079,
+      "brier_score": 0.19398294852850284,
+      "recall_top_decile": 0.21556350626118068,
+      "fit_time_s": 0.7012122918386012,
+      "assumed_test_utility": 29905.0
+    },
+    "decision_threshold": 0.20500000000000002,
+    "model_source": {
+      "source": "local",
+      "path": "artifacts/",
+      "fallback_reason": "RestException: INVALID_PARAMETER_VALUE: Registered model alias champion not found."
+    }
+  },
+  "openapi.json": {
+    "openapi": "3.1.0",
+    "info": {
+      "title": "Bor\u00e9al March\u00e9 API",
+      "description": "Customer Intelligence Platform \u2014 retention prediction, product recommendations, and a grounded bilingual assistant.",
+      "version": "0.1.0"
+    },
+    "paths": {
+      "/predict": {
+        "post": {
+          "tags": [
+            "prediction"
+          ],
+          "summary": "Predict",
+          "description": "Predict whether a single customer will return within 90 days.",
+          "operationId": "predict_predict_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PredictionRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PredictionResponse"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/predict/batch": {
+        "post": {
+          "tags": [
+            "prediction"
+          ],
+          "summary": "Predict Batch",
+          "description": "Predict retention for up to 500 customers in one call.",
+          "operationId": "predict_batch_predict_batch_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchPredictionRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BatchPredictionResponse"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/recommend/details": {
+        "get": {
+          "tags": [
+            "recommendation"
+          ],
+          "summary": "Recommendation Details",
+          "description": "All public training item descriptions, loaded rules and mining provenance.",
+          "operationId": "recommendation_details_recommend_details_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/RecommendationDetailsResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/recommend": {
+        "post": {
+          "tags": [
+            "recommendation"
+          ],
+          "summary": "Recommend",
+          "description": "Return product recommendations for the given basket.",
+          "operationId": "recommend_recommend_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendationRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/RecommendationResponse"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/chat": {
+        "post": {
+          "tags": [
+            "assistant"
+          ],
+          "summary": "Chat",
+          "operationId": "chat_chat_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ChatResponse"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/chat/stream": {
+        "post": {
+          "tags": [
+            "assistant"
+          ],
+          "summary": "Chat Stream",
+          "description": "The /chat answer as newline-delimited JSON events, for word-by-word display.",
+          "operationId": "chat_stream_chat_stream_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/metrics": {
+        "get": {
+          "tags": [
+            "monitoring"
+          ],
+          "summary": "Metrics",
+          "description": "Return live operational metrics with each check's rule and level.",
+          "operationId": "metrics_metrics_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/MonitoringResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/alerts": {
+        "get": {
+          "tags": [
+            "monitoring"
+          ],
+          "summary": "Alerts",
+          "description": "Alerts delivered by the background monitor; empty before the first evaluation.",
+          "operationId": "alerts_alerts_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/AlertsResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/decisions": {
+        "post": {
+          "tags": [
+            "human review"
+          ],
+          "summary": "Record Decision",
+          "description": "Record a reviewer's approval or rejection; nothing is sent to the customer.",
+          "operationId": "record_decision_decisions_post",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecisionRequest"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/DecisionRecord"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "get": {
+          "tags": [
+            "human review"
+          ],
+          "summary": "Recent Decisions",
+          "description": "The audit trail: who decided what, when and why.",
+          "operationId": "recent_decisions_decisions_get",
+          "parameters": [
+            {
+              "name": "limit",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "maximum": 200,
+                "minimum": 1,
+                "default": 20,
+                "title": "Limit"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/DecisionRecord"
+                    },
+                    "title": "Response Recent Decisions Decisions Get"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/health": {
+        "get": {
+          "tags": [
+            "infra"
+          ],
+          "summary": "Health",
+          "description": "Liveness probe \u2014 always returns 200 if the process is running.",
+          "operationId": "health_health_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HealthResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/ready": {
+        "get": {
+          "tags": [
+            "infra"
+          ],
+          "summary": "Ready",
+          "description": "Readiness probe \u2014 reports which models are loaded.",
+          "operationId": "ready_ready_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ReadyResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/version": {
+        "get": {
+          "tags": [
+            "infra"
+          ],
+          "summary": "Version",
+          "description": "Application and model version information.",
+          "operationId": "version_version_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/VersionResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/feature-contract": {
+        "get": {
+          "tags": [
+            "prediction"
+          ],
+          "summary": "Feature Contract",
+          "operationId": "feature_contract_feature_contract_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "additionalProperties": true,
+                    "type": "object",
+                    "title": "Response Feature Contract Feature Contract Get"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/customers/{customer_id}/features": {
+        "get": {
+          "tags": [
+            "prediction"
+          ],
+          "summary": "Customer Features",
+          "description": "Historical public-data demonstration only; no authentication is implemented.",
+          "operationId": "customer_features_customers__customer_id__features_get",
+          "parameters": [
+            {
+              "name": "customer_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Customer Id"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "additionalProperties": true,
+                    "title": "Response Customer Features Customers  Customer Id  Features Get"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "AlertEvent": {
+          "properties": {
+            "at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "At"
+            },
+            "check": {
+              "type": "string",
+              "title": "Check"
+            },
+            "state": {
+              "type": "string",
+              "title": "State"
+            },
+            "level": {
+              "type": "string",
+              "title": "Level"
+            },
+            "value": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Value"
+            },
+            "rule": {
+              "type": "string",
+              "title": "Rule"
+            },
+            "detail": {
+              "type": "string",
+              "title": "Detail",
+              "default": ""
+            },
+            "delivered_to": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "title": "Delivered To",
+              "default": []
+            }
+          },
+          "type": "object",
+          "required": [
+            "at",
+            "check",
+            "state",
+            "level",
+            "rule"
+          ],
+          "title": "AlertEvent"
+        },
+        "AlertsResponse": {
+          "properties": {
+            "active": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "title": "Active"
+            },
+            "alerts": {
+              "items": {
+                "$ref": "#/components/schemas/AlertEvent"
+              },
+              "type": "array",
+              "title": "Alerts"
+            },
+            "channels": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "title": "Channels"
+            },
+            "webhook_configured": {
+              "type": "boolean",
+              "title": "Webhook Configured"
+            },
+            "delivery_failures": {
+              "type": "integer",
+              "title": "Delivery Failures"
+            }
+          },
+          "type": "object",
+          "required": [
+            "active",
+            "alerts",
+            "channels",
+            "webhook_configured",
+            "delivery_failures"
+          ],
+          "title": "AlertsResponse"
+        },
+        "BatchPredictionRequest": {
+          "properties": {
+            "customers": {
+              "items": {
+                "$ref": "#/components/schemas/PredictionRequest"
+              },
+              "type": "array",
+              "maxItems": 500,
+              "minItems": 1,
+              "title": "Customers"
+            }
+          },
+          "additionalProperties": false,
+          "type": "object",
+          "required": [
+            "customers"
+          ],
+          "title": "BatchPredictionRequest"
+        },
+        "BatchPredictionResponse": {
+          "properties": {
+            "predictions": {
+              "items": {
+                "$ref": "#/components/schemas/PredictionResponse"
+              },
+              "type": "array",
+              "title": "Predictions"
+            },
+            "count": {
+              "type": "integer",
+              "title": "Count"
+            }
+          },
+          "type": "object",
+          "required": [
+            "predictions",
+            "count"
+          ],
+          "title": "BatchPredictionResponse"
+        },
+        "ChatRequest": {
+          "properties": {
+            "message": {
+              "type": "string",
+              "maxLength": 2000,
+              "minLength": 1,
+              "title": "Message"
+            },
+            "conversation_id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Conversation Id"
+            },
+            "customer_id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Customer Id"
+            },
+            "provider": {
+              "$ref": "#/components/schemas/Provider",
+              "default": "regex"
+            },
+            "language": {
+              "type": "string",
+              "pattern": "^(en|fr)$",
+              "title": "Language",
+              "default": "en"
+            }
+          },
+          "additionalProperties": false,
+          "type": "object",
+          "required": [
+            "message"
+          ],
+          "title": "ChatRequest"
+        },
+        "ChatResponse": {
+          "properties": {
+            "reply": {
+              "type": "string",
+              "title": "Reply"
+            },
+            "citations": {
+              "items": {
+                "$ref": "#/components/schemas/Citation"
+              },
+              "type": "array",
+              "title": "Citations",
+              "default": []
+            },
+            "tool_calls": {
+              "items": {
+                "$ref": "#/components/schemas/ToolCall"
+              },
+              "type": "array",
+              "title": "Tool Calls",
+              "default": []
+            },
+            "provider_used": {
+              "type": "string",
+              "title": "Provider Used"
+            },
+            "refused": {
+              "type": "boolean",
+              "title": "Refused",
+              "default": false
+            },
+            "refusal_reason": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Refusal Reason"
+            },
+            "passage_confidence": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "confident",
+                    "uncertain"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Passage Confidence"
+            },
+            "language": {
+              "type": "string",
+              "title": "Language"
+            },
+            "provider_latency_ms": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Provider Latency Ms"
+            },
+            "token_usage": {
+              "anyOf": [
+                {
+                  "additionalProperties": {
+                    "type": "integer"
+                  },
+                  "type": "object"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Token Usage"
+            },
+            "cost_usd": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cost Usd"
+            },
+            "timestamp": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Timestamp"
+            }
+          },
+          "type": "object",
+          "required": [
+            "reply",
+            "provider_used",
+            "language"
+          ],
+          "title": "ChatResponse"
+        },
+        "Check": {
+          "properties": {
+            "check": {
+              "type": "string",
+              "title": "Check"
+            },
+            "value": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Value"
+            },
+            "rule": {
+              "type": "string",
+              "title": "Rule"
+            },
+            "level": {
+              "type": "string",
+              "title": "Level"
+            },
+            "detail": {
+              "type": "string",
+              "title": "Detail",
+              "default": ""
+            }
+          },
+          "type": "object",
+          "required": [
+            "check",
+            "rule",
+            "level"
+          ],
+          "title": "Check",
+          "description": "One traffic-light rule: the measured value next to the rule it is judged by."
+        },
+        "Citation": {
+          "properties": {
+            "source": {
+              "type": "string",
+              "title": "Source"
+            },
+            "chunk": {
+              "type": "string",
+              "title": "Chunk"
+            },
+            "score": {
+              "type": "number",
+              "title": "Score"
+            }
+          },
+          "type": "object",
+          "required": [
+            "source",
+            "chunk",
+            "score"
+          ],
+          "title": "Citation"
+        },
+        "DecisionRecord": {
+          "properties": {
+            "id": {
+              "type": "integer",
+              "title": "Id"
+            },
+            "decided_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Decided At"
+            },
+            "customer_id": {
+              "type": "string",
+              "title": "Customer Id"
+            },
+            "probability": {
+              "type": "number",
+              "title": "Probability"
+            },
+            "threshold": {
+              "type": "number",
+              "title": "Threshold"
+            },
+            "model_version": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Model Version"
+            },
+            "proposed_action": {
+              "type": "string",
+              "title": "Proposed Action"
+            },
+            "decision": {
+              "type": "string",
+              "title": "Decision"
+            },
+            "reviewer": {
+              "type": "string",
+              "title": "Reviewer"
+            },
+            "reason": {
+              "type": "string",
+              "title": "Reason"
+            }
+          },
+          "type": "object",
+          "required": [
+            "id",
+            "decided_at",
+            "customer_id",
+            "probability",
+            "threshold",
+            "proposed_action",
+            "decision",
+            "reviewer",
+            "reason"
+          ],
+          "title": "DecisionRecord"
+        },
+        "DecisionRequest": {
+          "properties": {
+            "customer_id": {
+              "type": "string",
+              "maxLength": 100,
+              "minLength": 1,
+              "title": "Customer Id"
+            },
+            "probability": {
+              "type": "number",
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "title": "Probability"
+            },
+            "threshold": {
+              "type": "number",
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "title": "Threshold"
+            },
+            "model_version": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Model Version"
+            },
+            "proposed_action": {
+              "type": "string",
+              "enum": [
+                "offer_coupon",
+                "no_action"
+              ],
+              "title": "Proposed Action"
+            },
+            "decision": {
+              "type": "string",
+              "enum": [
+                "approved",
+                "rejected"
+              ],
+              "title": "Decision"
+            },
+            "reviewer": {
+              "type": "string",
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "\\S",
+              "title": "Reviewer"
+            },
+            "reason": {
+              "type": "string",
+              "maxLength": 500,
+              "minLength": 1,
+              "pattern": "\\S",
+              "title": "Reason"
+            }
+          },
+          "additionalProperties": false,
+          "type": "object",
+          "required": [
+            "customer_id",
+            "probability",
+            "threshold",
+            "proposed_action",
+            "decision",
+            "reviewer",
+            "reason"
+          ],
+          "title": "DecisionRequest",
+          "description": "A person's decision on the action the model proposed for one customer."
+        },
+        "DriftMetric": {
+          "properties": {
+            "feature": {
+              "type": "string",
+              "title": "Feature"
+            },
+            "statistic": {
+              "type": "string",
+              "title": "Statistic"
+            },
+            "value": {
+              "type": "number",
+              "title": "Value"
+            },
+            "threshold": {
+              "type": "number",
+              "title": "Threshold"
+            },
+            "alert": {
+              "type": "boolean",
+              "title": "Alert"
+            }
+          },
+          "type": "object",
+          "required": [
+            "feature",
+            "statistic",
+            "value",
+            "threshold",
+            "alert"
+          ],
+          "title": "DriftMetric"
+        },
+        "FeatureEffect": {
+          "properties": {
+            "feature": {
+              "type": "string",
+              "title": "Feature"
+            },
+            "value": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Value"
+            },
+            "typical_value": {
+              "type": "number",
+              "title": "Typical Value",
+              "description": "The training median of this feature."
+            },
+            "effect": {
+              "type": "number",
+              "title": "Effect",
+              "description": "Change in the probability of returning when the feature has this customer's value instead of the typical one. Positive raises it."
+            }
+          },
+          "type": "object",
+          "required": [
+            "feature",
+            "value",
+            "typical_value",
+            "effect"
+          ],
+          "title": "FeatureEffect",
+          "description": "How far one feature of this customer moves their probability, against a typical value."
+        },
+        "FiringRule": {
+          "properties": {
+            "antecedent": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "title": "Antecedent"
+            },
+            "consequent": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "title": "Consequent"
+            },
+            "confidence": {
+              "type": "number",
+              "title": "Confidence"
+            },
+            "lift": {
+              "type": "number",
+              "title": "Lift"
+            },
+            "support": {
+              "type": "number",
+              "title": "Support"
+            }
+          },
+          "type": "object",
+          "required": [
+            "antecedent",
+            "consequent",
+            "confidence",
+            "lift",
+            "support"
+          ],
+          "title": "FiringRule"
+        },
+        "HTTPValidationError": {
+          "properties": {
+            "detail": {
+              "items": {
+                "$ref": "#/components/schemas/ValidationError"
+              },
+              "type": "array",
+              "title": "Detail"
+            }
+          },
+          "type": "object",
+          "title": "HTTPValidationError"
+        },
+        "HealthResponse": {
+          "properties": {
+            "status": {
+              "type": "string",
+              "title": "Status",
+              "default": "ok"
+            },
+            "message": {
+              "type": "string",
+              "title": "Message",
+              "default": "Bor\u00e9al March\u00e9 API is running."
+            }
+          },
+          "type": "object",
+          "title": "HealthResponse"
+        },
+        "MonitoringResponse": {
+          "properties": {
+            "request_count": {
+              "type": "integer",
+              "title": "Request Count"
+            },
+            "error_rate": {
+              "type": "number",
+              "title": "Error Rate"
+            },
+            "latency_p50_ms": {
+              "type": "number",
+              "title": "Latency P50 Ms"
+            },
+            "latency_p95_ms": {
+              "type": "number",
+              "title": "Latency P95 Ms"
+            },
+            "latency_p99_ms": {
+              "type": "number",
+              "title": "Latency P99 Ms"
+            },
+            "drift_metrics": {
+              "items": {
+                "$ref": "#/components/schemas/DriftMetric"
+              },
+              "type": "array",
+              "title": "Drift Metrics",
+              "default": []
+            },
+            "status": {
+              "type": "string",
+              "title": "Status"
+            },
+            "drift_status": {
+              "type": "string",
+              "title": "Drift Status",
+              "default": "not_evaluated"
+            },
+            "window_description": {
+              "type": "string",
+              "title": "Window Description",
+              "default": "bounded local request log"
+            },
+            "log_write_failures": {
+              "type": "integer",
+              "title": "Log Write Failures",
+              "default": 0
+            },
+            "requests_by_route": {
+              "additionalProperties": {
+                "type": "integer"
+              },
+              "type": "object",
+              "title": "Requests By Route",
+              "default": {}
+            },
+            "latency_p95_by_route_ms": {
+              "additionalProperties": {
+                "type": "number"
+              },
+              "type": "object",
+              "title": "Latency P95 By Route Ms",
+              "default": {}
+            },
+            "prediction_drift": {
+              "items": {
+                "$ref": "#/components/schemas/DriftMetric"
+              },
+              "type": "array",
+              "title": "Prediction Drift",
+              "default": []
+            },
+            "data_quality": {
+              "additionalProperties": true,
+              "type": "object",
+              "title": "Data Quality",
+              "default": {}
+            },
+            "recommendation": {
+              "additionalProperties": true,
+              "type": "object",
+              "title": "Recommendation",
+              "default": {}
+            },
+            "checks": {
+              "items": {
+                "$ref": "#/components/schemas/Check"
+              },
+              "type": "array",
+              "title": "Checks",
+              "default": []
+            }
+          },
+          "type": "object",
+          "required": [
+            "request_count",
+            "error_rate",
+            "latency_p50_ms",
+            "latency_p95_ms",
+            "latency_p99_ms",
+            "status"
+          ],
+          "title": "MonitoringResponse"
+        },
+        "PredictionRequest": {
+          "properties": {
+            "customer_id": {
+              "type": "string",
+              "maxLength": 100,
+              "minLength": 1,
+              "title": "Customer Id",
+              "description": "Demo customer identifier"
+            },
+            "features": {
+              "additionalProperties": {
+                "type": "number"
+              },
+              "type": "object",
+              "title": "Features",
+              "description": "Pre-computed feature vector keyed by feature name"
+            }
+          },
+          "additionalProperties": false,
+          "type": "object",
+          "required": [
+            "customer_id",
+            "features"
+          ],
+          "title": "PredictionRequest",
+          "description": "Single-customer retention prediction."
+        },
+        "PredictionResponse": {
+          "properties": {
+            "customer_id": {
+              "type": "string",
+              "title": "Customer Id"
+            },
+            "probability": {
+              "type": "number",
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "title": "Probability"
+            },
+            "will_return": {
+              "type": "boolean",
+              "title": "Will Return"
+            },
+            "threshold": {
+              "type": "number",
+              "title": "Threshold"
+            },
+            "risk_label": {
+              "type": "string",
+              "title": "Risk Label"
+            },
+            "top_factors": {
+              "items": {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              "type": "array",
+              "title": "Top Factors",
+              "default": []
+            },
+            "explanation": {
+              "items": {
+                "$ref": "#/components/schemas/FeatureEffect"
+              },
+              "type": "array",
+              "title": "Explanation",
+              "default": []
+            },
+            "model_version": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Model Version"
+            },
+            "timestamp": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Timestamp"
+            }
+          },
+          "type": "object",
+          "required": [
+            "customer_id",
+            "probability",
+            "will_return",
+            "threshold",
+            "risk_label"
+          ],
+          "title": "PredictionResponse"
+        },
+        "Provider": {
+          "type": "string",
+          "enum": [
+            "regex",
+            "openai",
+            "ollama"
+          ],
+          "title": "Provider"
+        },
+        "ReadyResponse": {
+          "properties": {
+            "ready": {
+              "type": "boolean",
+              "title": "Ready"
+            },
+            "models_loaded": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "title": "Models Loaded",
+              "default": []
+            },
+            "errors": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object",
+              "title": "Errors"
+            }
+          },
+          "type": "object",
+          "required": [
+            "ready"
+          ],
+          "title": "ReadyResponse"
+        },
+        "RecommendationDetailsResponse": {
+          "properties": {
+            "items": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "title": "Items"
+            },
+            "rules": {
+              "items": {
+                "$ref": "#/components/schemas/FiringRule"
+              },
+              "type": "array",
+              "title": "Rules"
+            },
+            "metadata": {
+              "additionalProperties": true,
+              "type": "object",
+              "title": "Metadata"
+            }
+          },
+          "type": "object",
+          "required": [
+            "items",
+            "rules",
+            "metadata"
+          ],
+          "title": "RecommendationDetailsResponse"
+        },
+        "RecommendationRequest": {
+          "properties": {
+            "basket": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "maxItems": 100,
+              "title": "Basket",
+              "description": "List of product descriptions currently in the basket"
+            },
+            "top_k": {
+              "type": "integer",
+              "maximum": 20.0,
+              "minimum": 1.0,
+              "title": "Top K",
+              "default": 5
+            },
+            "customer_id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Customer Id"
+            }
+          },
+          "additionalProperties": false,
+          "type": "object",
+          "required": [
+            "basket"
+          ],
+          "title": "RecommendationRequest",
+          "description": "Given a basket of item descriptions, recommend next items."
+        },
+        "RecommendationResponse": {
+          "properties": {
+            "recommendations": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "title": "Recommendations"
+            },
+            "because": {
+              "items": {
+                "$ref": "#/components/schemas/FiringRule"
+              },
+              "type": "array",
+              "title": "Because",
+              "description": "The association rules that produced each recommendation"
+            },
+            "strategy": {
+              "type": "string",
+              "title": "Strategy",
+              "description": "'rule_based' | 'popularity_fallback' | 'empty_basket'",
+              "default": "rule_based"
+            },
+            "timestamp": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Timestamp"
+            }
+          },
+          "type": "object",
+          "required": [
+            "recommendations"
+          ],
+          "title": "RecommendationResponse"
+        },
+        "ToolCall": {
+          "properties": {
+            "tool_name": {
+              "type": "string",
+              "title": "Tool Name"
+            },
+            "arguments": {
+              "additionalProperties": true,
+              "type": "object",
+              "title": "Arguments"
+            },
+            "result": {
+              "title": "Result"
+            }
+          },
+          "type": "object",
+          "required": [
+            "tool_name",
+            "arguments",
+            "result"
+          ],
+          "title": "ToolCall"
+        },
+        "ValidationError": {
+          "properties": {
+            "loc": {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ]
+              },
+              "type": "array",
+              "title": "Location"
+            },
+            "msg": {
+              "type": "string",
+              "title": "Message"
+            },
+            "type": {
+              "type": "string",
+              "title": "Error Type"
+            },
+            "input": {
+              "title": "Input"
+            },
+            "ctx": {
+              "type": "object",
+              "title": "Context"
+            }
+          },
+          "type": "object",
+          "required": [
+            "loc",
+            "msg",
+            "type"
+          ],
+          "title": "ValidationError"
+        },
+        "VersionResponse": {
+          "properties": {
+            "version": {
+              "type": "string",
+              "title": "Version"
+            },
+            "git_sha": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Git Sha"
+            },
+            "model_version": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Model Version"
+            },
+            "trained_at": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Trained At"
+            },
+            "model_family": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Model Family"
+            },
+            "calibration_method": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Calibration Method"
+            },
+            "metrics": {
+              "additionalProperties": true,
+              "type": "object",
+              "title": "Metrics"
+            },
+            "decision_threshold": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Decision Threshold"
+            },
+            "model_source": {
+              "anyOf": [
+                {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Model Source"
+            }
+          },
+          "type": "object",
+          "required": [
+            "version"
+          ],
+          "title": "VersionResponse"
+        }
+      }
+    }
+  },
+  "metrics": {
+    "request_count": 81,
+    "error_rate": 0.1235,
+    "latency_p50_ms": 2.16,
+    "latency_p95_ms": 683.92,
+    "latency_p99_ms": 4821.44,
+    "drift_metrics": [
+      {
+        "feature": "recency_days",
+        "statistic": "psi",
+        "value": 4.520043335504716,
+        "threshold": 0.2,
+        "alert": true
+      },
+      {
+        "feature": "recency_days",
+        "statistic": "ks_pvalue",
+        "value": 1.8885129157466703e-216,
+        "threshold": 0.05,
+        "alert": true
+      },
+      {
+        "feature": "frequency",
+        "statistic": "psi",
+        "value": 0.09499193296754789,
+        "threshold": 0.2,
+        "alert": false
+      },
+      {
+        "feature": "frequency",
+        "statistic": "ks_pvalue",
+        "value": 0.03263753656276575,
+        "threshold": 0.05,
+        "alert": true
+      },
+      {
+        "feature": "monetary_mean",
+        "statistic": "psi",
+        "value": 0.04216528157583938,
+        "threshold": 0.2,
+        "alert": false
+      },
+      {
+        "feature": "monetary_mean",
+        "statistic": "ks_pvalue",
+        "value": 0.5961551606319622,
+        "threshold": 0.05,
+        "alert": false
+      },
+      {
+        "feature": "monetary_std",
+        "statistic": "psi",
+        "value": 0.09198854327093628,
+        "threshold": 0.2,
+        "alert": false
+      },
+      {
+        "feature": "monetary_std",
+        "statistic": "ks_pvalue",
+        "value": 0.007476577730274493,
+        "threshold": 0.05,
+        "alert": true
+      },
+      {
+        "feature": "avg_days_between_orders",
+        "statistic": "psi",
+        "value": 0.3053482449875533,
+        "threshold": 0.2,
+        "alert": true
+      },
+      {
+        "feature": "avg_days_between_orders",
+        "statistic": "ks_pvalue",
+        "value": 2.786185943831375e-07,
+        "threshold": 0.05,
+        "alert": true
+      },
+      {
+        "feature": "std_days_between_orders",
+        "statistic": "psi",
+        "value": 0.2098697489135966,
+        "threshold": 0.2,
+        "alert": true
+      },
+      {
+        "feature": "std_days_between_orders",
+        "statistic": "ks_pvalue",
+        "value": 0.0002721208122541972,
+        "threshold": 0.05,
+        "alert": true
+      },
+      {
+        "feature": "is_one_time_buyer",
+        "statistic": "psi",
+        "value": 0.09237936719938027,
+        "threshold": 0.2,
+        "alert": false
+      },
+      {
+        "feature": "is_one_time_buyer",
+        "statistic": "ks_pvalue",
+        "value": 0.032637536562766474,
+        "threshold": 0.05,
+        "alert": true
+      },
+      {
+        "feature": "avg_basket_size",
+        "statistic": "psi",
+        "value": 0.06815075605364955,
+        "threshold": 0.2,
+        "alert": false
+      },
+      {
+        "feature": "avg_basket_size",
+        "statistic": "ks_pvalue",
+        "value": 0.7123505419195728,
+        "threshold": 0.05,
+        "alert": false
+      },
+      {
+        "feature": "single_item_basket_ratio",
+        "statistic": "psi",
+        "value": 0.0005745175241921017,
+        "threshold": 0.2,
+        "alert": false
+      },
+      {
+        "feature": "single_item_basket_ratio",
+        "statistic": "ks_pvalue",
+        "value": 0.9999999994167437,
+        "threshold": 0.05,
+        "alert": false
+      },
+      {
+        "feature": "top_category_share",
+        "statistic": "psi",
+        "value": 0.06571346746882739,
+        "threshold": 0.2,
+        "alert": false
+      },
+      {
+        "feature": "top_category_share",
+        "statistic": "ks_pvalue",
+        "value": 0.34567741871343827,
+        "threshold": 0.05,
+        "alert": false
+      },
+      {
+        "feature": "n_unique_categories",
+        "statistic": "psi",
+        "value": 0.08834994205538306,
+        "threshold": 0.2,
+        "alert": false
+      },
+      {
+        "feature": "n_unique_categories",
+        "statistic": "ks_pvalue",
+        "value": 0.17621088180426583,
+        "threshold": 0.05,
+        "alert": false
+      },
+      {
+        "feature": "morning_purchase_ratio",
+        "statistic": "psi",
+        "value": 0.050985359474948866,
+        "threshold": 0.2,
+        "alert": false
+      },
+      {
+        "feature": "morning_purchase_ratio",
+        "statistic": "ks_pvalue",
+        "value": 0.42613166987960327,
+        "threshold": 0.05,
+        "alert": false
+      }
+    ],
+    "status": "red",
+    "drift_status": "measured",
+    "window_description": "bounded local request log",
+    "log_write_failures": 0,
+    "requests_by_route": {
+      "/predict": 32,
+      "/recommend": 42,
+      "/chat": 2,
+      "/predict/batch": 4,
+      "/chat/stream": 1
+    },
+    "latency_p95_by_route_ms": {
+      "/predict": 172.94,
+      "/recommend": 2.83,
+      "/chat": 683.52,
+      "/predict/batch": 5217.01,
+      "/chat/stream": 159.74
+    },
+    "prediction_drift": [
+      {
+        "feature": "predicted_probability",
+        "statistic": "psi",
+        "value": 0.5991192118889461,
+        "threshold": 0.2,
+        "alert": true
+      },
+      {
+        "feature": "predicted_probability",
+        "statistic": "ks_pvalue",
+        "value": 1.4732814658348824e-06,
+        "threshold": 0.05,
+        "alert": true
+      }
+    ],
+    "data_quality": {
+      "prediction_requests": 36,
+      "rejected_by_validation": 10,
+      "invalid_request_rate": 0.2777777777777778,
+      "out_of_range_share": {
+        "recency_days": 0.9836065573770492,
+        "frequency": 0.0,
+        "monetary_mean": 0.0,
+        "monetary_std": 0.0,
+        "avg_days_between_orders": 0.11475409836065574,
+        "std_days_between_orders": 0.00819672131147541,
+        "is_one_time_buyer": 0.0,
+        "avg_basket_size": 0.0,
+        "single_item_basket_ratio": 0.0,
+        "top_category_share": 0.0,
+        "n_unique_categories": 0.0,
+        "morning_purchase_ratio": 0.0
+      }
+    },
+    "recommendation": {
+      "requests": 42,
+      "by_strategy": {
+        "empty_basket": 1,
+        "rule_based": 16,
+        "popularity_fallback": 25
+      },
+      "non_empty_baskets": 41,
+      "rule_fire_rate": 0.3902439024390244
+    },
+    "checks": [
+      {
+        "check": "error_rate",
+        "value": 0.12345679012345678,
+        "rule": "yellow above 0.05, red above 0.1",
+        "level": "red",
+        "detail": ""
+      },
+      {
+        "check": "predict_latency_p95_ms",
+        "value": 172.9411534504834,
+        "rule": "yellow above 500 ms, single /predict requests",
+        "level": "green",
+        "detail": ""
+      },
+      {
+        "check": "input_drift",
+        "value": 4.520043335504716,
+        "rule": "red when any PSI > 0.2 or KS p-value < 0.05; value is the largest PSI",
+        "level": "red",
+        "detail": "alerting: avg_days_between_orders, frequency, is_one_time_buyer, monetary_std, recency_days, std_days_between_orders"
+      },
+      {
+        "check": "prediction_drift",
+        "value": 0.5991192118889461,
+        "rule": "red when any PSI > 0.2 or KS p-value < 0.05; value is the largest PSI",
+        "level": "red",
+        "detail": "alerting: predicted_probability"
+      },
+      {
+        "check": "invalid_request_rate",
+        "value": 0.2777777777777778,
+        "rule": "yellow above 0.05 (from 20 prediction requests)",
+        "level": "yellow",
+        "detail": ""
+      },
+      {
+        "check": "out_of_range_share",
+        "value": 0.9836065573770492,
+        "rule": "yellow when any feature has more than 0.01 of its values outside the training range",
+        "level": "yellow",
+        "detail": "features: avg_days_between_orders, recency_days"
+      },
+      {
+        "check": "rule_fire_rate",
+        "value": 0.3902439024390244,
+        "rule": "yellow below 0.5 (from 20 non-empty baskets)",
+        "level": "yellow",
+        "detail": ""
+      }
+    ]
+  },
+  "alerts": {
+    "active": [],
+    "alerts": [
+      {
+        "at": "2026-11-06T09:03:42.563330Z",
+        "check": "rule_fire_rate",
+        "state": "raised",
+        "level": "yellow",
+        "value": 0.375,
+        "rule": "yellow below 0.5 (from 20 non-empty baskets)",
+        "detail": "",
+        "delivered_to": [
+          "log",
+          "database"
+        ]
+      },
+      {
+        "at": "2026-11-06T09:03:42.563321Z",
+        "check": "out_of_range_share",
+        "state": "raised",
+        "level": "yellow",
+        "value": 0.9917355371900827,
+        "rule": "yellow when any feature has more than 0.01 of its values outside the training range",
+        "detail": "features: avg_days_between_orders, recency_days",
+        "delivered_to": [
+          "log",
+          "database"
+        ]
+      },
+      {
+        "at": "2026-11-06T09:03:42.563311Z",
+        "check": "invalid_request_rate",
+        "state": "raised",
+        "level": "yellow",
+        "value": 0.2857142857142857,
+        "rule": "yellow above 0.05 (from 20 prediction requests)",
+        "detail": "",
+        "delivered_to": [
+          "log",
+          "database"
+        ]
+      },
+      {
+        "at": "2026-11-06T09:03:42.563302Z",
+        "check": "prediction_drift",
+        "state": "raised",
+        "level": "red",
+        "value": 0.6587346516473105,
+        "rule": "red when any PSI > 0.2 or KS p-value < 0.05; value is the largest PSI",
+        "detail": "alerting: predicted_probability",
+        "delivered_to": [
+          "log",
+          "database"
+        ]
+      },
+      {
+        "at": "2026-11-06T09:03:42.563289Z",
+        "check": "input_drift",
+        "state": "raised",
+        "level": "red",
+        "value": 4.594763194077634,
+        "rule": "red when any PSI > 0.2 or KS p-value < 0.05; value is the largest PSI",
+        "detail": "alerting: avg_days_between_orders, frequency, is_one_time_buyer, monetary_std, recency_days, std_days_between_orders",
+        "delivered_to": [
+          "log",
+          "database"
+        ]
+      },
+      {
+        "at": "2026-11-06T09:03:42.563246Z",
+        "check": "error_rate",
+        "state": "raised",
+        "level": "red",
+        "value": 0.1282051282051282,
+        "rule": "yellow above 0.05, red above 0.1",
+        "detail": "",
+        "delivered_to": [
+          "log",
+          "database"
+        ]
+      }
+    ],
+    "channels": [
+      "log",
+      "database",
+      "webhook"
+    ],
+    "webhook_configured": false,
+    "delivery_failures": 0
+  },
+  "predict": {
+    "customer_id": "12347",
+    "probability": 0.762683,
+    "will_return": true,
+    "threshold": 0.20500000000000002,
+    "risk_label": "low",
+    "top_factors": [
+      {
+        "feature": "std_days_between_orders",
+        "importance": 0.2239,
+        "value": 12.759310326189265
+      },
+      {
+        "feature": "frequency",
+        "importance": 0.1858,
+        "value": 6.0
+      },
+      {
+        "feature": "avg_days_between_orders",
+        "importance": 0.1219,
+        "value": 54.4
+      },
+      {
+        "feature": "recency_days",
+        "importance": 0.103,
+        "value": 29.0
+      },
+      {
+        "feature": "monetary_std",
+        "importance": 0.089,
+        "value": 373.82359966522534
+      }
+    ],
+    "explanation": [
+      {
+        "feature": "frequency",
+        "value": 6.0,
+        "typical_value": 2.0,
+        "effect": 0.1483
+      },
+      {
+        "feature": "std_days_between_orders",
+        "value": 12.759310326189265,
+        "typical_value": 0.0,
+        "effect": 0.1223
+      },
+      {
+        "feature": "monetary_mean",
+        "value": 685.6966666666667,
+        "typical_value": 289.9475,
+        "effect": 0.0325
+      },
+      {
+        "feature": "n_unique_categories",
+        "value": 61.0,
+        "typical_value": 23.0,
+        "effect": 0.0277
+      },
+      {
+        "feature": "recency_days",
+        "value": 29.0,
+        "typical_value": 54.0,
+        "effect": 0.0226
+      }
+    ],
+    "model_version": "0.3.0",
+    "timestamp": "2026-11-06T19:15:46.910740Z"
+  },
+  "recommend": {
+    "recommendations": [
+      "white hanging heart t-light holder",
+      "regency cakestand 3 tier",
+      "assorted colour bird ornament",
+      "jumbo bag red retrospot",
+      "strawberry ceramic trinket box"
+    ],
+    "because": [],
+    "strategy": "empty_basket",
+    "timestamp": "2026-11-06T19:15:47.013848Z"
+  },
+  "chat": {
+    "reply": "Based on our documents: ## 2. Non-Perishable Products\n\n### 2.1 Eligibility\n\nNon-perishable products (canned goods, dry goods, household items, cleaning\nsupplies, personal care) may be returned if:\n\n- The return request is made **within 30 days** of delivery.\n- The item is **unopened and in its original packaging**.\n- The item is **not a final-sale or clearance item** (marked \"Vente finale\" on the\n  product page).\n\n### 2.2 Process\n\n1. Log in to your Bor\u00e9al March\u00e9 account and navigate to \"Order History.\"\n2. Select the order and click \"Request a return.\"\n3. Choose the items you wish to return and provide a reason.\n4. Print the prepaid return label that is emailed to you.\n5. Ship the item(s) within 7 days.\n\nOnce we receive and inspect the returned items, a refund is processed to the\noriginal payment method within 5 business days.\n\n### 2.3 Return shipping cost\n\nFor non-perishable returns, the return shipping cost is borne by the customer\nunless the return is due to a Bor\u00e9al March\u00e9 error (wrong item shipped, item\ndefective on arrival). A flat return shipping fee of $7.95 is deducted from the\nrefund.",
+    "citations": [
+      {
+        "source": "return_policy.md",
+        "chunk": "## 2. Non-Perishable Products\n\n### 2.1 Eligibility\n\nNon-perishable products (canned goods, dry goods, household items, cleaning\nsupplies, personal care) may be returned if:\n\n- The return request is made **within 30 days** of delivery.\n- The item is **unopened and in its original packaging**.\n- The item is **not a final-sale or clearance item** (marked \"Vente finale\" on the\n  product page).\n\n### 2.2 Process\n\n1. Log in to your Bor\u00e9al March\u00e9 account and navigate to \"Order History.\"\n2. Select the order and click \"Request a return.\"\n3. Choose the items you wish to return and provide a reason.\n4. Print the prepaid return label that is emailed to you.\n5. Ship the item(s) within 7 days.\n\nOnce we receive and inspect the returned items, a refund is processed to the\noriginal payment method within 5 business days.\n\n### 2.3 Return shipping cost\n\nFor non-perishable returns, the return shipping cost is borne by the customer\nunless the return is due to a Bor\u00e9al March\u00e9 error (wrong item shipped, item\ndefective on arrival). A flat return shipping fee of $7.95 is deducted from the\nrefund.",
+        "score": 0.7242112755775452
+      }
+    ],
+    "tool_calls": [
+      {
+        "tool_name": "policy_search",
+        "arguments": {
+          "question": "What is the return policy for non-perishable items?"
+        },
+        "result": {
+          "chunks": [
+            {
+              "text": "## 2. Non-Perishable Products\n\n### 2.1 Eligibility\n\nNon-perishable products (canned goods, dry goods, household items, cleaning\nsupplies, personal care) may be returned if:\n\n- The return request is made **within 30 days** of delivery.\n- The item is **unopened and in its original packaging**.\n- The item is **not a final-sale or clearance item** (marked \"Vente finale\" on the\n  product page).\n\n### 2.2 Process\n\n1. Log in to your Bor\u00e9al March\u00e9 account and navigate to \"Order History.\"\n2. Select the order and click \"Request a return.\"\n3. Choose the items you wish to return and provide a reason.\n4. Print the prepaid return label that is emailed to you.\n5. Ship the item(s) within 7 days.\n\nOnce we receive and inspect the returned items, a refund is processed to the\noriginal payment method within 5 business days.\n\n### 2.3 Return shipping cost\n\nFor non-perishable returns, the return shipping cost is borne by the customer\nunless the return is due to a Bor\u00e9al March\u00e9 error (wrong item shipped, item\ndefective on arrival). A flat return shipping fee of $7.95 is deducted from the\nrefund.",
+              "source": "return_policy.md",
+              "score": 0.7242112755775452,
+              "language": "en"
+            },
+            {
+              "text": "## 6. Promotional and Gift Items\n\n- **Items purchased with a promotional code** are refunded at the price actually\n  paid (after the discount), not the full retail price.\n- **Free promotional items** (e.g., free item with purchase) must be returned\n  together with the qualifying purchase to receive a full refund on the\n  qualifying item. If only the qualifying item is returned, the retail value of\n  the free item is deducted from the refund.\n- **Gift cards** are non-refundable and non-exchangeable.",
+              "source": "return_policy.md",
+              "score": 0.6541694402694702,
+              "language": "en"
+            },
+            {
+              "text": "## 3. Perishable Products\n\n### 3.1 General rule\n\nDue to food-safety regulations, **perishable products cannot be physically\nreturned**. This includes all items tagged as \"refrigerated\" or \"frozen,\" fresh\nproduce, bakery items, and any item with an expiration date within 14 days of\ndelivery.\n\n### 3.2 Quality issues\n\nIf a perishable product arrives in unsatisfactory condition (spoiled, past its\nexpiry date, incorrect temperature, wrong item), you may request a refund or\nreplacement:\n\n- Submit a request **within 48 hours** of delivery.\n- Include **at least one photo** showing the issue.\n- A refund or replacement is issued without requiring the item to be returned.\n\n### 3.3 Taste or preference\n\nPerishable items returned for reasons of taste or preference (\"I didn't like\nit,\" \"I changed my mind\") are **not eligible for a refund or exchange**. We\nencourage customers to review product descriptions, ingredients, and reviews\nbefore purchasing.",
+              "source": "return_policy.md",
+              "score": 0.6337469220161438,
+              "language": "en"
+            },
+            {
+              "text": "## 4. Damaged or Defective Items\n\nItems that arrive damaged (broken packaging, crushed, leaking) or defective are\neligible for a full refund or replacement regardless of whether they are\nperishable or non-perishable. Report the issue within 48 hours with a photo.",
+              "source": "return_policy.md",
+              "score": 0.5922291278839111,
+              "language": "en"
+            },
+            {
+              "text": "## 5. Wrong Item Received\n\nIf you receive an item you did not order, contact us within 48 hours. We will\narrange for the wrong item to be picked up at no cost and send the correct item\nor issue a full refund.",
+              "source": "return_policy.md",
+              "score": 0.5198243856430054,
+              "language": "en"
+            }
+          ],
+          "query": "What is the return policy for non-perishable items?"
+        }
+      }
+    ],
+    "provider_used": "regex",
+    "refused": false,
+    "refusal_reason": null,
+    "passage_confidence": "confident",
+    "language": "en",
+    "provider_latency_ms": 0.6602109999676031,
+    "token_usage": null,
+    "cost_usd": 0.0,
+    "timestamp": "2026-11-06T19:15:47.995704Z"
+  },
+  "streamlit_health": "ok"
+}

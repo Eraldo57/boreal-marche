@@ -9,17 +9,22 @@
     "mlflow": "boreal-mlflow@boreal-marche-eraldo57.iam.gserviceaccount.com",
     "train": "boreal-train@boreal-marche-eraldo57.iam.gserviceaccount.com",
     "build": "boreal-build@boreal-marche-eraldo57.iam.gserviceaccount.com",
-    "deploy": "boreal-deploy@boreal-marche-eraldo57.iam.gserviceaccount.com"
+    "deploy": "boreal-deploy@boreal-marche-eraldo57.iam.gserviceaccount.com",
+    "frontend": "boreal-frontend@boreal-marche-eraldo57.iam.gserviceaccount.com"
   },
   "number": "482023376300",
   "workload_identity_provider": "projects/482023376300/locations/global/workloadIdentityPools/github-pipeline/providers/github-main",
   "sql_connection": "boreal-marche-eraldo57:northamerica-northeast1:boreal-db",
   "runtime_sha256": "7253213df847c316161c75ee6003d20d0e80d9f8ad166852a2401c021bc22c7d",
-  "git_sha": "d3492014350b80d4942d163b63c79e850eba38ab",
+  "git_sha": "670f0c1ef270ea7765088e929101bcc6c9d3b7ad",
   "images": {
-    "api": "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/api:d3492014350b80d4942d163b63c79e850eba38ab",
-    "frontend": "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/frontend:d3492014350b80d4942d163b63c79e850eba38ab",
-    "vertex": "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/vertex:d3492014350b80d4942d163b63c79e850eba38ab",
-    "mlflow": "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/mlflow:d3492014350b80d4942d163b63c79e850eba38ab"
-  }
+    "api": "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/api:670f0c1ef270ea7765088e929101bcc6c9d3b7ad",
+    "frontend": "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/frontend:670f0c1ef270ea7765088e929101bcc6c9d3b7ad",
+    "vertex": "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/vertex:670f0c1ef270ea7765088e929101bcc6c9d3b7ad",
+    "mlflow": "northamerica-northeast1-docker.pkg.dev/boreal-marche-eraldo57/boreal/mlflow:670f0c1ef270ea7765088e929101bcc6c9d3b7ad"
+  },
+  "mlflow_url": "https://boreal-mlflow-qaonyx3dda-nn.a.run.app",
+  "api_url": "https://boreal-api-qaonyx3dda-nn.a.run.app",
+  "ui_url": "https://boreal-ui-qaonyx3dda-nn.a.run.app",
+  "trained_artifact_uri": "gs://boreal-marche-eraldo57-artifacts/training/full-20261106T191730Z/model"
 }
