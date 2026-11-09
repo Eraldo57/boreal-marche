@@ -1,0 +1,44 @@
+{
+  "passed": true,
+  "gates": [
+    {
+      "gate": "beats_recency_baseline",
+      "passed": true,
+      "detail": "PR-AUC 0.7611 vs recency heuristic 0.6711 (first champion)"
+    },
+    {
+      "gate": "no_new_fairness_flags",
+      "passed": true,
+      "detail": "new strong flags: none"
+    },
+    {
+      "gate": "no_widened_fairness_gaps",
+      "passed": true,
+      "detail": "flags widened by more than 2.0 pp: none"
+    }
+  ],
+  "candidate": {
+    "pr_auc": 0.7610699516816429,
+    "brier": 0.19340104467600638,
+    "threshold": 0.20500000000000002,
+    "strong_fairness_flags": {
+      "tenure_band=6-12 months": -15.623136553369111,
+      "tenure_band=under 6 months": -13.059033989266544,
+      "spend_quartile=Q1 (lowest)": -64.17956699956333,
+      "spend_quartile=Q2": -17.66716171060181,
+      "purchase_history=one-time": -66.56653277978421
+    }
+  },
+  "champion": null,
+  "flags_needing_acknowledgement": [
+    "purchase_history=one-time",
+    "spend_quartile=Q1 (lowest)",
+    "spend_quartile=Q2",
+    "tenure_band=6-12 months",
+    "tenure_band=under 6 months"
+  ],
+  "candidate_version": "3",
+  "champion_version": null,
+  "holdout": "test snapshot 2011-09-01, 5,233 rows",
+  "evaluated_at": "2026-11-09T17:47:10.848742+00:00"
+}
